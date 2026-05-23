@@ -89,6 +89,24 @@
   before committing.
 - Branch `feat/core-foundation` → PR #1 (bootstrap). Subsequent phases should be smaller PRs.
 
+## Phase 8 AI layer — local Copilot /review findings (all fixed before push)
+- Forecaster must reject `horizonDays < 1` (else NAN in the CI sqrt + mislabeled horizon).
+- Statistical inputs: **filter non-numeric/null** points, don't `intval()`-coerce to 0 (skews trend,
+  false anomalies). Enforce a hard floor of 2 observations so a misconfigured `min_observations`
+  (0/neg) can't `DivisionByZeroError`.
+- Anomaly outliers must be measured on **detrended residuals** (linear fit), not raw p5/p95, or a
+  normal trend continuation is falsely flagged. Floor residual-std at 0.5% of predicted so a
+  perfectly linear history still flags genuine breaks.
+- Honor feature toggles in the ServiceProvider with **null-object drivers** (NullForecaster/
+  NullAnomalyDetector) — binding the real driver unconditionally makes `ai.*.enabled` inert.
+- `AiDecisionLogger` must honor BOTH the global `ai_act.enabled` and the `decision_log.enabled`
+  sub-toggle, and persist `model_version` (don't leave the schema column orphaned).
+- Don't keep config keys the code ignores (removed `ai.forecast.driver`): a "dead setting" is a
+  review smell. Driver selection is via the interface binding.
+- The local `copilot /review` even runs PHP snippets to verify behavior — treat its findings as
+  high-signal, but still verify: it raised one **false positive** (claimed CI assertions were
+  reversed when they were correct & green) — push back with reasoning, don't blindly "fix".
+
 ## Copilot / CI feedback log
 - PR #1 (2026-05-23): review bot flagged a **P1** — `AdaptiveBackoff::class` in the ServiceProvider
   resolved to the wrong namespace (`Padosoft\PriceIntelligence\AdaptiveBackoff`) because the
