@@ -86,13 +86,6 @@
         "test:unit": "phpunit --testsuite=Unit",
         "test:feature": "phpunit --testsuite=Feature"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../laravel-ai-search-providers",
-            "options": { "symlink": false }
-        }
-    ],
     "config": {
         "sort-packages": true
     },

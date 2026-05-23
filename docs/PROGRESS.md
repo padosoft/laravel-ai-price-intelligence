@@ -8,7 +8,14 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **67 tests green**.
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **69 tests green**.
+
+**Open PR**: #1 `feat/core-foundation` (phases 0–7). Copilot review requested + 1 P1 fixed
+(AdaptiveBackoff import). Awaiting re-review / merge.
+
+**STRICT per-phase workflow (mandatory from now on)** — see AGENTS.md / .claude/rules:
+one PR per phase; local loop (phpunit + local `copilot` CLI review → fix) until clean → push →
+loop until CI green AND GitHub Copilot review has zero actionable comments. Only then the phase is done.
 
 ### Phase status
 - [x] **Phase 0 — Foundations**: composer.json, ServiceProvider, config, base migrations

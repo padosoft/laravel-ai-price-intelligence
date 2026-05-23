@@ -32,11 +32,18 @@ Rules every agent/session (and every spawned subagent) MUST follow when working 
 No task is complete until, locally and in CI:
 `composer validate`, **PHPUnit**, PHPStan (when configured), Pint (when configured) all pass.
 
-## PRs & Copilot review loop
-- Prefer small, focused PRs after the bootstrap.
-- Request **GitHub Copilot Code Review** and wait for it; CI green alone is not enough.
-- Fix or explicitly resolve all actionable Copilot feedback before merge, and **record what you
-  learned in `docs/LESSON.md`**.
+## PRs & Copilot review loop — STRICT, one PR per phase
+For EVERY roadmap phase, in this exact order (non-negotiable):
+1. Implement the phase on a per-phase branch (`feat/phase-N-...`).
+2. **Local loop until clean**: run `vendor\bin\phpunit` AND the local `copilot` CLI review; fix every
+   finding; repeat until both are clean. Never push before local is clean.
+3. Push and open/update the PR (one PR per phase), then request GitHub Copilot review via REST:
+   `gh api --method POST repos/<owner>/<repo>/pulls/<n>/requested_reviewers -f "reviewers[]=copilot-pull-request-reviewer[bot]"`
+   (`gh pr edit --add-reviewer copilot` and GraphQL `userLogins` both fail — REST works).
+4. **Remote loop until green**: wait for CI to pass AND for the GitHub Copilot review to have **zero
+   actionable comments**. Fix → push → re-check, looping until both are satisfied.
+5. Record every Copilot/CI learning in `docs/LESSON.md`. Only then mark the phase done.
+- CI green alone is NOT enough; Copilot review must be clean too.
 
 ## Final task of the build
 Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the repo's `AGENTS.md`,
