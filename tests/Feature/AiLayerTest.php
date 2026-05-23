@@ -104,6 +104,17 @@ final class AiLayerTest extends TestCase
     }
 
     #[Test]
+    public function global_ai_act_disable_accepts_falsy_string_values(): void
+    {
+        config()->set('price-intelligence.ai_act.enabled', 'false');
+        $tenant = Tenant::create(['code' => 't1', 'name' => 't1']);
+        app(TenantContext::class)->set($tenant->id);
+
+        $this->assertNull(app(AiDecisionLogger::class)->record($tenant->id, 'forecast', ['x' => 1]));
+        $this->assertSame(0, AiDecisionLog::query()->count());
+    }
+
+    #[Test]
     public function decision_logger_is_noop_when_disabled(): void
     {
         config()->set('price-intelligence.ai_act.decision_log.enabled', false);

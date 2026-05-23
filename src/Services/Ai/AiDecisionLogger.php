@@ -26,8 +26,12 @@ final class AiDecisionLogger
         ?string $modelVersion = null,
     ): ?AiDecisionLog {
         // Respect both the global EU AI Act switch and the decision-log sub-toggle.
-        // ai_act.enabled defaults to 'auto' (treated as on); only an explicit false disables.
-        if (config('price-intelligence.ai_act.enabled', 'auto') === false) {
+        // ai_act.enabled is 'auto'|bool: 'auto' means on; otherwise interpret as boolean so
+        // 'false', '0', 0 and false all disable robustly — not just a strict `false`.
+        $aiAct = config('price-intelligence.ai_act.enabled', 'auto');
+        $aiActEnabled = $aiAct === 'auto' ? true : filter_var($aiAct, FILTER_VALIDATE_BOOLEAN);
+
+        if (! $aiActEnabled) {
             return null;
         }
 

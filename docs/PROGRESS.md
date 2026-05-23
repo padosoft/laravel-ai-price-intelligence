@@ -8,7 +8,7 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **83 tests green**. CI green (8.3/8.4).
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **91 tests green**. CI green (8.3/8.4).
 
 **Open PR**: #1 `feat/core-foundation` (phases 0–7). Multiple Copilot review cycles; all actionable
 findings addressed (AdaptiveBackoff import, tenant scoping, secret hiding, price parsing, 204 return
