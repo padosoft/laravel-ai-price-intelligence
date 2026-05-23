@@ -15,8 +15,11 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|null $subject_id
  * @property string $feature
  * @property string|null $model
+ * @property string|null $model_version
+ * @property string|null $input_hash
  * @property array<string, mixed>|null $output
  * @property int|null $confidence
+ * @property int|null $cost_micros
  * @property bool $human_reviewed
  */
 final class AiDecisionLog extends PriceIntelligenceModel

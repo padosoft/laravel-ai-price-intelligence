@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Services\Ai;
 
 use Padosoft\PriceIntelligence\Models\AiDecisionLog;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 
 /**
  * Records every AI-generated decision for EU AI Act auditability. No-op when
@@ -35,7 +36,7 @@ final class AiDecisionLogger
             return null;
         }
 
-        if (! (bool) config('price-intelligence.ai_act.decision_log.enabled', true)) {
+        if (! Flag::enabled('price-intelligence.ai_act.decision_log.enabled', true)) {
             return null;
         }
 

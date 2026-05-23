@@ -22,6 +22,7 @@ use Padosoft\PriceIntelligence\Services\Pricing\FixedFxProvider;
 use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
 use Padosoft\PriceIntelligence\Services\Scraping\Drivers\GenericHttpScraper;
 use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 
 final class PriceIntelligenceServiceProvider extends ServiceProvider
@@ -52,11 +53,11 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
         // Honor the feature toggles: bind a no-op driver when disabled so the
         // advertised config flags actually take effect.
-        $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => (bool) config('price-intelligence.ai.forecast.enabled', true)
+        $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => Flag::enabled('price-intelligence.ai.forecast.enabled', true)
             ? new StatisticalForecaster((int) config('price-intelligence.ai.forecast.min_observations', 14))
             : new NullForecaster());
 
-        $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => (bool) config('price-intelligence.ai.anomaly.enabled', true)
+        $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => Flag::enabled('price-intelligence.ai.anomaly.enabled', true)
             ? new StatisticalAnomalyDetector()
             : new NullAnomalyDetector());
 
