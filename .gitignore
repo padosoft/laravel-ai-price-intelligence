@@ -1,0 +1,16 @@
+/vendor/
+/node_modules/
+.phpunit.cache/
+.phpunit.result.cache
+composer.phar
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+/build/
+/.idea/
+/.vscode/
+coverage/
+*.log
+composer.lock
