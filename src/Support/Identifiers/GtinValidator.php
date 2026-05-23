@@ -24,7 +24,8 @@ final class GtinValidator
     }
 
     /**
-     * Returns the canonical digit string (left-padded to GTIN-14) or null if invalid shape.
+     * Returns the stripped digit string (8/12/13/14 digits, as-is) or null if the
+     * shape is invalid. Use toGtin14() for the left-padded canonical form.
      */
     public static function normalize(string $value): ?string
     {

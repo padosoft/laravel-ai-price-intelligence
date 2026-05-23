@@ -8,10 +8,11 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **69 tests green**.
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **71 tests green**. CI green (8.3/8.4).
 
-**Open PR**: #1 `feat/core-foundation` (phases 0–7). Copilot review requested + 1 P1 fixed
-(AdaptiveBackoff import). Awaiting re-review / merge.
+**Open PR**: #1 `feat/core-foundation` (phases 0–7). Multiple Copilot review cycles; all actionable
+findings addressed (AdaptiveBackoff import, tenant scoping, secret hiding, price parsing, 204 return
+types, N+1, doc accuracy). Awaiting final clean review / merge.
 
 **STRICT per-phase workflow (mandatory from now on)** — see AGENTS.md / .claude/rules:
 one PR per phase; local loop (phpunit + local `copilot` CLI review → fix) until clean → push →
@@ -60,6 +61,7 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
 - [ ] **Final** — consolidate LESSON.md learnings into AGENTS.md / .claude/rules / skills
 
 ### Next action
-Phase 4: ProductScraper drivers (GenericHttp + Browsershot), PriceNormalizer (FX/VAT/unit price),
-FxProviderInterface, observations migrations (price/content/stock/promo + fetch_logs), PartitionManager,
-ScrapeCompetitorProductJob skeleton. Tests against saved HTML fixtures (no live HTTP).
+Close PR #1 (await final clean Copilot review + merge to main). Then **Phase 8 — AI layer** as its
+own PR following the strict per-phase loop: ForecastProviderInterface + StatisticalForecaster,
+AnomalyDetector, NarrativeWriter, PromoDetector, ContentGapAnalyzer, AssortmentMapper, VisualMatcher,
+ai_decision_logs + is_ai_generated, all pluggable with config toggles. Then phases 9–13 + Final.

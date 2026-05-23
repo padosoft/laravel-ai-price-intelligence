@@ -6,7 +6,9 @@ namespace Padosoft\PriceIntelligence\Services\Webhooks;
 
 /**
  * Signs and verifies webhook payloads with HMAC-SHA256. The header value is
- * "sha256=<hex>" (GitHub-style) for non-repudiation by the receiver.
+ * "sha256=<hex>" (GitHub-style). With a shared secret this gives payload integrity
+ * and authenticity (the receiver knows it came from a holder of the secret) —
+ * not cryptographic non-repudiation.
  */
 final class WebhookSigner
 {

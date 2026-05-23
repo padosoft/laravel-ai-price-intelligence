@@ -11,9 +11,10 @@
 - Project root for this package: `C:\Users\lopad\Documents\DocLore\Visual Basic\Ai\laravel-ai-price-intelligence`.
 
 ## Dependencies
-- `padosoft/laravel-ai-search-providers` is consumed via a **Composer path repository**
-  (`../laravel-ai-search-providers`, `symlink: false`) so we use the local, extendable copy. It is
-  also on Packagist, but local wins for development.
+- `padosoft/laravel-ai-search-providers` is consumed **from Packagist** (`^1.0 || dev-main`,
+  currently v1.2.1). We extend it via `SearchQueryData.metadata` (country/locale) with **no upstream
+  code change**, so the published package is enough and CI-portable. (A local path repository was
+  used briefly during early dev, then removed so GitHub Actions `composer install` works.)
 - `country` / `locale` for geo-aware discovery are passed through **`SearchQueryData.metadata`**
   (keys `country`, `locale`) — no upstream contract change required. Helper:
   `Support\Discovery\GeoSearchQueryFactory`.
@@ -70,9 +71,9 @@
   `copilot_work_started`; wait for the review, then address every actionable comment.
 
 ## Git / repo
-- `.gitignore` must exclude `vendor/`, `.phpunit.cache/`, `composer.lock` (library: lock not
-  committed; also our path-repo dep makes the lock non-portable). Stage with care; verify no
-  `vendor/` paths are staged before committing.
+- `.gitignore` must exclude `vendor/`, `.phpunit.cache/`, `composer.lock` (this is a library, so the
+  lock file is intentionally not committed). Stage with care; verify no `vendor/` paths are staged
+  before committing.
 - Branch `feat/core-foundation` → PR #1 (bootstrap). Subsequent phases should be smaller PRs.
 
 ## Copilot / CI feedback log

@@ -79,7 +79,7 @@ final class WebhookController
     {
         $subscription = WebhookSubscription::query()->findOrFail($id);
 
-        $delivered = $dispatcher->dispatch('digest.daily', $subscription->tenant_id, ['test' => true]);
+        $delivered = $dispatcher->dispatchToSubscription($subscription, 'digest.daily', ['test' => true]);
 
         return response()->json(['data' => ['delivered' => $delivered]]);
     }

@@ -7,9 +7,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Time-series and audit tables. These are the high-volume tables; in production
- * they are partitioned monthly by captured_at via PartitionManager (MySQL/PG).
- * The schema here is partition-friendly (captured_at present, no cross-table FKs).
+ * Time-series and audit tables. These are the high-volume tables and the schema
+ * is intentionally partition-friendly (captured_at present, no cross-table FKs)
+ * so monthly partitioning can be enabled later (planned PartitionManager, see
+ * docs/PROJECT.md §6 / phase 11). No partitioning is applied by this migration.
  */
 return new class extends Migration
 {
