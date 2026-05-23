@@ -16,8 +16,13 @@
 ## STRICT per-phase delivery loop (mandatory)
 For EVERY roadmap phase, in order:
 1. Implement the phase.
-2. **Local loop until clean**: run `vendor\bin\phpunit` AND the local `copilot` CLI review; fix every
+2. **Local loop until clean**: run `vendor\bin\phpunit` AND the local Copilot CLI review; fix every
    issue; repeat until both are clean. Do NOT push before local is clean.
+   - Local Copilot CLI invocation (exact): `copilot --autopilot --yolo -p "/review the changes on
+     this branch vs origin/main (git diff origin/main...HEAD); list concrete actionable
+     bugs/edge-cases/Laravel best-practice issues only; reply 'NO ISSUES' if none."`
+   - Scope the prompt to the **branch diff** (not just a file list) and use the `/review` skill.
+     Premium request (minutes); re-run until it reports NO ISSUES.
 3. Commit on a per-phase branch (`feat/phase-N-...`) — one PR per phase.
 4. Push and open/update the PR; request GitHub Copilot review (REST:
    `gh api --method POST repos/<o>/<r>/pulls/<n>/requested_reviewers -f "reviewers[]=copilot-pull-request-reviewer[bot]"`).

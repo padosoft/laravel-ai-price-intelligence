@@ -21,6 +21,12 @@ final class StatisticalForecaster implements ForecastProviderInterface
 
     public function forecast(array $priceSeriesCents, int $horizonDays): ?ForecastResult
     {
+        // A non-positive horizon is meaningless and would corrupt the CI formula
+        // (sqrt of a negative -> NAN) and mislabel the persisted horizon_days.
+        if ($horizonDays < 1) {
+            return null;
+        }
+
         $series = array_values(array_map('intval', $priceSeriesCents));
         $n = count($series);
 

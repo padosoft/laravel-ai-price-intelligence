@@ -61,6 +61,19 @@
 - A hooked security check blocks writing a PHP method literally named after the JS code-evaluation
   builtin — name test helpers `evaluator()` etc. instead.
 
+## Local Copilot CLI review (run BEFORE pushing) — WORKING invocation
+- Command: `copilot --autopilot --yolo -p "<prompt>"` (non-interactive; `--yolo` allows tools/paths
+  so it can run git + read files without prompts).
+- In the prompt, **scope it to the PR/branch diff**, not just a file list, and trigger the precise
+  review skill with **`/review`**. Example prompt:
+  `/review the changes on this branch vs origin/main (git diff origin/main...HEAD). Report concrete
+   actionable bugs / Laravel best-practice issues / edge cases only as a short bullet list; reply
+   'NO ISSUES' if none.`
+- It genuinely finds bugs the test suite misses (e.g. on phase 8 it caught that
+  `StatisticalForecaster::forecast()` didn't validate `horizonDays > 0` → NAN in the CI formula +
+  mislabeled persisted horizon). Run it, fix findings, re-run until 'NO ISSUES', THEN push.
+- It is a Premium request and can take several minutes; that's expected.
+
 ## Requesting GitHub Copilot review (WORKING method)
 - `gh pr edit <PR> --add-reviewer copilot` → **fails** ("Could not resolve user 'copilot'").
 - GraphQL `requestReviews(userLogins:...)` → **fails** (input doesn't accept `userLogins`).

@@ -19,6 +19,16 @@ final class StatisticalForecasterTest extends TestCase
     }
 
     #[Test]
+    public function it_rejects_a_non_positive_horizon(): void
+    {
+        $forecaster = new StatisticalForecaster(minObservations: 5);
+        $series = array_fill(0, 20, 5000);
+
+        $this->assertNull($forecaster->forecast($series, 0));
+        $this->assertNull($forecaster->forecast($series, -7));
+    }
+
+    #[Test]
     public function it_projects_a_rising_trend_upward(): void
     {
         // Strictly increasing series: forecast should be above the last value.
