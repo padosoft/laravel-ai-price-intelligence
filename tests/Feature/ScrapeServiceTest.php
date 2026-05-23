@@ -57,7 +57,7 @@ final class ScrapeServiceTest extends TestCase
         $obs = PriceObservation::query()->where('competitor_product_id', $competitor->id)->sole();
         $this->assertSame(29900, $obs->price_cents);
         $this->assertSame('EUR', $obs->currency);
-        $this->assertSame(29900, $obs->price_eur_cents);
+        $this->assertSame(29900, $obs->price_base_cents);
 
         $this->assertNotNull($competitor->fresh()->last_seen_at);
     }
@@ -73,8 +73,9 @@ final class ScrapeServiceTest extends TestCase
 
         $this->assertFalse($snapshot->reachable);
         $this->assertSame(0, PriceObservation::query()->where('competitor_product_id', $competitor->id)->count());
-        // A fetch log is still written for audit.
-        $this->assertSame(1, \Padosoft\PriceIntelligence\Models\FetchLog::query()->count());
+        // A fetch log is still written for audit, recording the real HTTP status.
+        $log = \Padosoft\PriceIntelligence\Models\FetchLog::query()->sole();
+        $this->assertSame(503, $log->status);
     }
 
     #[Test]
@@ -101,7 +102,7 @@ final class ScrapeServiceTest extends TestCase
 
         $obs = PriceObservation::query()->where('competitor_product_id', $competitor->id)->sole();
         // 108 USD / 1.08 = 100 EUR -> 10000 cents.
-        $this->assertSame(10000, $obs->price_eur_cents);
+        $this->assertSame(10000, $obs->price_base_cents);
         $this->assertSame('USD', $obs->currency);
     }
 }

@@ -15,7 +15,7 @@ final class TargetController
     public function index(Request $request): JsonResponse
     {
         $targets = MonitoringTarget::query()
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 

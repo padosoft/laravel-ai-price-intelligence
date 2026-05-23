@@ -71,7 +71,7 @@ final class WebhookController
     {
         WebhookSubscription::query()->findOrFail($id)->delete();
 
-        return response()->json(status: 204);
+        return response()->noContent();
     }
 
     public function test(int $id, WebhookDispatcher $dispatcher): JsonResponse

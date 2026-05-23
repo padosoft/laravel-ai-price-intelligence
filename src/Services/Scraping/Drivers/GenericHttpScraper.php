@@ -42,10 +42,10 @@ final class GenericHttpScraper implements ProductScraperInterface
                 ->get($url);
 
             if (! $response->successful()) {
-                return ProductSnapshot::unreachable($url);
+                return ProductSnapshot::unreachable($url, $response->status());
             }
 
-            return $this->extractor->extract($response->body(), $url);
+            return $this->extractor->extract($response->body(), $url)->withHttpStatus($response->status());
         } catch (Throwable) {
             return ProductSnapshot::unreachable($url);
         }

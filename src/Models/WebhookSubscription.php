@@ -23,6 +23,13 @@ final class WebhookSubscription extends PriceIntelligenceModel
 
     protected $guarded = [];
 
+    /**
+     * Never expose the encrypted secret in array/JSON output.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = ['secret_encrypted'];
+
     protected $casts = [
         'events' => 'array',
         'active' => 'boolean',

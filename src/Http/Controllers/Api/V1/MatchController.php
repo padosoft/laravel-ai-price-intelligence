@@ -44,7 +44,7 @@ final class MatchController
         $proposal = MatchProposal::query()->findOrFail($id);
         $this->persister->reject($proposal, auth()->id());
 
-        return response()->json(status: 204);
+        return response()->noContent();
     }
 
     /**

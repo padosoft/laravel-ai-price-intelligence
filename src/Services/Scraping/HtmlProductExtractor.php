@@ -146,20 +146,29 @@ final class HtmlProductExtractor
 
         if (is_array($offer) && isset($offer['price'])) {
             $raw = (string) $offer['price'];
-            $currency = isset($offer['priceCurrency']) ? (string) $offer['priceCurrency'] : null;
-            $cents = (int) round(((float) str_replace(',', '.', $raw)) * 100);
+            // Reuse PriceParser so JSON-LD prices with thousands separators (e.g. "1.299,00")
+            // are handled consistently rather than via a naive float cast.
+            $parsed = PriceParser::parse($raw);
+            $currency = isset($offer['priceCurrency'])
+                ? (string) $offer['priceCurrency']
+                : ($parsed['currency'] ?? null);
             $available = ! isset($offer['availability'])
                 || stripos((string) $offer['availability'], 'OutOfStock') === false;
 
-            return [$cents, $currency, $raw, $available];
+            return [$parsed['cents'] ?? null, $currency, $raw, $available];
         }
 
         // OpenGraph product price fallback.
         if (isset($og['product:price:amount'])) {
             $parsed = PriceParser::parse($og['product:price:amount']);
-            $currency = $og['product:price:currency'] ?? ($parsed['currency'] ?? null);
 
-            return [$parsed['cents'] ?? null, $currency, $og['product:price:amount'], true];
+            if ($parsed === null) {
+                return [null, $og['product:price:currency'] ?? null, $og['product:price:amount'], true];
+            }
+
+            $currency = $og['product:price:currency'] ?? $parsed['currency'];
+
+            return [$parsed['cents'], $currency, $og['product:price:amount'], true];
         }
 
         return [null, null, null, true];

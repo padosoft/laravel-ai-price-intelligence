@@ -14,7 +14,7 @@ final class AlertController
     {
         $alerts = Alert::query()
             ->when($request->boolean('unacknowledged'), fn ($q) => $q->whereNull('acknowledged_at'))
-            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
+            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')->toString()))
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 

@@ -17,7 +17,7 @@ final class PriceParser
     {
         $currency = self::detectCurrency($text);
 
-        // Keep digits, separators, minus.
+        // Keep only digits and decimal/thousand separators; prices are non-negative here.
         $clean = preg_replace('/[^0-9.,]/', '', $text) ?? '';
 
         if ($clean === '' || ! preg_match('/\d/', $clean)) {

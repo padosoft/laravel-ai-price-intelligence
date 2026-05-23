@@ -83,3 +83,17 @@
   of config values. **Lesson**: when binding `Foo::class` in a ServiceProvider, always confirm the
   short class name is imported, or use the fully-qualified name — otherwise it silently resolves to
   the provider's own namespace. Fixed by adding the import + regression test `BackoffBindingTest`.
+- PR #1 (2026-05-23) — Copilot full review, batch of valid findings, all fixed:
+  - `WebhookDispatcher` didn't scope by tenant → now `withoutTenantScope()->where('tenant_id',$id)`.
+  - `WebhookSubscription` could leak `secret_encrypted` in JSON → added `$hidden`.
+  - `HtmlProductExtractor` treated `PriceParser::parse()` as array when it can be null (would warn
+    under `failOnWarning`) → null-guarded; also reuse `PriceParser` for JSON-LD prices.
+  - `BelongsToTenant` skipped auto-fill in database mode while `tenant_id` is non-null → now always
+    auto-fills, only the global scope is gated by mode.
+  - `price_eur_cents` renamed to **`price_base_cents`** (base currency is configurable, not always EUR).
+  - `FetchLog.status` was hardcoded → now records the real HTTP status (`ProductSnapshot::$httpStatus`).
+  - Controllers passed `Illuminate\Support\Stringable` into `where()` → `->toString()`.
+  - 204 responses → `response()->noContent()`.
+  - Doc/comment fixes (MpnNormalizer, PriceParser).
+  **Meta-lesson**: the review caught ~15 real issues the passing test suite did not. The strict
+  per-phase Copilot loop is worth it.

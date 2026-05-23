@@ -6,7 +6,8 @@ namespace Padosoft\PriceIntelligence\Support\Identifiers;
 
 /**
  * Normalizes Manufacturer Part Numbers for equality comparison:
- * uppercase, strip non-alphanumeric, drop leading zeros of trailing numeric runs.
+ * uppercase and strip all non-alphanumeric characters (spaces, dashes, dots),
+ * so "AC-X1-64" and "ac x1 64" compare equal.
  */
 final class MpnNormalizer
 {

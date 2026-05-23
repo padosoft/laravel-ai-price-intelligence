@@ -51,7 +51,7 @@ final class ScrapeService
             'competitor_source_id' => $competitor->competitor_source_id,
             'url' => $competitor->url,
             'method' => 'GET',
-            'status' => $snapshot->reachable ? 200 : null,
+            'status' => $snapshot->httpStatus,
             'latency_ms' => $latencyMs,
             'driver' => $code->value,
             'body_hash' => $snapshot->htmlHash,
@@ -73,7 +73,7 @@ final class ScrapeService
                 'captured_at' => $now,
                 'price_cents' => $normalized['price_cents'],
                 'currency' => $normalized['currency'],
-                'price_eur_cents' => $normalized['price_eur_cents'],
+                'price_base_cents' => $normalized['price_base_cents'],
                 'shipping_cents' => $snapshot->shippingCents,
                 'available' => $normalized['available'],
                 'raw_price_text' => $snapshot->rawPriceText,
@@ -118,16 +118,16 @@ final class ScrapeService
 
         $this->alerts->fromPriceChange(
             competitor: $competitor,
-            previousCents: $previous?->price_eur_cents,
-            currentCents: $normalized['price_eur_cents'],
-            ourCents: $this->ourPriceEurCents($competitor),
+            previousCents: $previous?->price_base_cents,
+            currentCents: $normalized['price_base_cents'],
+            ourCents: $this->ourPriceBaseCents($competitor),
             available: $snapshot->available,
         );
 
         return $snapshot;
     }
 
-    private function ourPriceEurCents(CompetitorProduct $competitor): ?int
+    private function ourPriceBaseCents(CompetitorProduct $competitor): ?int
     {
         $product = $competitor->target?->product;
 

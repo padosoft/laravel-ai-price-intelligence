@@ -17,18 +17,20 @@ trait BelongsToTenant
 {
     public static function bootBelongsToTenant(): void
     {
-        if (self::tenancyMode() === 'database') {
-            return;
+        // The global row-level scope is only needed in single-DB mode. In
+        // database-per-tenant mode isolation is at the connection level.
+        if (self::tenancyMode() !== 'database') {
+            static::addGlobalScope('pi_tenant', function (Builder $builder): void {
+                $tenantId = self::currentTenantId();
+
+                if ($tenantId !== null) {
+                    $builder->where($builder->getModel()->getTable() . '.tenant_id', $tenantId);
+                }
+            });
         }
 
-        static::addGlobalScope('pi_tenant', function (Builder $builder): void {
-            $tenantId = self::currentTenantId();
-
-            if ($tenantId !== null) {
-                $builder->where($builder->getModel()->getTable() . '.tenant_id', $tenantId);
-            }
-        });
-
+        // Auto-fill tenant_id in BOTH modes: the column is non-null, and even in
+        // database mode rows should carry their tenant id for portability/exports.
         static::creating(function (Model $model): void {
             if ($model->getAttribute('tenant_id') === null) {
                 $tenantId = self::currentTenantId();

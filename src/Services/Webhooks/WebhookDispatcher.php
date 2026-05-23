@@ -32,7 +32,13 @@ final class WebhookDispatcher
         $body = json_encode($payload, JSON_UNESCAPED_SLASHES) ?: '{}';
         $delivered = 0;
 
-        $subscriptions = WebhookSubscription::query()->where('active', true)->get();
+        // Explicitly scope by tenant rather than relying on the ambient TenantContext
+        // global scope, so delivery is always correct regardless of caller context.
+        $subscriptions = WebhookSubscription::query()
+            ->withoutTenantScope()
+            ->where('tenant_id', $tenantId)
+            ->where('active', true)
+            ->get();
 
         foreach ($subscriptions as $subscription) {
             if (! $subscription->subscribesTo($event)) {

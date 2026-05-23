@@ -42,6 +42,7 @@ final class ProductSnapshot
         public readonly PromoType $promoType = PromoType::None,
         public readonly ?string $htmlHash = null,
         public readonly bool $reachable = true,
+        public readonly ?int $httpStatus = null,
     ) {
     }
 
@@ -70,12 +71,44 @@ final class ProductSnapshot
             promoType: $this->promoType,
             htmlHash: $this->htmlHash,
             reachable: $reachable,
+            httpStatus: $this->httpStatus,
         );
     }
 
-    public static function unreachable(string $url): self
+    public function withHttpStatus(?int $status): self
     {
-        return new self(url: $url, available: false, reachable: false);
+        $clone = $this->withReachable($this->reachable);
+
+        return new self(
+            url: $clone->url,
+            priceCents: $clone->priceCents,
+            currency: $clone->currency,
+            rawPriceText: $clone->rawPriceText,
+            shippingCents: $clone->shippingCents,
+            available: $clone->available,
+            stockQty: $clone->stockQty,
+            title: $clone->title,
+            description: $clone->description,
+            images: $clone->images,
+            breadcrumb: $clone->breadcrumb,
+            attributes: $clone->attributes,
+            jsonld: $clone->jsonld,
+            og: $clone->og,
+            gtin: $clone->gtin,
+            mpn: $clone->mpn,
+            brand: $clone->brand,
+            buyboxSeller: $clone->buyboxSeller,
+            sellerRating: $clone->sellerRating,
+            promoType: $clone->promoType,
+            htmlHash: $clone->htmlHash,
+            reachable: $clone->reachable,
+            httpStatus: $status,
+        );
+    }
+
+    public static function unreachable(string $url, ?int $httpStatus = null): self
+    {
+        return new self(url: $url, available: false, reachable: false, httpStatus: $httpStatus);
     }
 
     /**

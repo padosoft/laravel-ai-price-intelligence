@@ -24,7 +24,7 @@ return new class extends Migration
             $b->timestamp('captured_at')->index();
             $b->unsignedBigInteger('price_cents')->nullable();
             $b->string('currency', 3)->nullable();
-            $b->unsignedBigInteger('price_eur_cents')->nullable();
+            $b->unsignedBigInteger('price_base_cents')->nullable();
             $b->unsignedBigInteger('shipping_cents')->nullable();
             $b->boolean('available')->default(true);
             $b->string('raw_price_text')->nullable();

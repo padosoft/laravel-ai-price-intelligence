@@ -13,7 +13,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property \Illuminate\Support\Carbon $captured_at
  * @property int|null $price_cents
  * @property string|null $currency
- * @property int|null $price_eur_cents
+ * @property int|null $price_base_cents
  * @property int|null $shipping_cents
  * @property bool $available
  */

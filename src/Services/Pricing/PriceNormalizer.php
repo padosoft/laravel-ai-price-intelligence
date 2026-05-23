@@ -19,7 +19,7 @@ final class PriceNormalizer
     }
 
     /**
-     * @return array{price_cents: ?int, currency: ?string, price_eur_cents: ?int, available: bool}
+     * @return array{price_cents: ?int, currency: ?string, price_base_cents: ?int, available: bool}
      */
     public function normalize(ProductSnapshot $snapshot): array
     {
@@ -39,7 +39,7 @@ final class PriceNormalizer
         return [
             'price_cents' => $price,
             'currency' => $currency,
-            'price_eur_cents' => $baseCents,
+            'price_base_cents' => $baseCents,
             'available' => $snapshot->available,
         ];
     }

@@ -25,11 +25,11 @@ final class CatalogController
         $query = Product::query();
 
         if ($request->filled('brand')) {
-            $query->where('brand', $request->string('brand'));
+            $query->where('brand', $request->string('brand')->toString());
         }
 
         if ($request->filled('gtin')) {
-            $query->where('gtin', $request->string('gtin'));
+            $query->where('gtin', $request->string('gtin')->toString());
         }
 
         $products = $query->orderByDesc('id')->cursorPaginate(
@@ -75,6 +75,6 @@ final class CatalogController
         $product = Product::query()->findOrFail($id);
         $product->delete();
 
-        return response()->json(status: 204);
+        return response()->noContent();
     }
 }
