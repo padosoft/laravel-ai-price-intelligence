@@ -25,6 +25,12 @@ final class AiDecisionLogger
         ?int $subjectId = null,
         ?string $modelVersion = null,
     ): ?AiDecisionLog {
+        // Respect both the global EU AI Act switch and the decision-log sub-toggle.
+        // ai_act.enabled defaults to 'auto' (treated as on); only an explicit false disables.
+        if (config('price-intelligence.ai_act.enabled', 'auto') === false) {
+            return null;
+        }
+
         if (! (bool) config('price-intelligence.ai_act.decision_log.enabled', true)) {
             return null;
         }
