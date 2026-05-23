@@ -32,10 +32,12 @@ final class StatisticalAnomalyDetectorTest extends TestCase
     }
 
     #[Test]
-    public function it_flags_an_outlier_below_p5(): void
+    public function it_flags_an_outlier_far_from_the_trend(): void
     {
+        // Roughly flat history; 8000 is far from the ~10000 trend prediction
+        // (and still above 10% of the median, so it is an outlier, not a price_error).
         $history = [9800, 9900, 10000, 10100, 10200, 9950, 10050, 10000, 9900, 10100];
-        $decisions = $this->detector()->detect($history, 8000); // clearly below p5 but > 10% median
+        $decisions = $this->detector()->detect($history, 8000);
 
         $this->assertNotEmpty($decisions);
         $this->assertSame('outlier', $decisions[0]['type']);

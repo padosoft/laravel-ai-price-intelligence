@@ -54,8 +54,8 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   Tested end-to-end via Http::fake.
 - [~] **Phase 8 — AI layer (statistical core)** (PR open): ForecastProviderInterface +
   StatisticalForecaster (OLS trend + CI), AnomalyDetectorInterface + StatisticalAnomalyDetector
-  (price_error/outlier via percentiles), forecasts/anomalies/ai_decision_logs tables+models,
-  AiDecisionLogger (EU AI Act, toggleable). 83 tests green.
+  (price_error + detrended-residual outliers), forecasts/anomalies/ai_decision_logs tables+models,
+  AiDecisionLogger (EU AI Act, toggleable), null-object drivers honor toggles. 91 tests green.
   - **Phase 8b (LLM features, deferred to its own PR)**: NarrativeWriter, PromoDetector,
     ContentGapAnalyzer, AssortmentMapper, VisualMatcher — require LLM provider wiring; grouped with
     review-sentiment (Phase 9). Interfaces land when implemented to avoid untested stubs.

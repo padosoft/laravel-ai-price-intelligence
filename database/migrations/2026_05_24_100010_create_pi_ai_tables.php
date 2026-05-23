@@ -39,7 +39,9 @@ return new class extends Migration
                 $b->string('type', 30);
                 $b->string('severity', 20)->default('medium');
                 $b->json('evidence')->nullable();
-                $b->boolean('is_ai_generated')->default(false);
+                // Consistent with forecasts: anomalies are outputs of the AI/intelligence
+                // layer. A host using a purely deterministic path may override per row.
+                $b->boolean('is_ai_generated')->default(true);
                 $b->timestamp('detected_at');
                 $b->unsignedBigInteger('acknowledged_by')->nullable();
                 $b->timestamp('acknowledged_at')->nullable();

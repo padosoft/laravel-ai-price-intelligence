@@ -9,9 +9,10 @@ use Padosoft\PriceIntelligence\Enums\Severity;
 
 /**
  * Statistical anomaly detection over a price history:
- *  - outlier: current price below p5 or above p95 of history
  *  - price_error: current price is a tiny fraction of the historical median
  *    (likely a data-entry / "civetta" bait error worth exploiting or ignoring)
+ *  - outlier: current price deviates from the linear-trend prediction by more than
+ *    ~1.96x the residual std-dev (detrended, so a normal trend continuation is NOT flagged)
  * Pure and deterministic.
  */
 final class StatisticalAnomalyDetector implements AnomalyDetectorInterface
