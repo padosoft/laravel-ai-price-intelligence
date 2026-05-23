@@ -61,6 +61,19 @@
 - A hooked security check blocks writing a PHP method literally named after the JS code-evaluation
   builtin — name test helpers `evaluator()` etc. instead.
 
+## Local Copilot CLI review (run BEFORE pushing) — WORKING invocation
+- Command: `copilot --autopilot --yolo -p "<prompt>"` (non-interactive; `--yolo` allows tools/paths
+  so it can run git + read files without prompts).
+- In the prompt, **scope it to the PR/branch diff**, not just a file list, and trigger the precise
+  review skill with **`/review`**. Example prompt:
+  `/review the changes on this branch vs origin/main (git diff origin/main...HEAD). Report concrete
+   actionable bugs / Laravel best-practice issues / edge cases only as a short bullet list; reply
+   'NO ISSUES' if none.`
+- It genuinely finds bugs the test suite misses (e.g. on phase 8 it caught that
+  `StatisticalForecaster::forecast()` didn't validate `horizonDays > 0` → NAN in the CI formula +
+  mislabeled persisted horizon). Run it, fix findings, re-run until 'NO ISSUES', THEN push.
+- It is a Premium request and can take several minutes; that's expected.
+
 ## Requesting GitHub Copilot review (WORKING method)
 - `gh pr edit <PR> --add-reviewer copilot` → **fails** ("Could not resolve user 'copilot'").
 - GraphQL `requestReviews(userLogins:...)` → **fails** (input doesn't accept `userLogins`).
@@ -75,6 +88,24 @@
   lock file is intentionally not committed). Stage with care; verify no `vendor/` paths are staged
   before committing.
 - Branch `feat/core-foundation` → PR #1 (bootstrap). Subsequent phases should be smaller PRs.
+
+## Phase 8 AI layer — local Copilot /review findings (all fixed before push)
+- Forecaster must reject `horizonDays < 1` (else NAN in the CI sqrt + mislabeled horizon).
+- Statistical inputs: **filter non-numeric/null** points, don't `intval()`-coerce to 0 (skews trend,
+  false anomalies). Enforce a hard floor of 2 observations so a misconfigured `min_observations`
+  (0/neg) can't `DivisionByZeroError`.
+- Anomaly outliers must be measured on **detrended residuals** (linear fit), not raw p5/p95, or a
+  normal trend continuation is falsely flagged. Floor residual-std at 0.5% of predicted so a
+  perfectly linear history still flags genuine breaks.
+- Honor feature toggles in the ServiceProvider with **null-object drivers** (NullForecaster/
+  NullAnomalyDetector) — binding the real driver unconditionally makes `ai.*.enabled` inert.
+- `AiDecisionLogger` must honor BOTH the global `ai_act.enabled` and the `decision_log.enabled`
+  sub-toggle, and persist `model_version` (don't leave the schema column orphaned).
+- Don't keep config keys the code ignores (removed `ai.forecast.driver`): a "dead setting" is a
+  review smell. Driver selection is via the interface binding.
+- The local `copilot /review` even runs PHP snippets to verify behavior — treat its findings as
+  high-signal, but still verify: it raised one **false positive** (claimed CI assertions were
+  reversed when they were correct & green) — push back with reasoning, don't blindly "fix".
 
 ## Copilot / CI feedback log
 - PR #1 (2026-05-23): review bot flagged a **P1** — `AdaptiveBackoff::class` in the ServiceProvider

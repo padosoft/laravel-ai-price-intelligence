@@ -126,7 +126,9 @@ return [
     'ai' => [
         'visual_match' => ['enabled' => true],
         'content_gap' => ['enabled' => true],
-        'forecast' => ['enabled' => true, 'min_observations' => 14, 'show_confidence_interval' => true, 'driver' => 'statistical'],
+        // Forecast driver is selected by binding ForecastProviderInterface (Statistical by
+        // default); there is no string "driver" switch here to avoid a dead setting.
+        'forecast' => ['enabled' => true, 'min_observations' => 14, 'show_confidence_interval' => true],
         'anomaly' => ['enabled' => true],
         'narrative' => ['enabled' => true, 'driver' => 'fake'],
         'promo_detection' => ['enabled' => true, 'driver' => 'fake'],

@@ -42,8 +42,12 @@ For EVERY roadmap phase, in this exact order (non-negotiable):
    (`gh pr edit --add-reviewer copilot` and GraphQL `userLogins` both fail — REST works).
 4. **Remote loop until green**: wait for CI to pass AND for the GitHub Copilot review to have **zero
    actionable comments**. Fix → push → re-check, looping until both are satisfied.
-5. Record every Copilot/CI learning in `docs/LESSON.md`. Only then mark the phase done.
-- CI green alone is NOT enough; Copilot review must be clean too.
+5. Record every Copilot/CI learning in `docs/LESSON.md`.
+6. **AUTO-MERGE & ADVANCE (authorized)**: once CI is fully green AND the Copilot review has no
+   remaining comments, you are authorized to squash-merge the PR (`gh pr merge <n> --squash
+   --delete-branch`), sync local `main`, mark the phase done, and **immediately start the next phase**
+   — repeating this whole loop automatically until the roadmap is 100% complete. No need to ask.
+- CI green alone is NOT enough; Copilot review must be clean too before merging.
 
 ## Final task of the build
 Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the repo's `AGENTS.md`,

@@ -8,7 +8,7 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **71 tests green**. CI green (8.3/8.4).
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **91 tests green**. CI green (8.3/8.4).
 
 **Open PR**: #1 `feat/core-foundation` (phases 0–7). Multiple Copilot review cycles; all actionable
 findings addressed (AdaptiveBackoff import, tenant scoping, secret hiding, price parsing, 204 return
@@ -52,7 +52,13 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   stockout + severity), WebhookDispatcher (Http, per-endpoint failure isolation), AlertDispatcher,
   ScrapeService diffs vs previous obs and raises alerts + signed webhooks, AlertController + WebhookController.
   Tested end-to-end via Http::fake.
-- [ ] Phase 8 — AI layer (visual, content-gap, forecast, anomaly, narrative, promo, assortment)
+- [~] **Phase 8 — AI layer (statistical core)** (PR open): ForecastProviderInterface +
+  StatisticalForecaster (OLS trend + CI), AnomalyDetectorInterface + StatisticalAnomalyDetector
+  (price_error + detrended-residual outliers), forecasts/anomalies/ai_decision_logs tables+models,
+  AiDecisionLogger (EU AI Act, toggleable), null-object drivers honor toggles. 91 tests green.
+  - **Phase 8b (LLM features, deferred to its own PR)**: NarrativeWriter, PromoDetector,
+    ContentGapAnalyzer, AssortmentMapper, VisualMatcher — require LLM provider wiring; grouped with
+    review-sentiment (Phase 9). Interfaces land when implemented to avoid untested stubs.
 - [ ] Phase 9 — Review sentiment (GDPR-safe, pii-redactor)
 - [ ] Phase 10 — Repricer engine (opt, off default)
 - [ ] Phase 11 — Compliance hardening (robots, rate-limit, PiiFilter, AiActBridge, audit)
