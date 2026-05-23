@@ -28,7 +28,7 @@ final class PriceObservation extends PriceIntelligenceModel
     protected $casts = [
         'captured_at' => 'datetime',
         'price_cents' => 'integer',
-        'price_eur_cents' => 'integer',
+        'price_base_cents' => 'integer',
         'shipping_cents' => 'integer',
         'available' => 'boolean',
     ];

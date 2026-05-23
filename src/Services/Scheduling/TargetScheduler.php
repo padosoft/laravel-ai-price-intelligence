@@ -40,13 +40,20 @@ final class TargetScheduler
             ->limit($limit)
             ->get();
 
-        foreach ($targets as $target) {
-            $competitors = CompetitorProduct::query()
-                ->where('monitoring_target_id', $target->id)
-                ->where('match_status', MatchStatus::Confirmed->value)
-                ->get();
+        if ($targets->isEmpty()) {
+            return 0;
+        }
 
-            foreach ($competitors as $competitor) {
+        // Single query for all confirmed competitors of the due targets (avoids N+1),
+        // grouped by target id.
+        $competitorsByTarget = CompetitorProduct::query()
+            ->whereIn('monitoring_target_id', $targets->pluck('id'))
+            ->where('match_status', MatchStatus::Confirmed->value)
+            ->get()
+            ->groupBy('monitoring_target_id');
+
+        foreach ($targets as $target) {
+            foreach ($competitorsByTarget->get($target->id, collect()) as $competitor) {
                 ScrapeCompetitorProductJob::dispatch(
                     $competitor->id,
                     $target->tenant_id,

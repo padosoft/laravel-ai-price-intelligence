@@ -6,6 +6,7 @@ namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Padosoft\PriceIntelligence\Jobs\DiscoverCompetitorUrlsJob;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\MatchProposal;
@@ -39,7 +40,7 @@ final class MatchController
         return response()->json(['data' => $competitor], 200);
     }
 
-    public function reject(int $id): JsonResponse
+    public function reject(int $id): Response
     {
         $proposal = MatchProposal::query()->findOrFail($id);
         $this->persister->reject($proposal, auth()->id());

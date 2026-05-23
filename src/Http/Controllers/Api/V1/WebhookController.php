@@ -6,6 +6,7 @@ namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Padosoft\PriceIntelligence\Models\WebhookSubscription;
 use Padosoft\PriceIntelligence\Services\Webhooks\WebhookDispatcher;
 
@@ -67,7 +68,7 @@ final class WebhookController
         return response()->json(['data' => $subscription]);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(int $id): Response
     {
         WebhookSubscription::query()->findOrFail($id)->delete();
 

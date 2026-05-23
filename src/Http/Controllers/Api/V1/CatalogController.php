@@ -6,6 +6,7 @@ namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Padosoft\PriceIntelligence\Data\ProductData;
 use Padosoft\PriceIntelligence\Http\Requests\BulkUpsertProductsRequest;
 use Padosoft\PriceIntelligence\Http\Resources\ProductResource;
@@ -62,15 +63,16 @@ final class CatalogController
     {
         $request->validate(['file' => ['required', 'file', 'mimes:csv,txt']]);
 
-        $reader = new CsvCatalogReader();
-        $rows = $reader->read($request->file('file')->getRealPath());
+        $path = $request->file('file')->getRealPath();
 
-        $result = $this->importer->importInTransaction($rows);
+        abort_if($path === false, 422, 'Unable to read the uploaded file.');
+
+        $result = $this->importer->importInTransaction((new CsvCatalogReader())->read($path));
 
         return response()->json(['data' => $result], 200);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(int $id): Response
     {
         $product = Product::query()->findOrFail($id);
         $product->delete();
