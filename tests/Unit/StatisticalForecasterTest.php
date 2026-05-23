@@ -67,8 +67,37 @@ final class StatisticalForecasterTest extends TestCase
         $result = $forecaster->forecast($series, 7);
 
         $this->assertNotNull($result);
-        $this->assertLessThanOrEqual($result->forecastCents, $result->ciLowCents);
-        $this->assertGreaterThanOrEqual($result->forecastCents, $result->ciHighCents);
+        // Explicit ordering (clearer than paired assertLessThan/GreaterThan):
+        // ciLow <= forecast <= ciHigh, and the lower bound is never negative.
+        $this->assertTrue(
+            $result->ciLowCents <= $result->forecastCents
+            && $result->forecastCents <= $result->ciHighCents,
+            'CI must bracket the point forecast',
+        );
         $this->assertGreaterThanOrEqual(0, $result->ciLowCents);
+    }
+
+    #[Test]
+    public function it_skips_non_numeric_points_instead_of_zeroing_them(): void
+    {
+        $forecaster = new StatisticalForecaster(minObservations: 5);
+        // Two nulls interleaved; the real series is a flat 5000.
+        $series = [5000, null, 5000, 5000, null, 5000, 5000, 5000];
+
+        $result = $forecaster->forecast($series, 7);
+
+        $this->assertNotNull($result);
+        // If nulls had been coerced to 0 the forecast would be dragged far below 5000.
+        $this->assertSame(5000, $result->forecastCents);
+    }
+
+    #[Test]
+    public function misconfigured_min_observations_cannot_divide_by_zero(): void
+    {
+        $forecaster = new StatisticalForecaster(minObservations: 0);
+
+        // Empty / tiny series must return null, never a DivisionByZeroError.
+        $this->assertNull($forecaster->forecast([], 7));
+        $this->assertNull($forecaster->forecast([100], 7));
     }
 }

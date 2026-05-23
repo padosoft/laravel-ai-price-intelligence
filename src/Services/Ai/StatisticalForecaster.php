@@ -27,10 +27,17 @@ final class StatisticalForecaster implements ForecastProviderInterface
             return null;
         }
 
-        $series = array_values(array_map('intval', $priceSeriesCents));
+        // Drop missing/non-numeric points (e.g. null prices from incomplete scrape
+        // history) rather than coercing them to 0, which would skew the trend.
+        $series = array_values(array_map(
+            'intval',
+            array_filter($priceSeriesCents, static fn ($v): bool => is_numeric($v)),
+        ));
         $n = count($series);
 
-        if ($n < $this->minObservations) {
+        // OLS needs at least 2 points; also enforce the configured minimum and a
+        // hard floor so a misconfigured min_observations (0/negative) can't divide by zero.
+        if ($n < max(2, $this->minObservations)) {
             return null;
         }
 

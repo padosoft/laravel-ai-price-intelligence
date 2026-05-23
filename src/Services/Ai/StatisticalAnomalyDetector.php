@@ -28,9 +28,14 @@ final class StatisticalAnomalyDetector implements AnomalyDetectorInterface
      */
     public function detect(array $priceSeriesCents, int $currentCents): array
     {
-        $series = array_values(array_map('intval', $priceSeriesCents));
+        // Drop missing/non-numeric points instead of coercing them to 0, which
+        // would create false price_error / outlier signals.
+        $series = array_values(array_map(
+            'intval',
+            array_filter($priceSeriesCents, static fn ($v): bool => is_numeric($v)),
+        ));
 
-        if (count($series) < $this->minObservations) {
+        if (count($series) < max(2, $this->minObservations)) {
             return [];
         }
 
