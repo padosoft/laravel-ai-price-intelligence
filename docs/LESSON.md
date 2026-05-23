@@ -60,5 +60,26 @@
 - A hooked security check blocks writing a PHP method literally named after the JS code-evaluation
   builtin — name test helpers `evaluator()` etc. instead.
 
+## Requesting GitHub Copilot review (WORKING method)
+- `gh pr edit <PR> --add-reviewer copilot` → **fails** ("Could not resolve user 'copilot'").
+- GraphQL `requestReviews(userLogins:...)` → **fails** (input doesn't accept `userLogins`).
+- ✅ **REST works**: `gh api --method POST repos/<owner>/<repo>/pulls/<PR>/requested_reviewers
+  -f "reviewers[]=copilot-pull-request-reviewer[bot]"`. The response's `requested_reviewers` then
+  contains the `Copilot` bot. Use this in the copilot-pr-review-loop.
+- After requesting, poll `gh pr view <PR> --json reviews,comments` and the issue timeline for
+  `copilot_work_started`; wait for the review, then address every actionable comment.
+
+## Git / repo
+- `.gitignore` must exclude `vendor/`, `.phpunit.cache/`, `composer.lock` (library: lock not
+  committed; also our path-repo dep makes the lock non-portable). Stage with care; verify no
+  `vendor/` paths are staged before committing.
+- Branch `feat/core-foundation` → PR #1 (bootstrap). Subsequent phases should be smaller PRs.
+
 ## Copilot / CI feedback log
-- (none yet — append findings here as they arrive.)
+- PR #1 (2026-05-23): review bot flagged a **P1** — `AdaptiveBackoff::class` in the ServiceProvider
+  resolved to the wrong namespace (`Padosoft\PriceIntelligence\AdaptiveBackoff`) because the
+  `use ...\Services\Scheduling\AdaptiveBackoff;` import was missing. Effect: the container binding
+  registered under the wrong abstract, so `TargetScheduler` got default `enabled/max_factor` instead
+  of config values. **Lesson**: when binding `Foo::class` in a ServiceProvider, always confirm the
+  short class name is imported, or use the fully-qualified name — otherwise it silently resolves to
+  the provider's own namespace. Fixed by adding the import + regression test `BackoffBindingTest`.

@@ -13,6 +13,7 @@ use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
 use Padosoft\PriceIntelligence\Services\Matching\Embeddings\FakeEmbeddingProvider;
 use Padosoft\PriceIntelligence\Services\Pricing\FixedFxProvider;
+use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
 use Padosoft\PriceIntelligence\Services\Scraping\Drivers\GenericHttpScraper;
 use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
