@@ -8,11 +8,10 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **91 tests green**. CI green (8.3/8.4).
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **92 tests green**. CI green (8.3/8.4).
 
-**Open PR**: #1 `feat/core-foundation` (phases 0–7). Multiple Copilot review cycles; all actionable
-findings addressed (AdaptiveBackoff import, tenant scoping, secret hiding, price parsing, 204 return
-types, N+1, doc accuracy). Awaiting final clean review / merge.
+**Merged**: PR #1 (phases 0–7) + PR #2 (phase 8 AI core) — both via the full local-Copilot →
+push → CI → GitHub-Copilot → auto-merge loop. `main` @ 2e6dbfb. No open PR.
 
 **STRICT per-phase workflow (mandatory from now on)** — see AGENTS.md / .claude/rules:
 one PR per phase; local loop (phpunit + local `copilot` CLI review → fix) until clean → push →
@@ -52,7 +51,7 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   stockout + severity), WebhookDispatcher (Http, per-endpoint failure isolation), AlertDispatcher,
   ScrapeService diffs vs previous obs and raises alerts + signed webhooks, AlertController + WebhookController.
   Tested end-to-end via Http::fake.
-- [~] **Phase 8 — AI layer (statistical core)** (PR open): ForecastProviderInterface +
+- [x] **Phase 8 — AI layer (statistical core)** (PR #2 merged): ForecastProviderInterface +
   StatisticalForecaster (OLS trend + CI), AnomalyDetectorInterface + StatisticalAnomalyDetector
   (price_error + detrended-residual outliers), forecasts/anomalies/ai_decision_logs tables+models,
   AiDecisionLogger (EU AI Act, toggleable), null-object drivers honor toggles. 91 tests green.
@@ -67,7 +66,8 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
 - [ ] **Final** — consolidate LESSON.md learnings into AGENTS.md / .claude/rules / skills
 
 ### Next action
-Close PR #1 (await final clean Copilot review + merge to main). Then **Phase 8 — AI layer** as its
-own PR following the strict per-phase loop: ForecastProviderInterface + StatisticalForecaster,
-AnomalyDetector, NarrativeWriter, PromoDetector, ContentGapAnalyzer, AssortmentMapper, VisualMatcher,
-ai_decision_logs + is_ai_generated, all pluggable with config toggles. Then phases 9–13 + Final.
+**Phase 9 — Review sentiment (GDPR-safe)** as its own PR (strict loop): ReviewInsightInterface,
+ReviewScraper/Aggregator/SentimentAnalyzer, pii-redactor mandatory, off by default + per-domain
+opt-in, only anonymous aggregates persisted (review_insights table). Then phases 10–13 + Final.
+Note: Phase 8b LLM features (narrative/promo/content-gap/assortment/visual) still pending — can be
+folded near Phase 9 since they share LLM provider wiring.
