@@ -6,7 +6,10 @@ namespace Padosoft\PriceIntelligence\Support\Tenant;
 
 /**
  * Holds the current tenant id for the request/job lifecycle. Models scope to it
- * automatically via the BelongsToTenant trait. Jobs restore it in handle().
+ * automatically via the BelongsToTenant trait. Queued jobs set it at the start of
+ * handle() (each job runs in an isolated worker process, so no restore is needed);
+ * use runForTenant() when you must switch tenant within a single process and
+ * restore the previous context afterwards.
  */
 final class TenantContext
 {
