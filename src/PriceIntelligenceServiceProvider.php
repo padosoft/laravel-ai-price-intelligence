@@ -8,9 +8,13 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Padosoft\PriceIntelligence\Console\Commands\ImportCatalogCommand;
 use Padosoft\PriceIntelligence\Console\Commands\RunDueTargetsCommand;
+use Padosoft\PriceIntelligence\Contracts\AnomalyDetectorInterface;
 use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
+use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
 use Padosoft\PriceIntelligence\Services\Matching\Embeddings\FakeEmbeddingProvider;
 use Padosoft\PriceIntelligence\Services\Pricing\FixedFxProvider;
 use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
@@ -43,6 +47,12 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
         $this->app->bind(ProductScraperInterface::class, static fn ($app): ProductScraperInterface => new GenericHttpScraper(
             $app->make(HtmlProductExtractor::class),
         ));
+
+        $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => new StatisticalForecaster(
+            (int) config('price-intelligence.ai.forecast.min_observations', 14),
+        ));
+
+        $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => new StatisticalAnomalyDetector());
 
         $this->app->singleton(PriceIntelligenceManager::class, static fn ($app): PriceIntelligenceManager => new PriceIntelligenceManager(
             $app->make(TenantContext::class),
