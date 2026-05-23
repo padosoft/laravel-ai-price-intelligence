@@ -47,4 +47,23 @@ final class StatisticalAnomalyDetectorTest extends TestCase
         $history = [9800, 9900, 10000, 10100, 10200, 9950, 10050, 10000, 9900, 10100];
         $this->assertSame([], $this->detector()->detect($history, 10000));
     }
+
+    #[Test]
+    public function a_steady_trend_continuation_is_not_flagged(): void
+    {
+        // Strictly rising series; the next on-trend value must NOT be an outlier
+        // (detrended residuals ~0), unlike a naive p95 check.
+        $history = [10000, 10100, 10200, 10300, 10400, 10500, 10600, 10700, 10800, 10900];
+        $this->assertSame([], $this->detector()->detect($history, 11000));
+    }
+
+    #[Test]
+    public function a_break_from_the_trend_is_flagged(): void
+    {
+        $history = [10000, 10100, 10200, 10300, 10400, 10500, 10600, 10700, 10800, 10900];
+        $decisions = $this->detector()->detect($history, 7000);
+
+        $this->assertNotEmpty($decisions);
+        $this->assertSame('outlier', $decisions[0]['type']);
+    }
 }

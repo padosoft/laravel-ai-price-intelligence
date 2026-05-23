@@ -13,6 +13,8 @@ use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
 use Padosoft\PriceIntelligence\Services\Matching\Embeddings\FakeEmbeddingProvider;
@@ -48,11 +50,15 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
             $app->make(HtmlProductExtractor::class),
         ));
 
-        $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => new StatisticalForecaster(
-            (int) config('price-intelligence.ai.forecast.min_observations', 14),
-        ));
+        // Honor the feature toggles: bind a no-op driver when disabled so the
+        // advertised config flags actually take effect.
+        $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => (bool) config('price-intelligence.ai.forecast.enabled', true)
+            ? new StatisticalForecaster((int) config('price-intelligence.ai.forecast.min_observations', 14))
+            : new NullForecaster());
 
-        $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => new StatisticalAnomalyDetector());
+        $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => (bool) config('price-intelligence.ai.anomaly.enabled', true)
+            ? new StatisticalAnomalyDetector()
+            : new NullAnomalyDetector());
 
         $this->app->singleton(PriceIntelligenceManager::class, static fn ($app): PriceIntelligenceManager => new PriceIntelligenceManager(
             $app->make(TenantContext::class),

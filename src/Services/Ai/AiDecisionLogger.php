@@ -23,6 +23,7 @@ final class AiDecisionLogger
         ?int $confidence = null,
         ?string $subjectType = null,
         ?int $subjectId = null,
+        ?string $modelVersion = null,
     ): ?AiDecisionLog {
         if (! (bool) config('price-intelligence.ai_act.decision_log.enabled', true)) {
             return null;
@@ -34,6 +35,7 @@ final class AiDecisionLogger
             'subject_id' => $subjectId,
             'feature' => $feature,
             'model' => $model,
+            'model_version' => $modelVersion,
             'output' => $output,
             'confidence' => $confidence,
             'human_reviewed' => false,

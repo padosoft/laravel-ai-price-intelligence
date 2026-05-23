@@ -48,18 +48,61 @@ final class StatisticalAnomalyDetector implements AnomalyDetectorInterface
             return $decisions; // a price error subsumes the outlier signal
         }
 
-        $p5 = $this->percentile($series, 5);
-        $p95 = $this->percentile($series, 95);
+        // Outlier check on DETRENDED residuals so a normal continuation of a steady
+        // up/down trend is NOT flagged. Fit a linear trend, predict the next point,
+        // and flag when the deviation exceeds ~1.96 std-dev of historical residuals.
+        [$slope, $intercept, $residualStd] = $this->linearFit($series);
+        $predicted = $intercept + $slope * count($series);
+        $deviation = abs($currentCents - $predicted);
 
-        if ($currentCents < $p5 || $currentCents > $p95) {
+        // Floor the residual std at 0.5% of the predicted level so a perfectly
+        // linear history (residualStd == 0) still flags a genuine break, while
+        // noisy histories keep their own (larger) tolerance.
+        $effectiveStd = max($residualStd, abs($predicted) * 0.005);
+
+        if ($effectiveStd > 0.0 && $deviation > 1.96 * $effectiveStd) {
             $decisions[] = [
                 'type' => 'outlier',
                 'severity' => Severity::Medium->value,
-                'evidence' => ['current_cents' => $currentCents, 'p5_cents' => $p5, 'p95_cents' => $p95],
+                'evidence' => [
+                    'current_cents' => $currentCents,
+                    'expected_cents' => (int) round($predicted),
+                    'deviation_cents' => (int) round($deviation),
+                ],
             ];
         }
 
         return $decisions;
+    }
+
+    /**
+     * Ordinary least squares fit returning [slope, intercept, residualStdDev].
+     *
+     * @param  array<int, int>  $y
+     * @return array{0: float, 1: float, 2: float}
+     */
+    private function linearFit(array $y): array
+    {
+        $n = count($y);
+        $sumX = $sumY = $sumXY = $sumXX = 0.0;
+
+        foreach ($y as $x => $value) {
+            $sumX += $x;
+            $sumY += $value;
+            $sumXY += $x * $value;
+            $sumXX += $x * $x;
+        }
+
+        $denom = ($n * $sumXX) - ($sumX * $sumX);
+        $slope = $denom === 0.0 ? 0.0 : (($n * $sumXY) - ($sumX * $sumY)) / $denom;
+        $intercept = ($sumY - ($slope * $sumX)) / $n;
+
+        $sumSq = 0.0;
+        foreach ($y as $x => $value) {
+            $sumSq += ($value - ($intercept + $slope * $x)) ** 2;
+        }
+
+        return [$slope, $intercept, $n > 2 ? sqrt($sumSq / ($n - 2)) : 0.0];
     }
 
     /**

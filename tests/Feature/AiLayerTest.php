@@ -56,6 +56,40 @@ final class AiLayerTest extends TestCase
     }
 
     #[Test]
+    public function decision_logger_persists_model_version(): void
+    {
+        config()->set('price-intelligence.ai_act.decision_log.enabled', true);
+        $tenant = Tenant::create(['code' => 't1', 'name' => 't1']);
+        app(TenantContext::class)->set($tenant->id);
+
+        app(AiDecisionLogger::class)->record(
+            tenantId: $tenant->id,
+            feature: 'forecast',
+            output: ['x' => 1],
+            model: 'statistical',
+            modelVersion: 'statistical-v1',
+        );
+
+        $this->assertSame('statistical-v1', AiDecisionLog::query()->sole()->model_version);
+    }
+
+    #[Test]
+    public function disabled_ai_toggles_bind_null_drivers(): void
+    {
+        config()->set('price-intelligence.ai.forecast.enabled', false);
+        config()->set('price-intelligence.ai.anomaly.enabled', false);
+
+        $this->assertInstanceOf(
+            \Padosoft\PriceIntelligence\Services\Ai\NullForecaster::class,
+            app(ForecastProviderInterface::class),
+        );
+        $this->assertInstanceOf(
+            \Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector::class,
+            app(AnomalyDetectorInterface::class),
+        );
+    }
+
+    #[Test]
     public function decision_logger_is_noop_when_disabled(): void
     {
         config()->set('price-intelligence.ai_act.decision_log.enabled', false);
