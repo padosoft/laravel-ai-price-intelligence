@@ -140,9 +140,17 @@ return [
         'allowed_domains' => [],
     ],
 
+    // Advisory-only by design: the repricer NEVER applies prices (RuleDecision.applied stays
+    // false; a RepricingSuggested event is emitted for the host to act on). No "dry run" switch.
     'repricer' => [
         'enabled' => false,
+        // Deprecated no-op, retained for backward-compatibility: the repricer is ALWAYS
+        // advisory (it never applies prices), so there is effectively only "dry run".
         'dry_run_only' => true,
+        // Custom strategies: prefer registering callables in the container under
+        // "price-intelligence.repricer.custom.{name}" (config:cache safe). A map of
+        // name => invokable class-string may also be declared here.
+        'custom' => [],
     ],
 
     'pii' => ['enabled' => 'auto'],

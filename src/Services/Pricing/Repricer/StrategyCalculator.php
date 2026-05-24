@@ -1,0 +1,199 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Padosoft\PriceIntelligence\Services\Pricing\Repricer;
+
+use Padosoft\PriceIntelligence\Enums\RuleStrategy;
+
+/**
+ * Pure price-strategy math. Given competitor prices, our current price and rule
+ * parameters, computes a suggested price in cents (or null if no change is
+ * warranted / there is not enough data). Applies a margin floor, a max daily
+ * change clamp and charm rounding. NEVER mutates anything — advisory only.
+ *
+ * Recognized parameters (all optional):
+ *  - top_n (int)               beat_top_n: how many cheapest competitors to average
+ *  - delta_pct (float)         beat_top_n: adjust the reference by this % (negative = undercut)
+ *  - undercut_pct (float)      undercut_pct: % below the cheapest competitor
+ *  - min_price_cents (int)     hard price floor (margin protection)
+ *  - max_change_pct (float)    clamp the move to ± this % of the current price
+ *  - round_to_charm (float)    e.g. 0.99 -> round down to .99 endings (in major units)
+ *  - demand_factor (float)     dynamic_demand: multiplies the beat_top_n reference by demand.
+ *                              >1 = high demand -> raise price to capture margin;
+ *                              <1 = soft demand -> lower price to stay competitive.
+ */
+final class StrategyCalculator
+{
+    /**
+     * @param  array<int, int>  $competitorPricesCents
+     * @param  array<string, mixed>  $params
+     */
+    public function suggest(RuleStrategy $strategy, array $competitorPricesCents, ?int $currentCents, array $params = []): ?int
+    {
+        $prices = self::cleanPrices($competitorPricesCents);
+
+        if ($prices === []) {
+            return null;
+        }
+
+        $cheapest = $prices[0];
+
+        $raw = match ($strategy) {
+            RuleStrategy::MatchCheapest => $cheapest,
+            // MatchWithFloor MUST have an explicit margin floor; without one it would be
+            // indistinguishable from MatchCheapest, so it declines to suggest.
+            RuleStrategy::MatchWithFloor => (isset($params['min_price_cents']) && is_numeric($params['min_price_cents']) && (int) $params['min_price_cents'] > 0) ? $cheapest : null,
+            // floor() (round down) guarantees a strict undercut even for tiny prices,
+            // where round() could land back on the cheapest competitor.
+            RuleStrategy::UndercutPct => (int) floor($cheapest * (1 - $this->clampPct($this->float($params, 'undercut_pct', 1)) / 100)),
+            RuleStrategy::BeatTopN => $this->beatTopN($prices, $params),
+            RuleStrategy::DynamicDemand => (int) round($this->beatTopN($prices, $params) * $this->float($params, 'demand_factor', 1.0)),
+            RuleStrategy::Custom => null, // resolved by a registered callable in RepricerEngine
+        };
+
+        if ($raw === null) {
+            return null;
+        }
+
+        $suggested = $this->applyGuards($raw, $currentCents, $params);
+
+        // No suggestion if it equals the current price.
+        if ($currentCents !== null && $suggested === $currentCents) {
+            return null;
+        }
+
+        return $suggested;
+    }
+
+    /**
+     * Single linear pipeline so every constraint holds deterministically:
+     *  1. charm rounding   — cosmetic, applied first;
+     *  2. max-change clamp — soft guard around the current price;
+     *  3. margin floor     — HARD guard, applied LAST so it always wins (it may push
+     *                        above the max-change upper bound to protect margin).
+     * Each guard runs exactly once; nothing after the floor can re-break it. The
+     * trade-off is that a floor/clamp adjustment may drop the charm ending — bounds
+     * matter more than cosmetics. Public so the engine can guard custom outputs too.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function applyGuards(int $raw, ?int $currentCents, array $params): int
+    {
+        $price = $this->applyCharm($raw, $params);
+        $price = $this->applyMaxChange($price, $currentCents, $params);
+        $price = $this->applyFloor($price, $params);
+
+        return max(1, $price);
+    }
+
+    /**
+     * @param  array<int, int>  $sortedPrices
+     * @param  array<string, mixed>  $params
+     */
+    private function beatTopN(array $sortedPrices, array $params): int
+    {
+        $n = max(1, (int) ($params['top_n'] ?? 3));
+        $top = array_slice($sortedPrices, 0, $n);
+        $avg = array_sum($top) / count($top);
+        $delta = $this->float($params, 'delta_pct', -2); // default undercut 2%
+
+        return (int) round($avg * (1 + $delta / 100));
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function applyFloor(int $price, array $params): int
+    {
+        // Ignore a non-numeric/negative floor rather than casting it to 0 (which would
+        // silently disable margin protection).
+        if (! isset($params['min_price_cents']) || ! is_numeric($params['min_price_cents'])) {
+            return $price;
+        }
+
+        $floor = (int) $params['min_price_cents'];
+
+        return $floor > 0 ? max($floor, $price) : $price;
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function applyMaxChange(int $price, ?int $currentCents, array $params): int
+    {
+        if ($currentCents === null || ! isset($params['max_change_pct']) || ! is_numeric($params['max_change_pct'])) {
+            return $price;
+        }
+
+        // A negative percentage would invert the bounds; treat it as its magnitude.
+        $maxPct = abs($this->float($params, 'max_change_pct', 100));
+        $low = (int) round($currentCents * (1 - $maxPct / 100));
+        $high = (int) round($currentCents * (1 + $maxPct / 100));
+
+        return min($high, max($low, $price));
+    }
+
+    private function clampPct(float $pct): float
+    {
+        return max(0.0, min(100.0, $pct));
+    }
+
+    /**
+     * Filter to positive integer prices and sort ascending — the single source of
+     * truth for price cleaning (reused by the engine for audit evidence).
+     *
+     * @param  array<int, mixed>  $prices
+     * @return array<int, int>
+     */
+    public static function cleanPrices(array $prices): array
+    {
+        $clean = array_values(array_filter(
+            array_map('intval', $prices),
+            static fn (int $p): bool => $p > 0,
+        ));
+        sort($clean);
+
+        return $clean;
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function applyCharm(int $price, array $params): int
+    {
+        if (! isset($params['round_to_charm'])) {
+            return $price;
+        }
+
+        // The charm ending is a fraction of a major unit; clamp to [0, 0.99] so values
+        // like 1 or 0.999 can't produce a 100-cent ending (which would shift the price).
+        $charm = max(0.0, min(0.99, $this->float($params, 'round_to_charm', 0.99)));
+        $charmCents = (int) round($charm * 100);
+
+        // Charm rounding only makes sense at/above one major unit. For sub-unit prices
+        // (< 100 cents) leave the price untouched rather than collapsing it to 1 cent.
+        if ($price < 100) {
+            return $price;
+        }
+
+        $major = intdiv($price, 100);
+        $candidate = $major * 100 + $charmCents;
+
+        // Round down to the charm ending; if that exceeds the price, drop one major unit.
+        if ($candidate > $price) {
+            $candidate -= 100;
+        }
+
+        // Never let charm rounding push the price below one major unit.
+        return $candidate < 100 ? $price : $candidate;
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function float(array $params, string $key, float $default): float
+    {
+        return isset($params[$key]) && is_numeric($params[$key]) ? (float) $params[$key] : $default;
+    }
+}
