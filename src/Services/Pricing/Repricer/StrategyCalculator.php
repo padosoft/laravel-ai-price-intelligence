@@ -48,7 +48,7 @@ final class StrategyCalculator
             // MatchWithFloor MUST have an explicit margin floor; without one it would be
             // indistinguishable from MatchCheapest, so it declines to suggest.
             RuleStrategy::MatchWithFloor => isset($params['min_price_cents']) ? $cheapest : null,
-            RuleStrategy::UndercutPct => (int) round($cheapest * (1 - $this->float($params, 'undercut_pct', 1) / 100)),
+            RuleStrategy::UndercutPct => (int) round($cheapest * (1 - $this->clampPct($this->float($params, 'undercut_pct', 1)) / 100)),
             RuleStrategy::BeatTopN => $this->beatTopN($prices, $params),
             RuleStrategy::DynamicDemand => (int) round($this->beatTopN($prices, $params) * $this->float($params, 'demand_factor', 1.0)),
             RuleStrategy::Custom => null, // resolved by a registered callable in RepricerEngine
@@ -122,11 +122,17 @@ final class StrategyCalculator
             return $price;
         }
 
-        $maxPct = $this->float($params, 'max_change_pct', 100);
+        // A negative percentage would invert the bounds; treat it as its magnitude.
+        $maxPct = abs($this->float($params, 'max_change_pct', 100));
         $low = (int) round($currentCents * (1 - $maxPct / 100));
         $high = (int) round($currentCents * (1 + $maxPct / 100));
 
         return min($high, max($low, $price));
+    }
+
+    private function clampPct(float $pct): float
+    {
+        return max(0.0, min(100.0, $pct));
     }
 
     /**

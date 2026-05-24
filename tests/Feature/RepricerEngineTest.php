@@ -96,6 +96,21 @@ final class RepricerEngineTest extends TestCase
     }
 
     #[Test]
+    public function custom_strategy_resolves_from_container_binding(): void
+    {
+        // Recommended pattern: register in the container (config:cache safe).
+        config()->set('price-intelligence.repricer.enabled', true);
+        $this->app->bind('price-intelligence.repricer.custom.bound', fn () => fn ($product, $prices, $current, $params): int => 7777);
+        [$product, $rule] = $this->seedProductAndRule();
+        $rule->update(['strategy' => RuleStrategy::Custom->value, 'parameters' => ['callable' => 'bound']]);
+
+        $decision = app(RepricerEngineInterface::class)->evaluate($product->fresh(), $rule->fresh(), [9000]);
+
+        $this->assertNotNull($decision);
+        $this->assertSame(7777, $decision->suggested_price_cents);
+    }
+
+    #[Test]
     public function custom_strategy_uses_registered_callable(): void
     {
         config()->set('price-intelligence.repricer.enabled', true);

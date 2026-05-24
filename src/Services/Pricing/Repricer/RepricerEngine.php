@@ -74,8 +74,16 @@ final class RepricerEngine implements RepricerEngineInterface
     private function resolveCustom(RepricingRule $rule, Product $product, array $competitorPricesCents, ?int $current, array $params): ?int
     {
         $name = is_string($params['callable'] ?? null) ? $params['callable'] : null;
-        $registry = (array) config('price-intelligence.repricer.custom', []);
-        $callable = $name !== null ? ($registry[$name] ?? null) : null;
+
+        if ($name === null) {
+            return null;
+        }
+
+        // Resolve the custom strategy from the CONTAINER (binding key
+        // "price-intelligence.repricer.custom.{name}"), not from config: closures in
+        // config break `php artisan config:cache`. Hosts register them in a service
+        // provider. A config value that is a class-string is also supported.
+        $callable = $this->resolveCustomCallable($name);
 
         if (! is_callable($callable)) {
             return null;
@@ -90,5 +98,29 @@ final class RepricerEngine implements RepricerEngineInterface
         // Custom outputs go through the SAME safeguards (floor, max-change, charm)
         // so a host callable can't bypass margin protection.
         return $this->calculator->applyGuards($result, $current, $params);
+    }
+
+    private function resolveCustomCallable(string $name): mixed
+    {
+        $key = "price-intelligence.repricer.custom.{$name}";
+
+        // 1) Container binding (recommended — register in a service provider).
+        if (app()->bound($key)) {
+            $resolved = app($key);
+
+            return is_callable($resolved) ? $resolved : null;
+        }
+
+        // 2) Config value that is a class-string of an invokable (config-cache safe).
+        $configured = config("price-intelligence.repricer.custom.{$name}");
+
+        if (is_string($configured) && class_exists($configured)) {
+            $instance = app($configured);
+
+            return is_callable($instance) ? $instance : null;
+        }
+
+        // 3) A raw callable in config (works, but prevents config:cache — discouraged).
+        return is_callable($configured) ? $configured : null;
     }
 }

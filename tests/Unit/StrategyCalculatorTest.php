@@ -53,7 +53,7 @@ final class StrategyCalculatorTest extends TestCase
     #[Test]
     public function charm_rounding_applies(): void
     {
-        // raw 9500 with charm .99 -> 9499 (9.99 ending, rounded down from 9500).
+        // raw 9500 (95.00) with charm .99 -> 9499 (94.99 ending, rounded down).
         $result = $this->calc()->suggest(RuleStrategy::MatchCheapest, [9500], 12000, ['round_to_charm' => 0.99]);
         $this->assertSame(9499, $result);
     }
