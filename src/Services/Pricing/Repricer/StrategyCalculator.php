@@ -44,7 +44,9 @@ final class StrategyCalculator
             // MatchWithFloor MUST have an explicit margin floor; without one it would be
             // indistinguishable from MatchCheapest, so it declines to suggest.
             RuleStrategy::MatchWithFloor => (isset($params['min_price_cents']) && is_numeric($params['min_price_cents']) && (int) $params['min_price_cents'] > 0) ? $cheapest : null,
-            RuleStrategy::UndercutPct => (int) round($cheapest * (1 - $this->clampPct($this->float($params, 'undercut_pct', 1)) / 100)),
+            // floor() (round down) guarantees a strict undercut even for tiny prices,
+            // where round() could land back on the cheapest competitor.
+            RuleStrategy::UndercutPct => (int) floor($cheapest * (1 - $this->clampPct($this->float($params, 'undercut_pct', 1)) / 100)),
             RuleStrategy::BeatTopN => $this->beatTopN($prices, $params),
             RuleStrategy::DynamicDemand => (int) round($this->beatTopN($prices, $params) * $this->float($params, 'demand_factor', 1.0)),
             RuleStrategy::Custom => null, // resolved by a registered callable in RepricerEngine
