@@ -44,7 +44,10 @@ final class StrategyCalculator
         $cheapest = $prices[0];
 
         $raw = match ($strategy) {
-            RuleStrategy::MatchCheapest, RuleStrategy::MatchWithFloor => $cheapest,
+            RuleStrategy::MatchCheapest => $cheapest,
+            // MatchWithFloor MUST have an explicit margin floor; without one it would be
+            // indistinguishable from MatchCheapest, so it declines to suggest.
+            RuleStrategy::MatchWithFloor => isset($params['min_price_cents']) ? $cheapest : null,
             RuleStrategy::UndercutPct => (int) round($cheapest * (1 - $this->float($params, 'undercut_pct', 1) / 100)),
             RuleStrategy::BeatTopN => $this->beatTopN($prices, $params),
             RuleStrategy::DynamicDemand => (int) round($this->beatTopN($prices, $params) * $this->float($params, 'demand_factor', 1.0)),

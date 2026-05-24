@@ -79,6 +79,13 @@ final class StrategyCalculatorTest extends TestCase
     }
 
     #[Test]
+    public function match_with_floor_requires_an_explicit_floor(): void
+    {
+        $this->assertNull($this->calc()->suggest(RuleStrategy::MatchWithFloor, [9000], 12000));
+        $this->assertSame(9500, $this->calc()->suggest(RuleStrategy::MatchWithFloor, [9000], 12000, ['min_price_cents' => 9500]));
+    }
+
+    #[Test]
     public function no_competitors_returns_null(): void
     {
         $this->assertNull($this->calc()->suggest(RuleStrategy::MatchCheapest, [], 10000));

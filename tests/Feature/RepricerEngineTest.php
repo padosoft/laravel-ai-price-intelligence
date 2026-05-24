@@ -80,6 +80,22 @@ final class RepricerEngineTest extends TestCase
     }
 
     #[Test]
+    public function custom_returning_current_price_produces_no_decision_or_event(): void
+    {
+        Event::fake([RepricingSuggested::class]);
+        config()->set('price-intelligence.repricer.enabled', true);
+        config()->set('price-intelligence.repricer.custom', [
+            'same' => fn ($product, $prices, $current, $params): int => 12000, // equals current
+        ]);
+        [$product, $rule] = $this->seedProductAndRule();
+        $rule->update(['strategy' => RuleStrategy::Custom->value, 'parameters' => ['callable' => 'same']]);
+
+        $this->assertNull(app(RepricerEngineInterface::class)->evaluate($product->fresh(), $rule->fresh(), [9000]));
+        $this->assertSame(0, RuleDecision::query()->count());
+        Event::assertNotDispatched(RepricingSuggested::class);
+    }
+
+    #[Test]
     public function custom_strategy_uses_registered_callable(): void
     {
         config()->set('price-intelligence.repricer.enabled', true);

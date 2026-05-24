@@ -40,7 +40,9 @@ final class RepricerEngine implements RepricerEngineInterface
             ? $this->resolveCustom($rule, $product, $competitorPricesCents, $current, $params)
             : $this->calculator->suggest($rule->strategy, $competitorPricesCents, $current, $params);
 
-        if ($suggested === null) {
+        // No decision if there's nothing to do or it matches the current price
+        // (uniform across all strategies, including custom).
+        if ($suggested === null || $suggested === $current) {
             return null;
         }
 
