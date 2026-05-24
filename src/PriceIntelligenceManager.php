@@ -15,8 +15,7 @@ final class PriceIntelligenceManager
 {
     public function __construct(
         private readonly TenantContext $tenantContext,
-    ) {
-    }
+    ) {}
 
     public function tenant(): TenantContext
     {

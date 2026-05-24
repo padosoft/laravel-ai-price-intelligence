@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Enums\Frequency;
 use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Regression: the AdaptiveBackoff binding must register under the correct FQCN

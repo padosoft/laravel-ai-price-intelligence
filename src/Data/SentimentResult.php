@@ -14,8 +14,7 @@ final class SentimentResult
         public readonly float $score,
         public readonly array $themes,
         public readonly int $sampleCount,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

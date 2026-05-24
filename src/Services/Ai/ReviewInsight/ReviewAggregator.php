@@ -25,8 +25,7 @@ final class ReviewAggregator
     public function __construct(
         private readonly PiiFilterInterface $pii,
         private readonly ReviewSentimentInterface $analyzer,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int, string>  $rawReviewTexts

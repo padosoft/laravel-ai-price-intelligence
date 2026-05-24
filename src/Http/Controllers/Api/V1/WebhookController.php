@@ -26,7 +26,7 @@ final class WebhookController
             'active' => ['nullable', 'boolean'],
         ]);
 
-        $subscription = new WebhookSubscription();
+        $subscription = new WebhookSubscription;
         $subscription->fill([
             'url' => $validated['url'],
             'events' => $validated['events'] ?? ['*'],

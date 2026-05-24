@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -20,7 +21,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property string $source
  * @property string $status
  * @property int|null $reviewer_id
- * @property \Illuminate\Support\Carbon|null $reviewed_at
+ * @property Carbon|null $reviewed_at
  */
 final class MatchProposal extends PriceIntelligenceModel
 {

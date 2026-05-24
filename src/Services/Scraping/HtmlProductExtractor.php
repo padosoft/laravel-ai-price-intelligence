@@ -62,7 +62,7 @@ final class HtmlProductExtractor
             return [];
         }
 
-        foreach ($matches[1] ?? [] as $raw) {
+        foreach ($matches[1] as $raw) {
             $decoded = json_decode(trim($raw), true);
 
             if (is_array($decoded)) {
@@ -114,7 +114,7 @@ final class HtmlProductExtractor
         $og = [];
 
         if (preg_match_all('/<meta[^>]+>/i', $html, $metas) !== false) {
-            foreach ($metas[0] ?? [] as $tag) {
+            foreach ($metas[0] as $tag) {
                 if (preg_match('/(?:property|name)=["\']([^"\']+)["\']/i', $tag, $p) === 1
                     && preg_match('/content=["\']([^"\']*)["\']/i', $tag, $c) === 1) {
                     $key = strtolower($p[1]);

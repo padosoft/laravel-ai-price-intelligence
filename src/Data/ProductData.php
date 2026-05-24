@@ -28,8 +28,7 @@ final class ProductData
         public readonly ?int $ourPriceCents = null,
         public readonly ?string $currency = null,
         public readonly ?string $baseCountry = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $row

@@ -6,19 +6,20 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\CompetitorSource;
+use Padosoft\PriceIntelligence\Models\FetchLog;
 use Padosoft\PriceIntelligence\Models\MonitoringTarget;
 use Padosoft\PriceIntelligence\Models\Product;
 use Padosoft\PriceIntelligence\Models\Tenant;
+use Padosoft\PriceIntelligence\Services\Scraping\MarketplaceAdapterFactory;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\AmazonAdapter;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\GenericAdapter;
-use Padosoft\PriceIntelligence\Services\Scraping\MarketplaceAdapterFactory;
 use Padosoft\PriceIntelligence\Services\Scraping\ScrapeService;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class MarketplaceAdapterTest extends TestCase
 {
@@ -67,6 +68,6 @@ final class MarketplaceAdapterTest extends TestCase
         app(ScrapeService::class)->scrapeAndStore($competitor);
 
         $this->assertSame('B07PFFMP9P', $competitor->fresh()->external_ref);
-        $this->assertSame('amazon', \Padosoft\PriceIntelligence\Models\FetchLog::query()->sole()->driver);
+        $this->assertSame('amazon', FetchLog::query()->sole()->driver);
     }
 }

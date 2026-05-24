@@ -19,7 +19,7 @@ final class ReviewInsightDisabledException extends RuntimeException
 
         return new self(
             "Review insight pipeline is not opted-in for domain: {$label} "
-            . '(add the host to price-intelligence.review_insight.allowed_domains).'
+            .'(add the host to price-intelligence.review_insight.allowed_domains).'
         );
     }
 

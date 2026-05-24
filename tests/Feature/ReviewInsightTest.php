@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
 use Padosoft\PriceIntelligence\Exceptions\ReviewInsightDisabledException;
@@ -18,6 +17,7 @@ use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\ReviewAggregator;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class ReviewInsightTest extends TestCase
 {
@@ -40,7 +40,8 @@ final class ReviewInsightTest extends TestCase
     /** Bind a strong fake PII filter so the happy path can run without the redactor package. */
     private function bindStrongPii(): void
     {
-        $this->app->bind(PiiFilterInterface::class, fn () => new class implements PiiFilterInterface {
+        $this->app->bind(PiiFilterInterface::class, fn () => new class implements PiiFilterInterface
+        {
             public function redact(string $text): string
             {
                 return (string) preg_replace('/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/', '[REDACTED]', $text);

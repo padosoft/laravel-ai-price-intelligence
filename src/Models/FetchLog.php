@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -15,7 +16,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|null $latency_ms
  * @property bool $robots_allowed
  * @property string|null $driver
- * @property \Illuminate\Support\Carbon $captured_at
+ * @property Carbon $captured_at
  */
 final class FetchLog extends PriceIntelligenceModel
 {

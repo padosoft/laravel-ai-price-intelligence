@@ -15,8 +15,7 @@ final class PriceNormalizer
 {
     public function __construct(
         private readonly FxProviderInterface $fx,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{price_cents: ?int, currency: ?string, price_base_cents: ?int, available: bool}

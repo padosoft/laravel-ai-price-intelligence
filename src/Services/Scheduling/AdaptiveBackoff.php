@@ -18,8 +18,7 @@ final class AdaptiveBackoff
     public function __construct(
         private readonly bool $enabled = true,
         private readonly float $maxFactor = 4.0,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  float  $stabilityScore  fraction in [0,1] of recent observations with no price change

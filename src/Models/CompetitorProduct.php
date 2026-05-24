@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Enums\MatchStatus;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
@@ -22,9 +23,11 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|null $match_confidence
  * @property MatchMethod|null $match_method
  * @property int|null $validated_by
- * @property \Illuminate\Support\Carbon|null $validated_at
- * @property \Illuminate\Support\Carbon|null $last_seen_at
- * @property \Illuminate\Support\Carbon|null $dead_since
+ * @property Carbon|null $validated_at
+ * @property Carbon|null $last_seen_at
+ * @property Carbon|null $dead_since
+ * @property-read MonitoringTarget|null $target
+ * @property-read CompetitorSource|null $source
  */
 final class CompetitorProduct extends PriceIntelligenceModel
 {

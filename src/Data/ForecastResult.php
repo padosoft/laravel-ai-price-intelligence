@@ -12,8 +12,7 @@ final class ForecastResult
         public readonly ?int $ciLowCents,
         public readonly ?int $ciHighCents,
         public readonly string $modelVersion,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

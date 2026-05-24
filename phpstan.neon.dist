@@ -1,0 +1,11 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - src
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Optional dependency (padosoft/laravel-pii-redactor) — guarded by class_exists().
+        - '#unknown class Padosoft\\PiiRedactor\\Facades\\Pii#'

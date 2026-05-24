@@ -24,7 +24,7 @@ trait BelongsToTenant
                 $tenantId = self::currentTenantId();
 
                 if ($tenantId !== null) {
-                    $builder->where($builder->getModel()->getTable() . '.tenant_id', $tenantId);
+                    $builder->where($builder->getModel()->getTable().'.tenant_id', $tenantId);
                 }
             });
         }

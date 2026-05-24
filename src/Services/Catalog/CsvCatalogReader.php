@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Services\Catalog;
 
 use Generator;
+use League\Csv\Reader;
 use Padosoft\PriceIntelligence\Data\ProductData;
 use RuntimeException;
 
@@ -20,11 +21,11 @@ final class CsvCatalogReader
      */
     public function read(string $path): Generator
     {
-        if (! class_exists(\League\Csv\Reader::class)) {
+        if (! class_exists(Reader::class)) {
             throw new RuntimeException('league/csv is required for CSV import. Run: composer require league/csv');
         }
 
-        $csv = \League\Csv\Reader::createFromPath($path, 'r');
+        $csv = Reader::createFromPath($path, 'r');
         $csv->setHeaderOffset(0);
 
         foreach ($csv->getRecords() as $record) {

@@ -6,11 +6,11 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Auth\GenericUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Models\Product;
 use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Invokable tenant resolver used as a class-string (config:cache safe). Resolves

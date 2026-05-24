@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
+use Padosoft\PriceIntelligence\Support\Discovery\GeoSearchQueryFactory;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Padosoft\PriceIntelligence\Support\Discovery\GeoSearchQueryFactory;
 
 final class GeoSearchQueryFactoryTest extends TestCase
 {

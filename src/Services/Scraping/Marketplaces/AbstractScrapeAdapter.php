@@ -20,8 +20,7 @@ abstract class AbstractScrapeAdapter implements MarketplaceAdapterInterface
 {
     public function __construct(
         protected readonly ProductScraperInterface $scraper,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string, mixed>  $options

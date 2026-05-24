@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Padosoft\PriceIntelligence\Enums\RuleStrategy;
 use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 final class StrategyCalculatorTest extends TestCase
 {
     private function calc(): StrategyCalculator
     {
-        return new StrategyCalculator();
+        return new StrategyCalculator;
     }
 
     #[Test]

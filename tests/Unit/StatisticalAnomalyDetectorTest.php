@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
+use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 
 final class StatisticalAnomalyDetectorTest extends TestCase
 {

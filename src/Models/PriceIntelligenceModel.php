@@ -23,7 +23,7 @@ abstract class PriceIntelligenceModel extends Model
             return $this->table;
         }
 
-        $configured = config('price-intelligence.tables.' . static::$configKey);
+        $configured = config('price-intelligence.tables.'.static::$configKey);
 
         return is_string($configured) && $configured !== ''
             ? $configured

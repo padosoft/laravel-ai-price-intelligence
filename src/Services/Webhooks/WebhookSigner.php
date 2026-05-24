@@ -16,7 +16,7 @@ final class WebhookSigner
 
     public static function sign(string $payload, string $secret): string
     {
-        return 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        return 'sha256='.hash_hmac('sha256', $payload, $secret);
     }
 
     public static function verify(string $payload, string $secret, string $signature): bool

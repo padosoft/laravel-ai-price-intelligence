@@ -6,9 +6,10 @@ namespace Padosoft\PriceIntelligence\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Padosoft\PriceIntelligence\Models\Product;
 
 /**
- * @mixin \Padosoft\PriceIntelligence\Models\Product
+ * @mixin Product
  */
 final class ProductResource extends JsonResource
 {

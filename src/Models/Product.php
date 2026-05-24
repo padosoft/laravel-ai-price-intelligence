@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -25,6 +26,8 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|null $our_price_cents
  * @property string|null $currency
  * @property string|null $base_country
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class Product extends PriceIntelligenceModel
 {

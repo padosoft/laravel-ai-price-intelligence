@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
+use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
 
 final class HtmlProductExtractorTest extends TestCase
 {
     private function extractor(): HtmlProductExtractor
     {
-        return new HtmlProductExtractor();
+        return new HtmlProductExtractor;
     }
 
     #[Test]

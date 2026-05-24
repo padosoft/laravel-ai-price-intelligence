@@ -18,8 +18,7 @@ final class CatalogController
 {
     public function __construct(
         private readonly CatalogImporter $importer,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -67,7 +66,7 @@ final class CatalogController
 
         abort_if($path === false, 422, 'Unable to read the uploaded file.');
 
-        $result = $this->importer->importInTransaction((new CsvCatalogReader())->read($path));
+        $result = $this->importer->importInTransaction((new CsvCatalogReader)->read($path));
 
         return response()->json(['data' => $result], 200);
     }

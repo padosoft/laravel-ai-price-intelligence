@@ -12,7 +12,7 @@ use Padosoft\PriceIntelligence\PriceIntelligenceManager;
  * @method static \Padosoft\PriceIntelligence\PriceIntelligenceManager forTenant(int|string $tenantId)
  * @method static string version()
  *
- * @see \Padosoft\PriceIntelligence\PriceIntelligenceManager
+ * @see PriceIntelligenceManager
  */
 final class PriceIntelligence extends Facade
 {

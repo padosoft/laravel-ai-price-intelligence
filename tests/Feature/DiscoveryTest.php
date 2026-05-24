@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\LaravelAiSearchProviders\Models\SearchProviderConfig;
 use Padosoft\PriceIntelligence\Enums\Frequency;
+use Padosoft\PriceIntelligence\Models\ApiKey;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\MatchProposal;
 use Padosoft\PriceIntelligence\Models\MonitoringTarget;
@@ -16,6 +16,7 @@ use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Services\Discovery\UrlDiscoveryService;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class DiscoveryTest extends TestCase
 {
@@ -126,7 +127,7 @@ final class DiscoveryTest extends TestCase
             'status' => 'pending',
         ]);
 
-        [$key, $plaintext] = \Padosoft\PriceIntelligence\Models\ApiKey::issue($tenant->id, 'k', ['*']);
+        [$key, $plaintext] = ApiKey::issue($tenant->id, 'k', ['*']);
 
         $this->withHeader('X-Api-Key', $plaintext)
             ->postJson("/api/v1/matches/{$proposal->id}/approve")

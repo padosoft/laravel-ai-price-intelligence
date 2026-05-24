@@ -20,8 +20,7 @@ final class EmbeddingSemanticMatcher implements MatchStepInterface
 {
     public function __construct(
         private readonly EmbeddingProviderInterface $embeddings,
-    ) {
-    }
+    ) {}
 
     public function applicable(Product $product, ProductSnapshot $candidate): bool
     {

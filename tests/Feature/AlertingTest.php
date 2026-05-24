@@ -6,7 +6,6 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Models\Alert;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\MonitoringTarget;
@@ -17,6 +16,7 @@ use Padosoft\PriceIntelligence\Services\Scraping\ScrapeService;
 use Padosoft\PriceIntelligence\Services\Webhooks\WebhookSigner;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class AlertingTest extends TestCase
 {
@@ -61,7 +61,7 @@ final class AlertingTest extends TestCase
             $i++;
 
             return Http::response(
-                '<script type="application/ld+json">{"@type":"Product","name":"Phone","offers":{"price":"' . $price . '","priceCurrency":"EUR"}}</script>',
+                '<script type="application/ld+json">{"@type":"Product","name":"Phone","offers":{"price":"'.$price.'","priceCurrency":"EUR"}}</script>',
                 200,
             );
         });

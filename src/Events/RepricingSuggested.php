@@ -19,6 +19,5 @@ final class RepricingSuggested
 
     public function __construct(
         public readonly RuleDecision $decision,
-    ) {
-    }
+    ) {}
 }

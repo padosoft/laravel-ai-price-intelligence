@@ -6,7 +6,6 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Enums\Frequency;
 use Padosoft\PriceIntelligence\Jobs\ScrapeCompetitorProductJob;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
@@ -16,6 +15,7 @@ use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Services\Scheduling\TargetScheduler;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class SchedulerTest extends TestCase
 {

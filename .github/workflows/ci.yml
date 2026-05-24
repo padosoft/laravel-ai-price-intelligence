@@ -45,3 +45,27 @@ jobs:
 
       - name: Run PHPUnit (Unit, Feature, E2E)
         run: vendor/bin/phpunit --testsuite Unit,Feature,E2E
+
+  quality:
+    name: Pint + PHPStan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, json, mbstring, sqlite, pdo_sqlite, fileinfo, openssl, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Code style (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G

@@ -19,17 +19,17 @@ use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
 use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
+use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
 use Padosoft\PriceIntelligence\Services\Compliance\DomainRateLimiter;
 use Padosoft\PriceIntelligence\Services\Compliance\NullAiActBridge;
 use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
-use Padosoft\PriceIntelligence\Services\Pricing\Repricer\RepricerEngine;
-use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
-use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
-use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
-use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
 use Padosoft\PriceIntelligence\Services\Matching\Embeddings\FakeEmbeddingProvider;
 use Padosoft\PriceIntelligence\Services\Pricing\FixedFxProvider;
+use Padosoft\PriceIntelligence\Services\Pricing\Repricer\RepricerEngine;
+use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
 use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
 use Padosoft\PriceIntelligence\Services\Scraping\Drivers\GenericHttpScraper;
 use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
@@ -40,18 +40,16 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/price-intelligence.php', 'price-intelligence');
+        $this->mergeConfigFrom(__DIR__.'/../config/price-intelligence.php', 'price-intelligence');
 
-        $this->app->singleton(TenantContext::class, static fn (): TenantContext => new TenantContext());
+        $this->app->singleton(TenantContext::class, static fn (): TenantContext => new TenantContext);
 
         $this->app->bind(EmbeddingProviderInterface::class, static function (): EmbeddingProviderInterface {
             // Default offline-safe driver; host apps rebind to OpenAI/Voyage/etc.
-            return new FakeEmbeddingProvider();
+            return new FakeEmbeddingProvider;
         });
 
-        $this->app->bind(FxProviderInterface::class, static fn (): FxProviderInterface => new FixedFxProvider(
-            (string) config('price-intelligence.fx.base', 'EUR'),
-        ));
+        $this->app->bind(FxProviderInterface::class, static fn (): FxProviderInterface => new FixedFxProvider);
 
         $this->app->bind(AdaptiveBackoff::class, static fn (): AdaptiveBackoff => new AdaptiveBackoff(
             (bool) config('price-intelligence.resilience.adaptive_backoff.enabled', true),
@@ -66,19 +64,19 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
         // advertised config flags actually take effect.
         $this->app->bind(ForecastProviderInterface::class, static fn (): ForecastProviderInterface => Flag::enabled('price-intelligence.ai.forecast.enabled', true)
             ? new StatisticalForecaster((int) config('price-intelligence.ai.forecast.min_observations', 14))
-            : new NullForecaster());
+            : new NullForecaster);
 
         $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => Flag::enabled('price-intelligence.ai.anomaly.enabled', true)
-            ? new StatisticalAnomalyDetector()
-            : new NullAnomalyDetector());
+            ? new StatisticalAnomalyDetector
+            : new NullAnomalyDetector);
 
-        $this->app->bind(PiiFilterInterface::class, static fn (): PiiFilterInterface => new PiiFilter());
+        $this->app->bind(PiiFilterInterface::class, static fn (): PiiFilterInterface => new PiiFilter);
 
         $this->app->bind(RepricerEngineInterface::class, static fn ($app): RepricerEngineInterface => new RepricerEngine(
             $app->make(StrategyCalculator::class),
         ));
 
-        $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer());
+        $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer);
 
         $this->app->singleton(DomainRateLimiter::class, static fn ($app): DomainRateLimiter => new DomainRateLimiter(
             $app->make('cache.store'),
@@ -86,7 +84,7 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
         // EU AI Act bridge: null-object unless a real bridge is bound (e.g. by
         // padosoft/laravel-ai-act-compliance or the host). Never hard-fails.
-        $this->app->bindIf(AiActBridgeInterface::class, static fn (): AiActBridgeInterface => new NullAiActBridge());
+        $this->app->bindIf(AiActBridgeInterface::class, static fn (): AiActBridgeInterface => new NullAiActBridge);
 
         $this->app->singleton(PriceIntelligenceManager::class, static fn ($app): PriceIntelligenceManager => new PriceIntelligenceManager(
             $app->make(TenantContext::class),
@@ -96,15 +94,15 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ((bool) $this->app['config']->get('price-intelligence.load_migrations', true)) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
 
         $this->publishes([
-            __DIR__ . '/../config/price-intelligence.php' => $this->configPath('price-intelligence.php'),
+            __DIR__.'/../config/price-intelligence.php' => $this->configPath('price-intelligence.php'),
         ], 'price-intelligence-config');
 
         $this->publishes([
-            __DIR__ . '/../database/migrations' => $this->databasePath('migrations'),
+            __DIR__.'/../database/migrations' => $this->databasePath('migrations'),
         ], 'price-intelligence-migrations');
 
         $this->registerRoutes();
@@ -130,7 +128,7 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
             return;
         }
 
-        $routes = __DIR__ . '/../routes/api.php';
+        $routes = __DIR__.'/../routes/api.php';
 
         if (! is_file($routes)) {
             return;
@@ -144,11 +142,11 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
     private function configPath(string $file): string
     {
-        return function_exists('config_path') ? config_path($file) : base_path('config/' . $file);
+        return function_exists('config_path') ? config_path($file) : base_path('config/'.$file);
     }
 
     private function databasePath(string $folder): string
     {
-        return function_exists('database_path') ? database_path($folder) : base_path('database/' . $folder);
+        return function_exists('database_path') ? database_path($folder) : base_path('database/'.$folder);
     }
 }
