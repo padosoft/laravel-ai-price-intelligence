@@ -91,7 +91,11 @@ final class RepricerEngine implements RepricerEngineInterface
             return null;
         }
 
-        $result = $callable($product, $competitorPricesCents, $current, $params);
+        // Pass the SAME cleaned (positive, sorted) prices the built-in strategies and the
+        // persisted evidence use, so custom callables see consistent input.
+        $cleaned = StrategyCalculator::cleanPrices($competitorPricesCents);
+
+        $result = $callable($product, $cleaned, $current, $params);
 
         if (! is_int($result)) {
             return null;
