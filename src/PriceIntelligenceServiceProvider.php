@@ -7,7 +7,9 @@ namespace Padosoft\PriceIntelligence;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Padosoft\PriceIntelligence\Console\Commands\ImportCatalogCommand;
+use Padosoft\PriceIntelligence\Console\Commands\PruneAuditLogsCommand;
 use Padosoft\PriceIntelligence\Console\Commands\RunDueTargetsCommand;
+use Padosoft\PriceIntelligence\Contracts\AiActBridgeInterface;
 use Padosoft\PriceIntelligence\Contracts\AnomalyDetectorInterface;
 use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
@@ -18,6 +20,8 @@ use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
+use Padosoft\PriceIntelligence\Services\Compliance\DomainRateLimiter;
+use Padosoft\PriceIntelligence\Services\Compliance\NullAiActBridge;
 use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
 use Padosoft\PriceIntelligence\Services\Pricing\Repricer\RepricerEngine;
 use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
@@ -76,6 +80,12 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
         $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer());
 
+        $this->app->singleton(DomainRateLimiter::class, static fn ($app): DomainRateLimiter => new DomainRateLimiter($app->make('cache.store')));
+
+        // EU AI Act bridge: null-object unless a real bridge is bound (e.g. by
+        // padosoft/laravel-ai-act-compliance or the host). Never hard-fails.
+        $this->app->bindIf(AiActBridgeInterface::class, static fn (): AiActBridgeInterface => new NullAiActBridge());
+
         $this->app->singleton(PriceIntelligenceManager::class, static fn ($app): PriceIntelligenceManager => new PriceIntelligenceManager(
             $app->make(TenantContext::class),
         ));
@@ -101,6 +111,7 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
             $this->commands([
                 ImportCatalogCommand::class,
                 RunDueTargetsCommand::class,
+                PruneAuditLogsCommand::class,
             ]);
 
             $this->app->booted(function (): void {

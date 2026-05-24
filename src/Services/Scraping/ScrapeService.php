@@ -26,7 +26,24 @@ final class ScrapeService
         private readonly MarketplaceAdapterFactory $adapters,
         private readonly PriceNormalizer $normalizer,
         private readonly \Padosoft\PriceIntelligence\Services\Alerts\AlertDispatcher $alerts,
+        private readonly \Padosoft\PriceIntelligence\Contracts\PiiFilterInterface $pii,
     ) {
+    }
+
+    private function redact(?string $text): ?string
+    {
+        if ($text === null || $text === '') {
+            return $text;
+        }
+
+        // GDPR: strip any PII captured in scraped content before persisting.
+        $enabled = config('price-intelligence.pii.enabled', 'auto');
+
+        if ($enabled === false) {
+            return $text;
+        }
+
+        return $this->pii->redact($text);
     }
 
     /**
@@ -85,8 +102,8 @@ final class ScrapeService
             'tenant_id' => $competitor->tenant_id,
             'competitor_product_id' => $competitor->id,
             'captured_at' => $now,
-            'title' => $snapshot->title,
-            'description_md' => $snapshot->description,
+            'title' => $this->redact($snapshot->title),
+            'description_md' => $this->redact($snapshot->description),
             'attributes' => $snapshot->attributes,
             'og' => $snapshot->og,
             'jsonld' => $snapshot->jsonld,
