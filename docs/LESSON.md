@@ -129,3 +129,9 @@
   - Doc/comment fixes (MpnNormalizer, PriceParser).
   **Meta-lesson**: the review caught ~15 real issues the passing test suite did not. The strict
   per-phase Copilot loop is worth it.
+- **Admin panel API endpoints (2026-05-24)**: `ApiKey` intentionally omits `BelongsToTenant` so
+  `ResolveTenant` middleware can look it up before tenant context is set. Any controller that manages
+  `ApiKey` records must **manually** add `->where('tenant_id', $tenantContext->id())` — the global
+  scope will NOT protect these queries. `ApiKeyController::index()` and `::revoke()` both lacked this
+  filter, exposing all tenants' key metadata and allowing cross-tenant revocation. Fixed by adding
+  explicit `where('tenant_id', ...)` to both methods and covering with two new isolation tests.

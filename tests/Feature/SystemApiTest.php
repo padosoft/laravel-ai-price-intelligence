@@ -100,6 +100,42 @@ final class SystemApiTest extends TestCase
     }
 
     #[Test]
+    public function api_keys_index_is_scoped_to_calling_tenant(): void
+    {
+        // Tenant A creates a key; Tenant B should not see it in the list.
+        $tenantA = Tenant::create(['code' => 'ta', 'name' => 'A']);
+        [, $keyA] = ApiKey::issue($tenantA->id, 'key-a', ['*']);
+
+        $tenantB = Tenant::create(['code' => 'tb', 'name' => 'B']);
+        [, $keyB] = ApiKey::issue($tenantB->id, 'key-b', ['*']);
+        app(TenantContext::class)->set($tenantB->id);
+
+        $this->withHeader('X-Api-Key', $keyB)
+            ->getJson('/api/v1/api-keys')
+            ->assertOk()
+            ->assertJsonMissing(['name' => 'key-a']);
+    }
+
+    #[Test]
+    public function api_key_revoke_cannot_target_another_tenants_key(): void
+    {
+        $tenantA = Tenant::create(['code' => 'ta2', 'name' => 'A2']);
+        [$keyModelA] = ApiKey::issue($tenantA->id, 'victim', ['*']);
+
+        $tenantB = Tenant::create(['code' => 'tb2', 'name' => 'B2']);
+        [, $keyB] = ApiKey::issue($tenantB->id, 'attacker', ['*']);
+        app(TenantContext::class)->set($tenantB->id);
+
+        // Tenant B tries to revoke Tenant A's key by ID — must 404.
+        $this->withHeader('X-Api-Key', $keyB)
+            ->deleteJson("/api/v1/api-keys/{$keyModelA->id}")
+            ->assertNotFound();
+
+        // Confirm the target key was NOT revoked.
+        $this->assertNull(ApiKey::query()->find($keyModelA->id)?->revoked_at);
+    }
+
+    #[Test]
     public function system_endpoints_require_auth(): void
     {
         $this->getJson('/api/v1/rules')->assertUnauthorized();
