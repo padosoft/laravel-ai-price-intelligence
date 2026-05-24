@@ -73,8 +73,9 @@ final class ObservationApiTest extends TestCase
     }
 
     #[Test]
-    public function reviews_are_listed(): void
+    public function reviews_are_listed_when_the_module_is_enabled(): void
     {
+        config()->set('price-intelligence.review_insight.enabled', true);
         $key = $this->auth();
         ReviewInsight::query()->create([
             'competitor_product_id' => 3,
@@ -90,6 +91,36 @@ final class ObservationApiTest extends TestCase
             ->getJson('/api/v1/reviews?period=2026-W21')
             ->assertOk()
             ->assertJsonPath('data.0.sample_count', 120);
+    }
+
+    #[Test]
+    public function reviews_return_empty_when_the_module_is_disabled(): void
+    {
+        config()->set('price-intelligence.review_insight.enabled', false);
+        $key = $this->auth();
+        ReviewInsight::query()->create([
+            'competitor_product_id' => 3,
+            'period' => '2026-W21',
+            'sentiment_score' => 0.62,
+            'sample_count' => 120,
+            'is_ai_generated' => true,
+            'generated_at' => now(),
+        ]);
+
+        $this->withHeader('X-Api-Key', $key)
+            ->getJson('/api/v1/reviews')
+            ->assertOk()
+            ->assertJsonPath('meta.enabled', false)
+            ->assertJsonCount(0, 'data');
+    }
+
+    #[Test]
+    public function malformed_date_filters_are_rejected(): void
+    {
+        $key = $this->auth();
+        $this->withHeader('X-Api-Key', $key)
+            ->getJson('/api/v1/observations/prices?from=not-a-date')
+            ->assertStatus(422);
     }
 
     #[Test]

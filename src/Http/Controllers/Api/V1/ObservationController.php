@@ -20,6 +20,12 @@ final class ObservationController
 {
     public function prices(Request $request): JsonResponse
     {
+        $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+            'competitor_product_id' => ['nullable', 'integer'],
+        ]);
+
         $prices = PriceObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))

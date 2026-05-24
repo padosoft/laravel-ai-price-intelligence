@@ -12,6 +12,7 @@ use Padosoft\PriceIntelligence\Models\ContentGap;
 use Padosoft\PriceIntelligence\Models\Forecast;
 use Padosoft\PriceIntelligence\Models\Narrative;
 use Padosoft\PriceIntelligence\Models\ReviewInsight;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 
 /**
  * Read endpoints for the AI/derived signals the admin's Intelligence screens consume.
@@ -32,6 +33,8 @@ final class IntelligenceController
 
     public function anomalies(Request $request): JsonResponse
     {
+        $request->validate(['since' => ['nullable', 'date']]);
+
         $anomalies = Anomaly::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')->toString()))
@@ -50,6 +53,12 @@ final class IntelligenceController
      */
     public function reviews(Request $request): JsonResponse
     {
+        // GDPR-safe module is opt-in: when disabled, expose nothing (matches the contract
+        // and avoids surfacing insights for a feature the tenant turned off).
+        if (! Flag::enabled('price-intelligence.review_insight.enabled', false)) {
+            return response()->json(['data' => [], 'meta' => ['enabled' => false]]);
+        }
+
         $reviews = ReviewInsight::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))

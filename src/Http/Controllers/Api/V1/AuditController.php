@@ -16,6 +16,12 @@ final class AuditController
 {
     public function fetchLogs(Request $request): JsonResponse
     {
+        $request->validate([
+            'since' => ['nullable', 'date'],
+            'status' => ['nullable', 'integer'],
+            'competitor_source_id' => ['nullable', 'integer'],
+        ]);
+
         $logs = FetchLog::query()
             ->when($request->filled('competitor_source_id'), fn ($q) => $q->where('competitor_source_id', $request->integer('competitor_source_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->integer('status')))
