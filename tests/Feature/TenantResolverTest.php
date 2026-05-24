@@ -29,7 +29,7 @@ final class TenantResolverTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function sanctum_user_tenant_is_resolved_via_class_string_resolver(): void
+    public function authenticated_user_tenant_is_resolved_via_class_string_resolver(): void
     {
         $tenant = Tenant::create(['code' => 't1', 'name' => 't1']);
         app(TenantContext::class)->set($tenant->id);
