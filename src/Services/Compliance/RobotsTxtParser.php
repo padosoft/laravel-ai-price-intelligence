@@ -60,6 +60,12 @@ final class RobotsTxtParser
             [$field, $value] = $this->splitDirective($line);
 
             if ($field === 'user-agent') {
+                // Ignore an empty User-agent value — an empty group key would match
+                // every crawler via str_contains($ua, '').
+                if ($value === '') {
+                    continue;
+                }
+
                 if (! $collecting) {
                     $currentUas = [];
                 }

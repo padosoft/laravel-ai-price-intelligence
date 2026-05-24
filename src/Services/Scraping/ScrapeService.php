@@ -13,6 +13,7 @@ use Padosoft\PriceIntelligence\Models\PriceObservation;
 use Padosoft\PriceIntelligence\Models\PromoObservation;
 use Padosoft\PriceIntelligence\Models\StockObservation;
 use Padosoft\PriceIntelligence\Services\Pricing\PriceNormalizer;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 
 /**
  * Fetches a competitor product, normalizes its price and persists the resulting
@@ -36,13 +37,11 @@ final class ScrapeService
             return $text;
         }
 
-        // GDPR: strip any PII captured in scraped content before persisting.
-        // pii.enabled is 'auto'|bool: 'auto' means on; otherwise interpret robustly so
-        // 'false'/'0'/0 all disable (not just a strict boolean false).
-        $enabled = config('price-intelligence.pii.enabled', 'auto');
-        $on = $enabled === 'auto' ? true : filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
-
-        return $on ? $this->pii->redact($text) : $text;
+        // GDPR: strip any PII from scraped content before persisting. Flag::enabled treats
+        // 'auto'/unrecognized as on and only falsy values ('false'/'0'/0/false) as off.
+        return Flag::enabled('price-intelligence.pii.enabled', true)
+            ? $this->pii->redact($text)
+            : $text;
     }
 
     /**
