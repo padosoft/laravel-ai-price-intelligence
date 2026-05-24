@@ -7,7 +7,8 @@ How an ecommerce host integrates `laravel-ai-price-intelligence`.
 - **API key (machine-to-machine)**: send `X-Api-Key: <plaintext>`. Issue with
   `ApiKey::issue($tenantId, $name, $scopes)` (the plaintext is shown once).
 - **Sanctum (UI)**: bearer token; the tenant is resolved from the authenticated user via
-  `config('price-intelligence.api.tenant_resolver')` (defaults to `$user->tenant_id`). Sanctum is
+  `config('price-intelligence.api.tenant_resolver')` (defaults to `$user->tenant_id`; set it to an
+  invokable **class-string** rather than a closure so `php artisan config:cache` keeps working). Sanctum is
   not enabled by default — the package's `api.middleware` is just `['api']`; add Sanctum (and any
   auth middleware) in your host app if you want session/bearer auth alongside the API-key path.
 

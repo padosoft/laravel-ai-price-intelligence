@@ -186,8 +186,9 @@ return [
         'prefix' => 'api/v1',
         'middleware' => ['api'],
         'register_routes' => true,
-        // Optional callable/closure to resolve the tenant id from the authenticated
-        // user when using Sanctum (defaults to $user->tenant_id when null).
+        // Resolve the tenant id from the authenticated Sanctum user (defaults to
+        // $user->tenant_id when null). For `php artisan config:cache` compatibility set
+        // this to an invokable class-string (resolved via the container), not a closure.
         'tenant_resolver' => null,
     ],
 
