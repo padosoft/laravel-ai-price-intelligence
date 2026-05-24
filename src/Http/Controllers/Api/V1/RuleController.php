@@ -19,9 +19,16 @@ use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
  */
 final class RuleController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(['data' => RepricingRule::query()->orderBy('priority')->orderByDesc('id')->get()]);
+        $request->validate(['per_page' => ['nullable', 'integer', 'min:1', 'max:200']]);
+
+        $rules = RepricingRule::query()
+            ->orderBy('priority')
+            ->orderByDesc('id')
+            ->cursorPaginate((int) $request->integer('per_page', 50));
+
+        return response()->json($rules);
     }
 
     public function store(Request $request): JsonResponse

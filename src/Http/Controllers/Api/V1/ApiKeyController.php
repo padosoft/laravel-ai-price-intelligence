@@ -19,14 +19,20 @@ final class ApiKeyController
         private readonly TenantContext $tenantContext,
     ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        // Never expose key_hash; surface only safe metadata.
+        $request->validate(['per_page' => ['nullable', 'integer', 'min:1', 'max:200']]);
+
+        // Never expose key_hash; surface only safe metadata. Cursor-paginated like the
+        // other list endpoints.
         $keys = ApiKey::query()
             ->orderByDesc('id')
-            ->get(['id', 'tenant_id', 'name', 'scopes', 'last_used_at', 'expires_at', 'revoked_at', 'created_at']);
+            ->cursorPaginate(
+                (int) $request->integer('per_page', 50),
+                ['id', 'tenant_id', 'name', 'scopes', 'last_used_at', 'expires_at', 'revoked_at', 'created_at'],
+            );
 
-        return response()->json(['data' => $keys]);
+        return response()->json($keys);
     }
 
     public function store(Request $request): JsonResponse
