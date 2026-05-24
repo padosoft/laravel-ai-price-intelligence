@@ -63,13 +63,15 @@ final class ReviewAggregator
 
     private function persist(CompetitorProduct $competitor, string $period, SentimentResult $result): ReviewInsight
     {
+        // Match the full unique index (tenant_id, competitor_product_id, period) so the
+        // upsert can never collide across tenants.
         return ReviewInsight::query()->updateOrCreate(
             [
+                'tenant_id' => $competitor->tenant_id,
                 'competitor_product_id' => $competitor->id,
                 'period' => $period,
             ],
             [
-                'tenant_id' => $competitor->tenant_id,
                 'sentiment_score' => $result->score,
                 'themes' => $result->themes,
                 'sample_count' => $result->sampleCount,
