@@ -22,6 +22,12 @@ final class IntelligenceController
 {
     public function forecasts(Request $request): JsonResponse
     {
+        $request->validate([
+            'competitor_product_id' => ['nullable', 'integer'],
+            'horizon' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $forecasts = Forecast::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('horizon'), fn ($q) => $q->where('horizon_days', $request->integer('horizon')))
@@ -33,7 +39,13 @@ final class IntelligenceController
 
     public function anomalies(Request $request): JsonResponse
     {
-        $request->validate(['since' => ['nullable', 'date']]);
+        $request->validate([
+            'since' => ['nullable', 'date'],
+            'competitor_product_id' => ['nullable', 'integer'],
+            'type' => ['nullable', 'string', 'max:50'],
+            'severity' => ['nullable', 'string', 'max:20'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
 
         $anomalies = Anomaly::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
@@ -59,6 +71,12 @@ final class IntelligenceController
             return response()->json(['data' => [], 'meta' => ['enabled' => false]]);
         }
 
+        $request->validate([
+            'competitor_product_id' => ['nullable', 'integer'],
+            'period' => ['nullable', 'string', 'max:20'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $reviews = ReviewInsight::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
@@ -70,6 +88,11 @@ final class IntelligenceController
 
     public function narratives(Request $request): JsonResponse
     {
+        $request->validate([
+            'period' => ['nullable', 'string', 'max:20'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $narratives = Narrative::query()
             ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
             ->orderByDesc('generated_at')
@@ -80,6 +103,12 @@ final class IntelligenceController
 
     public function assortmentGaps(Request $request): JsonResponse
     {
+        $request->validate([
+            'competitor_source_id' => ['nullable', 'integer'],
+            'status' => ['nullable', 'string', 'max:20'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $gaps = AssortmentGap::query()
             ->when($request->filled('competitor_source_id'), fn ($q) => $q->where('competitor_source_id', $request->integer('competitor_source_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
@@ -91,6 +120,11 @@ final class IntelligenceController
 
     public function contentGaps(Request $request): JsonResponse
     {
+        $request->validate([
+            'product_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $gaps = ContentGap::query()
             ->when($request->filled('product_id'), fn ($q) => $q->where('product_id', $request->integer('product_id')))
             ->orderByDesc('generated_at')

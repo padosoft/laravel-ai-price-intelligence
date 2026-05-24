@@ -79,6 +79,15 @@ final class IntelligenceApiTest extends TestCase
     }
 
     #[Test]
+    public function malformed_integer_filters_are_rejected(): void
+    {
+        $key = $this->auth();
+        $this->withHeader('X-Api-Key', $key)
+            ->getJson('/api/v1/forecasts?horizon=abc')
+            ->assertStatus(422);
+    }
+
+    #[Test]
     public function intelligence_endpoints_require_auth(): void
     {
         $this->getJson('/api/v1/forecasts')->assertUnauthorized();

@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ## [1.1.0] - 2026-05-24
 
 Admin-facing REST API expansion (consumed by `padosoft/laravel-ai-price-intelligence-admin`).
-159 tests, Pint + PHPStan level 5 clean.
+Full PHPUnit suite green (PHP 8.3/8.4), Pint + PHPStan level 5 clean.
 
 ### Added
 - **Identity**: `GET /tenants/me` — resolved tenant + toggleable feature flags + caller abilities.

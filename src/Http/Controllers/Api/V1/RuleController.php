@@ -109,6 +109,12 @@ final class RuleController
 
     public function decisions(Request $request): JsonResponse
     {
+        $request->validate([
+            'repricing_rule_id' => ['nullable', 'integer'],
+            'product_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
         $decisions = RuleDecision::query()
             ->when($request->filled('repricing_rule_id'), fn ($q) => $q->where('repricing_rule_id', $request->integer('repricing_rule_id')))
             ->when($request->filled('product_id'), fn ($q) => $q->where('product_id', $request->integer('product_id')))
