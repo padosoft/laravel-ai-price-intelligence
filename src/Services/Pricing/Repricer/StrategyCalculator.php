@@ -149,6 +149,12 @@ final class StrategyCalculator
         $charm = max(0.0, min(0.99, $this->float($params, 'round_to_charm', 0.99)));
         $charmCents = (int) round($charm * 100);
 
+        // Charm rounding only makes sense at/above one major unit. For sub-unit prices
+        // (< 100 cents) leave the price untouched rather than collapsing it to 1 cent.
+        if ($price < 100) {
+            return $price;
+        }
+
         $major = intdiv($price, 100);
         $candidate = $major * 100 + $charmCents;
 
@@ -157,7 +163,8 @@ final class StrategyCalculator
             $candidate -= 100;
         }
 
-        return max(1, $candidate);
+        // Never let charm rounding push the price below one major unit.
+        return $candidate < 100 ? $price : $candidate;
     }
 
     /**

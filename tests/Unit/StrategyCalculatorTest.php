@@ -79,6 +79,14 @@ final class StrategyCalculatorTest extends TestCase
     }
 
     #[Test]
+    public function charm_leaves_sub_major_unit_prices_intact(): void
+    {
+        // A 50-cent price must not collapse to 1 cent when charm rounding is on.
+        $result = $this->calc()->suggest(RuleStrategy::MatchCheapest, [50], 9000, ['round_to_charm' => 0.99]);
+        $this->assertSame(50, $result);
+    }
+
+    #[Test]
     public function match_with_floor_requires_an_explicit_floor(): void
     {
         $this->assertNull($this->calc()->suggest(RuleStrategy::MatchWithFloor, [9000], 12000));
