@@ -54,7 +54,7 @@ It is **boundary-respecting**: it provides intelligence; your platform keeps the
 
 - 🔌 **Catalog onboarding**: bulk JSON, CSV import, webhook sync, console command.
 - 🌍 **Geo-aware discovery** via [`padosoft/laravel-ai-search-providers`](https://github.com/padosoft/laravel-ai-search-providers) (per-target country/locale).
-- 🧠 **Cascade product matching** with confidence band + human-review queue (auto ≥85 / review 60–85 / reject <60).
+- 🧠 **Cascade product matching** with confidence band + human-review queue (auto-confirm ≥85 · review 60–84 · reject <60).
 - 🕷️ **Scraping**: JSON-LD + OpenGraph extraction, generic HTTP + Browsershot, **marketplace adapters**
   (Amazon, eBay, Google Shopping, Idealo, Trovaprezzi).
 - 💶 **Price normalization**: multi-currency FX to a base currency, time-series observations.
