@@ -56,6 +56,9 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
     Route::get('/anomalies', [IntelligenceController::class, 'anomalies'])->name('price-intelligence.anomalies.index');
     Route::get('/reviews', [IntelligenceController::class, 'reviews'])->name('price-intelligence.reviews.index');
+    Route::get('/narratives', [IntelligenceController::class, 'narratives'])->name('price-intelligence.narratives.index');
+    Route::get('/assortment-gaps', [IntelligenceController::class, 'assortmentGaps'])->name('price-intelligence.assortment-gaps.index');
+    Route::get('/content-gaps', [IntelligenceController::class, 'contentGaps'])->name('price-intelligence.content-gaps.index');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('price-intelligence.alerts.index');
     Route::get('/alerts/stream', [AlertController::class, 'stream'])->name('price-intelligence.alerts.stream');

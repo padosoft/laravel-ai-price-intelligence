@@ -7,7 +7,10 @@ namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Padosoft\PriceIntelligence\Models\Anomaly;
+use Padosoft\PriceIntelligence\Models\AssortmentGap;
+use Padosoft\PriceIntelligence\Models\ContentGap;
 use Padosoft\PriceIntelligence\Models\Forecast;
+use Padosoft\PriceIntelligence\Models\Narrative;
 use Padosoft\PriceIntelligence\Models\ReviewInsight;
 
 /**
@@ -54,5 +57,36 @@ final class IntelligenceController
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($reviews);
+    }
+
+    public function narratives(Request $request): JsonResponse
+    {
+        $narratives = Narrative::query()
+            ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
+            ->orderByDesc('generated_at')
+            ->cursorPaginate((int) $request->integer('per_page', 20));
+
+        return response()->json($narratives);
+    }
+
+    public function assortmentGaps(Request $request): JsonResponse
+    {
+        $gaps = AssortmentGap::query()
+            ->when($request->filled('competitor_source_id'), fn ($q) => $q->where('competitor_source_id', $request->integer('competitor_source_id')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
+            ->orderByDesc('importance_score')
+            ->cursorPaginate((int) $request->integer('per_page', 50));
+
+        return response()->json($gaps);
+    }
+
+    public function contentGaps(Request $request): JsonResponse
+    {
+        $gaps = ContentGap::query()
+            ->when($request->filled('product_id'), fn ($q) => $q->where('product_id', $request->integer('product_id')))
+            ->orderByDesc('generated_at')
+            ->cursorPaginate((int) $request->integer('per_page', 50));
+
+        return response()->json($gaps);
     }
 }
