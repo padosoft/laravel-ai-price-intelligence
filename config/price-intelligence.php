@@ -140,9 +140,10 @@ return [
         'allowed_domains' => [],
     ],
 
+    // Advisory-only by design: the repricer NEVER applies prices (RuleDecision.applied stays
+    // false; a RepricingSuggested event is emitted for the host to act on). No "dry run" switch.
     'repricer' => [
         'enabled' => false,
-        'dry_run_only' => true,
     ],
 
     'pii' => ['enabled' => 'auto'],

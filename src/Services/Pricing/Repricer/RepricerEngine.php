@@ -55,7 +55,9 @@ final class RepricerEngine implements RepricerEngineInterface
             'applied' => false, // advisory only — the package never applies prices
             'reason' => $rule->strategy->value,
             'evidence' => [
-                'competitor_prices_cents' => array_values($competitorPricesCents),
+                // Store the cleaned, sorted prices actually used by the calculator
+                // (positive only) so the audit reflects what drove the decision.
+                'competitor_prices_cents' => $this->cleanPrices($competitorPricesCents),
                 'parameters' => $params,
             ],
         ]);
@@ -98,6 +100,18 @@ final class RepricerEngine implements RepricerEngineInterface
         // Custom outputs go through the SAME safeguards (floor, max-change, charm)
         // so a host callable can't bypass margin protection.
         return $this->calculator->applyGuards($result, $current, $params);
+    }
+
+    /**
+     * @param  array<int, int>  $prices
+     * @return array<int, int>
+     */
+    private function cleanPrices(array $prices): array
+    {
+        $clean = array_values(array_filter(array_map('intval', $prices), static fn (int $p): bool => $p > 0));
+        sort($clean);
+
+        return $clean;
     }
 
     private function resolveCustomCallable(string $name): mixed
