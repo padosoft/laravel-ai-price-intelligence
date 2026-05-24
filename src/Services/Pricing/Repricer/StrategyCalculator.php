@@ -31,16 +31,12 @@ final class StrategyCalculator
      */
     public function suggest(RuleStrategy $strategy, array $competitorPricesCents, ?int $currentCents, array $params = []): ?int
     {
-        $prices = array_values(array_filter(
-            array_map('intval', $competitorPricesCents),
-            static fn (int $p): bool => $p > 0,
-        ));
+        $prices = self::cleanPrices($competitorPricesCents);
 
         if ($prices === []) {
             return null;
         }
 
-        sort($prices);
         $cheapest = $prices[0];
 
         $raw = match ($strategy) {
@@ -124,7 +120,7 @@ final class StrategyCalculator
      */
     private function applyMaxChange(int $price, ?int $currentCents, array $params): int
     {
-        if ($currentCents === null || ! isset($params['max_change_pct'])) {
+        if ($currentCents === null || ! isset($params['max_change_pct']) || ! is_numeric($params['max_change_pct'])) {
             return $price;
         }
 
@@ -139,6 +135,24 @@ final class StrategyCalculator
     private function clampPct(float $pct): float
     {
         return max(0.0, min(100.0, $pct));
+    }
+
+    /**
+     * Filter to positive integer prices and sort ascending — the single source of
+     * truth for price cleaning (reused by the engine for audit evidence).
+     *
+     * @param  array<int, mixed>  $prices
+     * @return array<int, int>
+     */
+    public static function cleanPrices(array $prices): array
+    {
+        $clean = array_values(array_filter(
+            array_map('intval', $prices),
+            static fn (int $p): bool => $p > 0,
+        ));
+        sort($clean);
+
+        return $clean;
     }
 
     /**
