@@ -47,7 +47,7 @@ final class StrategyCalculator
             RuleStrategy::MatchCheapest => $cheapest,
             // MatchWithFloor MUST have an explicit margin floor; without one it would be
             // indistinguishable from MatchCheapest, so it declines to suggest.
-            RuleStrategy::MatchWithFloor => isset($params['min_price_cents']) ? $cheapest : null,
+            RuleStrategy::MatchWithFloor => (isset($params['min_price_cents']) && is_numeric($params['min_price_cents']) && (int) $params['min_price_cents'] > 0) ? $cheapest : null,
             RuleStrategy::UndercutPct => (int) round($cheapest * (1 - $this->clampPct($this->float($params, 'undercut_pct', 1)) / 100)),
             RuleStrategy::BeatTopN => $this->beatTopN($prices, $params),
             RuleStrategy::DynamicDemand => (int) round($this->beatTopN($prices, $params) * $this->float($params, 'demand_factor', 1.0)),
@@ -108,9 +108,15 @@ final class StrategyCalculator
      */
     private function applyFloor(int $price, array $params): int
     {
-        $floor = isset($params['min_price_cents']) ? (int) $params['min_price_cents'] : null;
+        // Ignore a non-numeric/negative floor rather than casting it to 0 (which would
+        // silently disable margin protection).
+        if (! isset($params['min_price_cents']) || ! is_numeric($params['min_price_cents'])) {
+            return $price;
+        }
 
-        return $floor !== null ? max($floor, $price) : $price;
+        $floor = (int) $params['min_price_cents'];
+
+        return $floor > 0 ? max($floor, $price) : $price;
     }
 
     /**
