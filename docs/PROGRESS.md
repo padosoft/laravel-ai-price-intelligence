@@ -8,10 +8,10 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **92 tests green**. CI green (8.3/8.4).
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **102 tests green**. CI green (8.3/8.4).
 
-**Merged**: PR #1 (phases 0–7) + PR #2 (phase 8 AI core) — both via the full local-Copilot →
-push → CI → GitHub-Copilot → auto-merge loop. `main` @ 2e6dbfb. No open PR.
+**Merged**: PR #1 (0–7), PR #2 (phase 8 AI), PR #3 (phase 9 review sentiment) — all via the full
+local-Copilot → push → CI → GitHub-Copilot → auto-merge loop. `main` @ 2923757.
 
 **STRICT per-phase workflow (mandatory from now on)** — see AGENTS.md / .claude/rules:
 one PR per phase; local loop (phpunit + local `copilot` CLI review → fix) until clean → push →
@@ -58,7 +58,10 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   - **Phase 8b (LLM features, deferred to its own PR)**: NarrativeWriter, PromoDetector,
     ContentGapAnalyzer, AssortmentMapper, VisualMatcher — require LLM provider wiring; grouped with
     review-sentiment (Phase 9). Interfaces land when implemented to avoid untested stubs.
-- [ ] Phase 9 — Review sentiment (GDPR-safe, pii-redactor)
+- [x] **Phase 9 — Review sentiment (GDPR-safe)** (PR #3 merged): ReviewSentimentInterface +
+  LexiconSentimentAnalyzer, PiiFilterInterface + PiiFilter (laravel-pii-redactor or regex fallback),
+  ReviewAggregator (off-by-default, per-domain opt-in, mandatory PII redaction, anonymous aggregates
+  only), ReviewInsight model/migration, refusal exception.
 - [ ] Phase 10 — Repricer engine (opt, off default)
 - [ ] Phase 11 — Compliance hardening (robots, rate-limit, PiiFilter, AiActBridge, audit)
 - [ ] Phase 12 — Docs finali + README + COMPETITIVE-MATRIX + openapi.json
