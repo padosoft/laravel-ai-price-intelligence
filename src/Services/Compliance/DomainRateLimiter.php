@@ -7,10 +7,13 @@ namespace Padosoft\PriceIntelligence\Services\Compliance;
 use Illuminate\Cache\RateLimiter;
 
 /**
- * Per-domain "gentleman" rate limiter built on Laravel's RateLimiter, which uses
- * an atomic hit counter with a managed decay window (no read-check-write race and
- * a correctly-maintained TTL). attempt() returns false when the domain has hit
- * its per-minute limit, so callers can defer the fetch.
+ * Per-domain "gentleman" rate limiter built on Laravel's RateLimiter (atomic hit
+ * counter with a managed decay window). attempt() returns false when the domain
+ * has hit its per-minute limit, so callers can defer the fetch.
+ *
+ * Note: this is a politeness guard, not a security control. Under heavy concurrency
+ * across many workers the limit may be exceeded by a small margin (the check + hit
+ * are not globally locked); that is an acceptable trade-off for polite scraping.
  */
 final class DomainRateLimiter
 {

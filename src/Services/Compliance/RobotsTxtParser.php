@@ -85,9 +85,39 @@ final class RobotsTxtParser
             }
         }
 
-        $ua = strtolower($userAgent);
+        return $this->selectGroup($groups, $userAgent);
+    }
 
-        return $groups[$ua] ?? $groups['*'] ?? [];
+    /**
+     * Pick the matching group per the robots convention: a crawler matches a group
+     * whose user-agent token is a case-insensitive substring of the crawler name;
+     * the most specific (longest) matching token wins, falling back to "*".
+     *
+     * @param  array<string, array<int, array{0: string, 1: string}>>  $groups
+     * @return array<int, array{0: string, 1: string}>
+     */
+    private function selectGroup(array $groups, string $userAgent): array
+    {
+        $ua = strtolower($userAgent);
+        $bestKey = null;
+        $bestLen = -1;
+
+        foreach (array_keys($groups) as $key) {
+            if ($key === '*') {
+                continue;
+            }
+
+            if (str_contains($ua, $key) && strlen($key) > $bestLen) {
+                $bestKey = $key;
+                $bestLen = strlen($key);
+            }
+        }
+
+        if ($bestKey !== null) {
+            return $groups[$bestKey];
+        }
+
+        return $groups['*'] ?? [];
     }
 
     /**

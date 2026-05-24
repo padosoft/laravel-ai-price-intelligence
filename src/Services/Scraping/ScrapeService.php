@@ -37,13 +37,12 @@ final class ScrapeService
         }
 
         // GDPR: strip any PII captured in scraped content before persisting.
+        // pii.enabled is 'auto'|bool: 'auto' means on; otherwise interpret robustly so
+        // 'false'/'0'/0 all disable (not just a strict boolean false).
         $enabled = config('price-intelligence.pii.enabled', 'auto');
+        $on = $enabled === 'auto' ? true : filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
 
-        if ($enabled === false) {
-            return $text;
-        }
-
-        return $this->pii->redact($text);
+        return $on ? $this->pii->redact($text) : $text;
     }
 
     /**

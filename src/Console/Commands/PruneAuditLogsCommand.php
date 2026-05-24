@@ -15,8 +15,16 @@ final class PruneAuditLogsCommand extends Command
 
     public function handle(): int
     {
-        $days = $this->option('days') !== null
-            ? (int) $this->option('days')
+        $daysOption = $this->option('days');
+
+        if ($daysOption !== null && ! is_numeric($daysOption)) {
+            $this->error('--days must be a number.');
+
+            return self::FAILURE;
+        }
+
+        $days = $daysOption !== null
+            ? (int) $daysOption
             : (int) config('price-intelligence.compliance.audit.retention_days', 90);
 
         if ($days <= 0) {

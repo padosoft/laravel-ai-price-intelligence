@@ -52,4 +52,13 @@ final class RobotsTxtParserTest extends TestCase
         $this->assertFalse($this->parser()->isAllowed($robots, '/files/report.pdf'));
         $this->assertTrue($this->parser()->isAllowed($robots, '/files/report.html'));
     }
+
+    #[Test]
+    public function user_agent_is_matched_case_insensitively_by_substring(): void
+    {
+        // A real UA like "PriceIntelligenceBot/1.0" matches a "priceintelligencebot" group.
+        $robots = "User-agent: PriceIntelligenceBot\nDisallow: /no\n\nUser-agent: *\nDisallow:";
+        $this->assertFalse($this->parser()->isAllowed($robots, '/no/x', 'PriceIntelligenceBot/1.0 (+https://x)'));
+        $this->assertTrue($this->parser()->isAllowed($robots, '/yes', 'PriceIntelligenceBot/1.0'));
+    }
 }
