@@ -61,6 +61,25 @@ final class RepricerEngineTest extends TestCase
     }
 
     #[Test]
+    public function custom_strategy_output_respects_the_margin_floor(): void
+    {
+        config()->set('price-intelligence.repricer.enabled', true);
+        config()->set('price-intelligence.repricer.custom', [
+            'too_low' => fn ($product, $prices, $current, $params): int => 1000,
+        ]);
+        [$product, $rule] = $this->seedProductAndRule();
+        $rule->update([
+            'strategy' => RuleStrategy::Custom->value,
+            'parameters' => ['callable' => 'too_low', 'min_price_cents' => 8000],
+        ]);
+
+        $decision = app(RepricerEngineInterface::class)->evaluate($product->fresh(), $rule->fresh(), [9000]);
+
+        $this->assertNotNull($decision);
+        $this->assertGreaterThanOrEqual(8000, $decision->suggested_price_cents);
+    }
+
+    #[Test]
     public function custom_strategy_uses_registered_callable(): void
     {
         config()->set('price-intelligence.repricer.enabled', true);

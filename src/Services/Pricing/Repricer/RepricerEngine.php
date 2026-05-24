@@ -81,6 +81,12 @@ final class RepricerEngine implements RepricerEngineInterface
 
         $result = $callable($product, $competitorPricesCents, $current, $params);
 
-        return is_int($result) ? $result : null;
+        if (! is_int($result)) {
+            return null;
+        }
+
+        // Custom outputs go through the SAME safeguards (floor, max-change, charm)
+        // so a host callable can't bypass margin protection.
+        return $this->calculator->applyGuards($result, $current, $params);
     }
 }

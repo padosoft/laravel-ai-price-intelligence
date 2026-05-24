@@ -59,6 +59,26 @@ final class StrategyCalculatorTest extends TestCase
     }
 
     #[Test]
+    public function charm_rounding_never_drops_below_the_margin_floor(): void
+    {
+        $result = $this->calc()->suggest(RuleStrategy::MatchCheapest, [8000], 12000, [
+            'min_price_cents' => 8000,
+            'round_to_charm' => 0.99,
+        ]);
+
+        $this->assertNotNull($result);
+        $this->assertGreaterThanOrEqual(8000, $result);
+    }
+
+    #[Test]
+    public function out_of_range_charm_is_clamped(): void
+    {
+        $result = $this->calc()->suggest(RuleStrategy::MatchCheapest, [9500], 12000, ['round_to_charm' => 1.0]);
+        $this->assertNotNull($result);
+        $this->assertLessThanOrEqual(9500, $result);
+    }
+
+    #[Test]
     public function no_competitors_returns_null(): void
     {
         $this->assertNull($this->calc()->suggest(RuleStrategy::MatchCheapest, [], 10000));

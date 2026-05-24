@@ -39,8 +39,7 @@ return new class extends Migration
                 $b->boolean('applied')->default(false);
                 $b->string('reason')->nullable();
                 $b->json('evidence')->nullable();
-                $b->timestamp('created_at')->nullable();
-                $b->timestamp('updated_at')->nullable();
+                $b->timestamps();
             });
         }
     }

@@ -19,7 +19,9 @@ use Padosoft\PriceIntelligence\Enums\RuleStrategy;
  *  - min_price_cents (int)     hard price floor (margin protection)
  *  - max_change_pct (float)    clamp the move to ± this % of the current price
  *  - round_to_charm (float)    e.g. 0.99 -> round down to .99 endings (in major units)
- *  - demand_factor (float)     dynamic_demand: >1 more aggressive, <1 less
+ *  - demand_factor (float)     dynamic_demand: multiplies the beat_top_n reference by demand.
+ *                              >1 = high demand -> raise price to capture margin;
+ *                              <1 = soft demand -> lower price to stay competitive.
  */
 final class StrategyCalculator
 {
@@ -53,10 +55,7 @@ final class StrategyCalculator
             return null;
         }
 
-        $suggested = $this->applyFloor($raw, $params);
-        $suggested = $this->applyMaxChange($suggested, $currentCents, $params);
-        $suggested = $this->applyCharm($suggested, $params);
-        $suggested = max(1, $suggested);
+        $suggested = $this->applyGuards($raw, $currentCents, $params);
 
         // No suggestion if it equals the current price.
         if ($currentCents !== null && $suggested === $currentCents) {
@@ -64,6 +63,27 @@ final class StrategyCalculator
         }
 
         return $suggested;
+    }
+
+    /**
+     * Apply cosmetic charm rounding first, then the HARD constraints last so they
+     * always hold: max-change clamp, then the margin floor (highest priority — it
+     * can override the max-change lower bound to protect margin). Public so the
+     * RepricerEngine can run the same guards over custom-strategy outputs.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function applyGuards(int $raw, ?int $currentCents, array $params): int
+    {
+        $price = $this->applyCharm($raw, $params);
+        $price = $this->applyMaxChange($price, $currentCents, $params);
+        $price = $this->applyFloor($price, $params); // floor wins over everything
+        $price = $this->applyCharm($price, $params);  // re-charm if floor/clamp moved it
+
+        // If charm pushed back below the floor, the floor still wins.
+        $price = $this->applyFloor($price, $params);
+
+        return max(1, $price);
     }
 
     /**
@@ -115,9 +135,13 @@ final class StrategyCalculator
             return $price;
         }
 
-        $charm = $this->float($params, 'round_to_charm', 0.99); // major-unit ending
+        // The charm ending is a fraction of a major unit; clamp to [0, 0.99] so values
+        // like 1 or 0.999 can't produce a 100-cent ending (which would shift the price).
+        $charm = max(0.0, min(0.99, $this->float($params, 'round_to_charm', 0.99)));
+        $charmCents = (int) round($charm * 100);
+
         $major = intdiv($price, 100);
-        $candidate = $major * 100 + (int) round($charm * 100);
+        $candidate = $major * 100 + $charmCents;
 
         // Round down to the charm ending; if that exceeds the price, drop one major unit.
         if ($candidate > $price) {
