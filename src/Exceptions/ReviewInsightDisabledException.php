@@ -13,16 +13,18 @@ final class ReviewInsightDisabledException extends RuntimeException
         return new self('Review insight module is disabled (set price-intelligence.review_insight.enabled = true).');
     }
 
-    public static function domainNotAllowed(string $host): self
+    public static function domainNotAllowed(?string $host): self
     {
+        $label = ($host === null || $host === '') ? '(unknown — competitor has no source/host)' : $host;
+
         return new self(
-            "Review insight pipeline is not opted-in for domain: {$host} "
-            . '(add it to price-intelligence.review_insight.allowed_domains).'
+            "Review insight pipeline is not opted-in for domain: {$label} "
+            . '(add the host to price-intelligence.review_insight.allowed_domains).'
         );
     }
 
     public static function weakPii(): self
     {
-        return new self('Review sentiment requires padosoft/laravel-pii-redactor to be installed (strong PII redaction).');
+        return new self('Review insight requires padosoft/laravel-pii-redactor to be installed (strong PII redaction).');
     }
 }

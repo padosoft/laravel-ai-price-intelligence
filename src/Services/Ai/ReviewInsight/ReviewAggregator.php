@@ -55,7 +55,7 @@ final class ReviewAggregator
         $allowed = (array) config('price-intelligence.review_insight.allowed_domains', []);
 
         if ($host === null || ! in_array($host, $allowed, true)) {
-            throw ReviewInsightDisabledException::domainNotAllowed((string) $host);
+            throw ReviewInsightDisabledException::domainNotAllowed($host);
         }
 
         if (! $this->pii->isStrong()) {
