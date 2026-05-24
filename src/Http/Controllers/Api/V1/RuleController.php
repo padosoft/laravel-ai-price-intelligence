@@ -139,7 +139,7 @@ final class RuleController
             // the key to leave them unchanged).
             'target_filter' => ['nullable', 'array'],
             'parameters' => ['nullable', 'array'],
-            'priority' => ['sometimes', 'integer', 'min:0'],
+            'priority' => ['sometimes', 'integer', 'min:0', 'max:65535'],
             'status' => ['sometimes', 'string', Rule::in(['active', 'paused'])],
         ]);
     }

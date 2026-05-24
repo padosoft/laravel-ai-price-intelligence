@@ -20,6 +20,7 @@ final class AuditController
             'since' => ['nullable', 'date'],
             'status' => ['nullable', 'integer'],
             'competitor_source_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
         ]);
 
         $logs = FetchLog::query()

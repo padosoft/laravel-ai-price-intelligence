@@ -24,6 +24,7 @@ final class ObservationController
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
             'competitor_product_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
         ]);
 
         $prices = PriceObservation::query()
