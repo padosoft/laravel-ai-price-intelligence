@@ -32,6 +32,7 @@ final class IntelligenceController
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('horizon'), fn ($q) => $q->where('horizon_days', $request->integer('horizon')))
             ->orderByDesc('generated_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($forecasts);
@@ -54,6 +55,7 @@ final class IntelligenceController
             ->when($request->boolean('unacknowledged'), fn ($q) => $q->whereNull('acknowledged_at'))
             ->when($request->filled('since'), fn ($q) => $q->where('detected_at', '>=', $request->date('since')))
             ->orderByDesc('detected_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($anomalies);
@@ -81,6 +83,7 @@ final class IntelligenceController
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
             ->orderByDesc('generated_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($reviews);
@@ -96,6 +99,7 @@ final class IntelligenceController
         $narratives = Narrative::query()
             ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
             ->orderByDesc('generated_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 20));
 
         return response()->json($narratives);
@@ -113,6 +117,7 @@ final class IntelligenceController
             ->when($request->filled('competitor_source_id'), fn ($q) => $q->where('competitor_source_id', $request->integer('competitor_source_id')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
             ->orderByDesc('importance_score')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($gaps);
@@ -128,6 +133,7 @@ final class IntelligenceController
         $gaps = ContentGap::query()
             ->when($request->filled('product_id'), fn ($q) => $q->where('product_id', $request->integer('product_id')))
             ->orderByDesc('generated_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($gaps);

@@ -32,6 +32,7 @@ final class ObservationController
             ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
             ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
             ->orderByDesc('captured_at')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 100));
 
         return response()->json($prices);
