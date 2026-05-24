@@ -52,3 +52,21 @@ For EVERY roadmap phase, in this exact order (non-negotiable):
 ## Final task of the build
 Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the repo's `AGENTS.md`,
 `.claude/rules/`, and any skills with the new knowledge so it persists for future work.
+
+## Distilled lessons (carry into future work)
+- **PowerShell, not bash** for php/composer/phpunit/pint/phpstan (PHP 8.4 via Herd; not on bash PATH).
+- **Local Copilot review**: `copilot --autopilot --yolo -p "/review the changes on this branch vs
+  origin/main (git diff origin/main...HEAD); list concrete bugs; reply 'NO ISSUES' if none."` — Premium,
+  a few minutes; it even runs code to verify. Run to NO ISSUES before pushing.
+- **GitHub Copilot review**: request via REST `gh api --method POST repos/<o>/<r>/pulls/<n>/requested_reviewers
+  -f "reviewers[]=copilot-pull-request-reviewer[bot]"` (`gh pr edit --add-reviewer copilot` fails).
+- **Reviewers can be wrong / contradict each other** (e.g. PHPStan says a `?? []` is dead while Copilot
+  asks to add it). Verify against language/framework semantics; when right, push back with a clarifying
+  comment instead of churning the code. Don't add `?? []`/casts/baselines just to silence a tool.
+- **PHPStan (level 5 + larastan)**: needs `--memory-limit=1G`. Type Eloquent relation magic with
+  `@property-read`. Don't `(bool) config()` for flags — use `Support\Config\Flag::enabled()` (handles
+  'auto' and falsy strings). Config closures break `config:cache` → use container bindings or class-strings.
+- **Pint** normalizes CRLF→LF and import order; run `pint` then `pint --test` before committing.
+- **Orchestra TestCase** is required for any test touching Eloquent (booting the app); its `seed()` method
+  is reserved — don't define a private `seed()` helper.
+- **GitHub flakiness**: `gh pr merge` can 504 without merging — re-check PR `state` and retry idempotently.

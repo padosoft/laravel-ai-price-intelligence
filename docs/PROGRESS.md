@@ -66,15 +66,18 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   beat_top_n/match_with_floor/dynamic_demand/custom) with margin floor, max-change clamp, charm
   rounding; RepricerEngine (off by default, advisory-only, RepricingSuggested event); container-resolved
   custom strategies. ~10 Copilot rounds of pricing edge-case hardening.
-- [ ] Phase 11 — Compliance hardening (robots, rate-limit, PiiFilter, AiActBridge, audit)
+- [x] **Phase 11 — Compliance hardening** (PR #5 merged): RobotsTxtPolicy, per-domain atomic
+  rate limiter, PiiFilter, AiActBridge (null-object), audit retention + PruneAuditLogs command.
 - [x] **Phase 12 — Docs + README** (PR #6 merged): README (banner + web-panel screenshot),
   INTEGRATION-GUIDE, EXTENDING, COMPETITIVE-MATRIX; api.tenant_resolver class-string support.
-- [ ] Phase 13 — Release v1.0 alpha prep (CHANGELOG, phpstan, pint, CI)
-- [ ] **Final** — consolidate LESSON.md learnings into AGENTS.md / .claude/rules / skills
+- [x] **Phase 13 — Release v1.0 prep** (PR #7 merged): CHANGELOG, phpstan level 5, pint, CI
+  quality job (pint --test + phpstan on PHP 8.3/8.4).
+- [x] **Final** — consolidated LESSON.md learnings into AGENTS.md "Distilled lessons" section +
+  .claude/rules. CHANGELOG bumped 1.0.0-alpha → 1.0.0.
 
 ### Next action
-**Phase 9 — Review sentiment (GDPR-safe)** as its own PR (strict loop): ReviewInsightInterface,
-ReviewScraper/Aggregator/SentimentAnalyzer, pii-redactor mandatory, off by default + per-domain
-opt-in, only anonymous aggregates persisted (review_insights table). Then phases 10–13 + Final.
-Note: Phase 8b LLM features (narrative/promo/content-gap/assortment/visual) still pending — can be
-folded near Phase 9 since they share LLM provider wiring.
+**CORE COMPLETE — 13/13 phases merged.** Tag v1.0.0 + GitHub release on the core, then begin the
+admin panel build (`laravel-ai-price-intelligence-admin`) per the saved plan: read the realized
+template at ~/Downloads/ai-price-intelligence-web-panel, composer require the core, implement all
+15 screens, PHP + Vitest + Playwright per screen, strict local-Copilot → CI → GitHub-Copilot loop,
+then tag admin v1.0.0.
