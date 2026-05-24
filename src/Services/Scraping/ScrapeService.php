@@ -53,6 +53,8 @@ final class ScrapeService
      */
     public function scrapeAndStore(CompetitorProduct $competitor, array $options = []): ProductSnapshot
     {
+        // adapter_code is a non-null column (DB default 'generic', cast to AdapterCode), so the
+        // only fallback case is a missing source — equivalent to the prior ?->adapter_code ?? Generic.
         $source = $competitor->source;
         $code = $source !== null ? $source->adapter_code : AdapterCode::Generic;
         $adapter = $this->adapters->make($code);
