@@ -69,10 +69,14 @@ final class StrategyCalculator
     }
 
     /**
-     * Apply cosmetic charm rounding first, then the HARD constraints last so they
-     * always hold: max-change clamp, then the margin floor (highest priority — it
-     * can override the max-change lower bound to protect margin). Public so the
-     * RepricerEngine can run the same guards over custom-strategy outputs.
+     * Single linear pipeline so every constraint holds deterministically:
+     *  1. charm rounding   — cosmetic, applied first;
+     *  2. max-change clamp — soft guard around the current price;
+     *  3. margin floor     — HARD guard, applied LAST so it always wins (it may push
+     *                        above the max-change upper bound to protect margin).
+     * Each guard runs exactly once; nothing after the floor can re-break it. The
+     * trade-off is that a floor/clamp adjustment may drop the charm ending — bounds
+     * matter more than cosmetics. Public so the engine can guard custom outputs too.
      *
      * @param  array<string, mixed>  $params
      */
@@ -80,10 +84,6 @@ final class StrategyCalculator
     {
         $price = $this->applyCharm($raw, $params);
         $price = $this->applyMaxChange($price, $currentCents, $params);
-        $price = $this->applyFloor($price, $params); // floor wins over everything
-        $price = $this->applyCharm($price, $params);  // re-charm if floor/clamp moved it
-
-        // If charm pushed back below the floor, the floor still wins.
         $price = $this->applyFloor($price, $params);
 
         return max(1, $price);
