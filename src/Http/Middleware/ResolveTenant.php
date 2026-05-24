@@ -46,6 +46,12 @@ final class ResolveTenant
         if ($user !== null) {
             $resolver = config('price-intelligence.api.tenant_resolver');
 
+            // Accept a callable OR an invokable class-string resolved via the container
+            // (class-strings keep `php artisan config:cache` working; closures do not).
+            if (is_string($resolver) && class_exists($resolver)) {
+                $resolver = app($resolver);
+            }
+
             $tenantId = is_callable($resolver)
                 ? $resolver($user)
                 : ($user->tenant_id ?? null);
