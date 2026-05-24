@@ -12,8 +12,12 @@ use Padosoft\PriceIntelligence\Contracts\AnomalyDetectorInterface;
 use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
+use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
+use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
 use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
@@ -60,6 +64,10 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
         $this->app->bind(AnomalyDetectorInterface::class, static fn (): AnomalyDetectorInterface => Flag::enabled('price-intelligence.ai.anomaly.enabled', true)
             ? new StatisticalAnomalyDetector()
             : new NullAnomalyDetector());
+
+        $this->app->bind(PiiFilterInterface::class, static fn (): PiiFilterInterface => new PiiFilter());
+
+        $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer());
 
         $this->app->singleton(PriceIntelligenceManager::class, static fn ($app): PriceIntelligenceManager => new PriceIntelligenceManager(
             $app->make(TenantContext::class),
