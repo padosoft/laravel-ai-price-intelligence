@@ -15,6 +15,9 @@ final class PruneAuditLogsCommand extends Command
 
     public function handle(): int
     {
+        // Retention maintenance runs regardless of compliance.audit.enabled: that flag
+        // controls whether NEW fetches are logged, while pruning cleans up already-stored
+        // logs (which still need trimming even after logging is turned off).
         $daysOption = $this->option('days');
 
         if ($daysOption !== null && filter_var($daysOption, FILTER_VALIDATE_INT) === false) {
