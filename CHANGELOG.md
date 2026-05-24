@@ -6,9 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
-## [1.0.0-alpha] - 2026-05-24
+## [1.0.0] - 2026-05-24
 
-First public alpha. Enterprise Product & Price Intelligence / Competitor Monitoring for Laravel.
+First public release. Enterprise Product & Price Intelligence / Competitor Monitoring for Laravel.
+133 tests, CI green (PHP 8.3/8.4), Pint + PHPStan level 5 clean.
 
 ### Added
 - **Foundations**: multi-tenant (single-DB + database-per-tenant ready), Sanctum + API-key auth with
@@ -39,5 +40,5 @@ First public alpha. Enterprise Product & Price Intelligence / Competitor Monitor
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0-alpha...HEAD
-[1.0.0-alpha]: https://github.com/padosoft/laravel-ai-price-intelligence/releases/tag/v1.0.0-alpha
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/padosoft/laravel-ai-price-intelligence/releases/tag/v1.0.0
