@@ -14,10 +14,13 @@ use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
 use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
+use Padosoft\PriceIntelligence\Services\Pricing\Repricer\RepricerEngine;
+use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
 use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
@@ -66,6 +69,10 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
             : new NullAnomalyDetector());
 
         $this->app->bind(PiiFilterInterface::class, static fn (): PiiFilterInterface => new PiiFilter());
+
+        $this->app->bind(RepricerEngineInterface::class, static fn ($app): RepricerEngineInterface => new RepricerEngine(
+            $app->make(StrategyCalculator::class),
+        ));
 
         $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer());
 
