@@ -87,6 +87,25 @@ final class SystemApiTest extends TestCase
     }
 
     #[Test]
+    public function minting_api_keys_requires_the_apikeys_manage_scope(): void
+    {
+        // A limited key without apikeys:manage must not be able to mint new keys.
+        $tenant = Tenant::create(['code' => 'lim', 'name' => 'Limited']);
+        [, $limited] = ApiKey::issue($tenant->id, 'readonly', ['catalog:read']);
+        app(TenantContext::class)->set($tenant->id);
+
+        $this->withHeader('X-Api-Key', $limited)
+            ->postJson('/api/v1/api-keys', ['name' => 'escalation', 'scopes' => ['*']])
+            ->assertForbidden();
+
+        // A wildcard key satisfies the scope.
+        [, $full] = ApiKey::issue($tenant->id, 'full', ['*']);
+        $this->withHeader('X-Api-Key', $full)
+            ->postJson('/api/v1/api-keys', ['name' => 'ok', 'scopes' => ['catalog:read']])
+            ->assertCreated();
+    }
+
+    #[Test]
     public function audit_fetch_logs_are_listed(): void
     {
         $key = $this->auth();

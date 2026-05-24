@@ -128,10 +128,13 @@ final class RuleController
         return $request->validate([
             'name' => [$required, 'string', 'max:191'],
             'strategy' => [$required, Rule::enum(RuleStrategy::class)],
+            // target_filter/parameters may be cleared with an explicit null;
+            // priority/status back non-nullable columns, so null is rejected (must omit
+            // the key to leave them unchanged).
             'target_filter' => ['nullable', 'array'],
             'parameters' => ['nullable', 'array'],
-            'priority' => ['nullable', 'integer', 'min:0'],
-            'status' => ['nullable', 'string', Rule::in(['active', 'paused'])],
+            'priority' => ['sometimes', 'integer', 'min:0'],
+            'status' => ['sometimes', 'string', Rule::in(['active', 'paused'])],
         ]);
     }
 }

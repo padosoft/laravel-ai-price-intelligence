@@ -71,9 +71,17 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::delete('/rules/{id}', [RuleController::class, 'destroy'])->whereNumber('id')->name('price-intelligence.rules.destroy');
     Route::get('/rule-decisions', [RuleController::class, 'decisions'])->name('price-intelligence.rule-decisions.index');
 
+    // Minting/revoking keys is an escalation vector: require the apikeys:manage scope
+    // (a '*' key satisfies it; session auth is unaffected). ResolveTenant runs once for
+    // the group; the scoped instance here additionally enforces the ability for API keys.
     Route::get('/api-keys', [ApiKeyController::class, 'index'])->name('price-intelligence.api-keys.index');
-    Route::post('/api-keys', [ApiKeyController::class, 'store'])->name('price-intelligence.api-keys.store');
-    Route::delete('/api-keys/{id}', [ApiKeyController::class, 'revoke'])->whereNumber('id')->name('price-intelligence.api-keys.revoke');
+    Route::post('/api-keys', [ApiKeyController::class, 'store'])
+        ->middleware(ResolveTenant::class.':apikeys:manage')
+        ->name('price-intelligence.api-keys.store');
+    Route::delete('/api-keys/{id}', [ApiKeyController::class, 'revoke'])
+        ->whereNumber('id')
+        ->middleware(ResolveTenant::class.':apikeys:manage')
+        ->name('price-intelligence.api-keys.revoke');
 
     Route::get('/audit/fetch-logs', [AuditController::class, 'fetchLogs'])->name('price-intelligence.audit.fetch-logs');
 
