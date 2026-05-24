@@ -17,8 +17,8 @@ final class PruneAuditLogsCommand extends Command
     {
         $daysOption = $this->option('days');
 
-        if ($daysOption !== null && ! is_numeric($daysOption)) {
-            $this->error('--days must be a number.');
+        if ($daysOption !== null && filter_var($daysOption, FILTER_VALIDATE_INT) === false) {
+            $this->error('--days must be a whole number.');
 
             return self::FAILURE;
         }

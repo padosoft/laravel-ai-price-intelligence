@@ -50,6 +50,10 @@ final class RobotsTxtParser
             $line = trim(preg_replace('/#.*$/', '', $line) ?? '');
 
             if ($line === '') {
+                // A blank line terminates the current user-agent group (robots convention).
+                $currentUas = [];
+                $collecting = false;
+
                 continue;
             }
 
