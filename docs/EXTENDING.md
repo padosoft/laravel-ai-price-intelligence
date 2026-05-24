@@ -8,7 +8,7 @@ Everything is pluggable via Interface + Driver. Rebind any contract in a service
 |---|---|---|
 | `ProductScraperInterface` | `GenericHttpScraper` | fetch + extract a `ProductSnapshot` from a URL |
 | `MarketplaceAdapterInterface` | per-`AdapterCode` | marketplace-specific fetch (Amazon/eBay/…) |
-| `ProductMatcherInterface` (steps) | GTIN/MPN/name/embedding | matching cascade steps |
+| `MatchStepInterface` (cascade steps) | ExactGtin / MpnBrand / NormalizedName / EmbeddingSemantic matchers | matching cascade steps |
 | `EmbeddingProviderInterface` | `FakeEmbeddingProvider` | text embeddings for semantic matching |
 | `FxProviderInterface` | `FixedFxProvider` | currency conversion |
 | `ForecastProviderInterface` | `StatisticalForecaster` | price forecasting |
