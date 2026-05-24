@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Compliance;
 
-use Illuminate\Cache\RateLimiter;
+use Illuminate\Contracts\Cache\Repository as Cache;
 
 /**
- * Per-domain "gentleman" rate limiter built on Laravel's RateLimiter (atomic hit
- * counter with a managed decay window). attempt() returns false when the domain
- * has hit its per-minute limit, so callers can defer the fetch.
- *
- * Note: this is a politeness guard, not a security control. Under heavy concurrency
- * across many workers the limit may be exceeded by a small margin (the check + hit
- * are not globally locked); that is an acceptable trade-off for polite scraping.
+ * Per-domain "gentleman" rate limiter using an atomic fixed-window counter.
+ * `add()` creates the window key with a TTL only if absent (atomic), and
+ * `increment()` is atomic, so concurrent workers each consume exactly one slot
+ * and the allowed count is never overshot — unlike a read-check-write sequence.
  */
 final class DomainRateLimiter
 {
     private const WINDOW_SECONDS = 60;
 
     public function __construct(
-        private readonly RateLimiter $limiter,
+        private readonly Cache $cache,
     ) {
     }
 
@@ -34,20 +31,20 @@ final class DomainRateLimiter
 
         $key = $this->key($host);
 
-        if ($this->limiter->tooManyAttempts($key, $limit)) {
-            return false;
-        }
+        // Atomically ensure the window counter exists with a TTL, then atomically
+        // increment it. The increment result is this caller's unique slot number,
+        // so the allowed count is never overshot under concurrency.
+        $this->cache->add($key, 0, self::WINDOW_SECONDS);
+        $count = (int) $this->cache->increment($key);
 
-        $this->limiter->hit($key, self::WINDOW_SECONDS);
-
-        return true;
+        return $count <= $limit;
     }
 
     public function remaining(string $host, ?int $perMinute = null): int
     {
         $limit = $perMinute ?? (int) config('price-intelligence.compliance.rate_limit.default_rpm', 30);
 
-        return max(0, $this->limiter->remaining($this->key($host), $limit));
+        return max(0, $limit - (int) $this->cache->get($this->key($host), 0));
     }
 
     private function key(string $host): string
