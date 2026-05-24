@@ -71,7 +71,11 @@ final class TenantController
         $plaintext = $request->header('X-Api-Key');
 
         if (is_string($plaintext) && $plaintext !== '') {
-            $apiKey = ApiKey::query()->where('key_hash', ApiKey::hash($plaintext))->first();
+            // Identify the caller's key cross-tenant (same rationale as ResolveTenant).
+            $apiKey = ApiKey::query()
+                ->withoutGlobalScope('pi_tenant')
+                ->where('key_hash', ApiKey::hash($plaintext))
+                ->first();
 
             if ($apiKey === null) {
                 return [];
