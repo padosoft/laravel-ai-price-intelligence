@@ -37,7 +37,7 @@ final class ImportCatalogCommand extends Command
             return self::FAILURE;
         }
 
-        $reader = new CsvCatalogReader();
+        $reader = new CsvCatalogReader;
         $result = $importer->importInTransaction($reader->read($file));
 
         $this->info(sprintf(

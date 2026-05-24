@@ -101,7 +101,7 @@ return new class extends Migration
     public function down(): void
     {
         foreach (['price_observations', 'content_snapshots', 'stock_observations', 'promo_observations', 'fetch_logs'] as $key) {
-            $default = 'pi_' . $key;
+            $default = 'pi_'.$key;
             Schema::dropIfExists((string) config("price-intelligence.tables.{$key}", $default));
         }
     }

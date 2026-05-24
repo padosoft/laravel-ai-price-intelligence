@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -16,7 +17,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|null $ci_high_cents
  * @property string $model_version
  * @property bool $is_ai_generated
- * @property \Illuminate\Support\Carbon $generated_at
+ * @property Carbon $generated_at
  */
 final class Forecast extends PriceIntelligenceModel
 {

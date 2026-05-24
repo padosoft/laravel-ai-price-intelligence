@@ -20,8 +20,7 @@ final class GenericHttpScraper implements ProductScraperInterface
 {
     public function __construct(
         private readonly HtmlProductExtractor $extractor,
-    ) {
-    }
+    ) {}
 
     public function supports(string $url): bool
     {

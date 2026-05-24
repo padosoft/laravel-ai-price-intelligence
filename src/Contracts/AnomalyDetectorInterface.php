@@ -12,7 +12,7 @@ namespace Padosoft\PriceIntelligence\Contracts;
 interface AnomalyDetectorInterface
 {
     /**
-     * @param  array<int, int>  $priceSeriesCents  chronological, oldest first
+     * @param  array<int, mixed>  $priceSeriesCents  chronological, oldest first; non-numeric points are skipped
      * @return array<int, array{type: string, severity: string, evidence: array<string, mixed>}>
      */
     public function detect(array $priceSeriesCents, int $currentCents): array;

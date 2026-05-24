@@ -20,11 +20,10 @@ final class StatisticalAnomalyDetector implements AnomalyDetectorInterface
     public function __construct(
         private readonly int $minObservations = 8,
         private readonly float $priceErrorRatio = 0.1,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param  array<int, int>  $priceSeriesCents
+     * @param  array<int, mixed>  $priceSeriesCents  non-numeric points are skipped
      * @return array<int, array{type: string, severity: string, evidence: array<string, mixed>}>
      */
     public function detect(array $priceSeriesCents, int $currentCents): array

@@ -32,8 +32,7 @@ final class MatchingPipeline
     public function __construct(
         private readonly array $steps,
         private readonly array $confidenceBand = [60, 85],
-    ) {
-    }
+    ) {}
 
     public function match(Product $product, ProductSnapshot $candidate): MatchOutcome
     {

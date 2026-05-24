@@ -15,9 +15,7 @@ use Padosoft\PriceIntelligence\Support\Identifiers\SlugNormalizer;
  */
 final class FakeEmbeddingProvider implements EmbeddingProviderInterface
 {
-    public function __construct(private readonly int $dimensions = 64)
-    {
-    }
+    public function __construct(private readonly int $dimensions = 64) {}
 
     /**
      * @return array<int, float>

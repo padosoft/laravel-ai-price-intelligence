@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
+use Padosoft\PriceIntelligence\Support\Identifiers\GtinValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Padosoft\PriceIntelligence\Support\Identifiers\GtinValidator;
 
 final class GtinValidatorTest extends TestCase
 {

@@ -43,8 +43,7 @@ final class ProductSnapshot
         public readonly ?string $htmlHash = null,
         public readonly bool $reachable = true,
         public readonly ?int $httpStatus = null,
-    ) {
-    }
+    ) {}
 
     public function withReachable(bool $reachable): self
     {

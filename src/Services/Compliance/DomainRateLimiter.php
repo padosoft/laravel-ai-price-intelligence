@@ -18,8 +18,7 @@ final class DomainRateLimiter
 
     public function __construct(
         private readonly Cache $cache,
-    ) {
-    }
+    ) {}
 
     public function attempt(string $host, ?int $perMinute = null): bool
     {
@@ -49,6 +48,6 @@ final class DomainRateLimiter
 
     private function key(string $host): string
     {
-        return 'pi:ratelimit:' . strtolower($host);
+        return 'pi:ratelimit:'.strtolower($host);
     }
 }

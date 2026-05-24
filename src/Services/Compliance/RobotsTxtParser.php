@@ -37,7 +37,7 @@ final class RobotsTxtParser
     }
 
     /**
-     * @return array<int, array{0: string, 1: string}>  [type, pattern]
+     * @return array<int, array{0: string, 1: string}> [type, pattern]
      */
     private function rulesFor(string $robotsTxt, string $userAgent): array
     {
@@ -156,7 +156,7 @@ final class RobotsTxtParser
 
         $regex = preg_quote($core, '#');
         $regex = str_replace('\*', '.*', $regex);
-        $regex = '#^' . $regex . ($anchoredEnd ? '$' : '') . '#';
+        $regex = '#^'.$regex.($anchoredEnd ? '$' : '').'#';
 
         return preg_match($regex, $path) === 1;
     }

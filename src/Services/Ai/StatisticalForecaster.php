@@ -16,8 +16,7 @@ final class StatisticalForecaster implements ForecastProviderInterface
 {
     public function __construct(
         private readonly int $minObservations = 14,
-    ) {
-    }
+    ) {}
 
     public function forecast(array $priceSeriesCents, int $horizonDays): ?ForecastResult
     {
@@ -65,7 +64,7 @@ final class StatisticalForecaster implements ForecastProviderInterface
 
     /**
      * @param  array<int, int>  $y
-     * @return array{0: float, 1: float}  [slope, intercept]
+     * @return array{0: float, 1: float} [slope, intercept]
      */
     private function ols(array $y): array
     {

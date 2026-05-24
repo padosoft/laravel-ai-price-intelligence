@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Contracts\AiActBridgeInterface;
 use Padosoft\PriceIntelligence\Models\FetchLog;
 use Padosoft\PriceIntelligence\Models\Tenant;
@@ -13,6 +12,7 @@ use Padosoft\PriceIntelligence\Services\Compliance\DomainRateLimiter;
 use Padosoft\PriceIntelligence\Services\Compliance\NullAiActBridge;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class ComplianceTest extends TestCase
 {

@@ -58,11 +58,13 @@ final class HtmlProductExtractor
     {
         $blocks = [];
 
+        // On error preg_match_all returns false (handled here). On 0 matches it returns 0
+        // and still populates $matches[1] as an empty array, so the loop is always safe.
         if (preg_match_all('/<script[^>]*type=["\']application\/ld\+json["\'][^>]*>(.*?)<\/script>/is', $html, $matches) === false) {
             return [];
         }
 
-        foreach ($matches[1] ?? [] as $raw) {
+        foreach ($matches[1] as $raw) {
             $decoded = json_decode(trim($raw), true);
 
             if (is_array($decoded)) {
@@ -113,8 +115,10 @@ final class HtmlProductExtractor
     {
         $og = [];
 
+        // preg_match_all populates $metas[0] as an empty array on 0 matches (it only
+        // omits it on error, which the !== false guard excludes), so the loop is safe.
         if (preg_match_all('/<meta[^>]+>/i', $html, $metas) !== false) {
-            foreach ($metas[0] ?? [] as $tag) {
+            foreach ($metas[0] as $tag) {
                 if (preg_match('/(?:property|name)=["\']([^"\']+)["\']/i', $tag, $p) === 1
                     && preg_match('/content=["\']([^"\']*)["\']/i', $tag, $c) === 1) {
                     $key = strtolower($p[1]);

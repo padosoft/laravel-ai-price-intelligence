@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -18,7 +19,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property array<int, array<string, mixed>>|null $themes
  * @property int $sample_count
  * @property bool $is_ai_generated
- * @property \Illuminate\Support\Carbon $generated_at
+ * @property Carbon $generated_at
  */
 final class ReviewInsight extends PriceIntelligenceModel
 {

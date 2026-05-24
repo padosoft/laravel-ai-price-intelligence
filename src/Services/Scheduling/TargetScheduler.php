@@ -20,8 +20,7 @@ final class TargetScheduler
 {
     public function __construct(
         private readonly AdaptiveBackoff $backoff,
-    ) {
-    }
+    ) {}
 
     /**
      * @return int number of scrape jobs dispatched

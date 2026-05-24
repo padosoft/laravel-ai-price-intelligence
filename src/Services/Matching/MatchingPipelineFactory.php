@@ -19,17 +19,16 @@ final class MatchingPipelineFactory
 {
     public function __construct(
         private readonly EmbeddingProviderInterface $embeddings,
-    ) {
-    }
+    ) {}
 
     public function make(): MatchingPipeline
     {
         $band = (array) config('price-intelligence.matching.confidence_band', [60, 85]);
 
         $steps = [
-            new ExactGtinMatcher(),
-            new MpnBrandMatcher(),
-            new NormalizedNameMatcher(),
+            new ExactGtinMatcher,
+            new MpnBrandMatcher,
+            new NormalizedNameMatcher,
         ];
 
         if ((bool) config('price-intelligence.matching.embeddings.enabled', true) !== false) {

@@ -6,7 +6,6 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Enums\RuleStrategy;
 use Padosoft\PriceIntelligence\Events\RepricingSuggested;
@@ -16,6 +15,7 @@ use Padosoft\PriceIntelligence\Models\RuleDecision;
 use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class RepricerEngineTest extends TestCase
 {

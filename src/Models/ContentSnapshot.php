@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
  * @property int $id
  * @property int|string $tenant_id
  * @property int $competitor_product_id
- * @property \Illuminate\Support\Carbon $captured_at
+ * @property Carbon $captured_at
  * @property string|null $title
  * @property array<string, mixed>|null $attributes
  * @property string|null $html_hash

@@ -39,6 +39,7 @@ final class TenantContext
      * Run a callback under a specific tenant, restoring the previous context after.
      *
      * @template T
+     *
      * @param  callable():T  $callback
      * @return T
      */

@@ -18,8 +18,7 @@ final class AlertDispatcher
     public function __construct(
         private readonly PriceChangeEvaluator $evaluator,
         private readonly WebhookDispatcher $webhooks,
-    ) {
-    }
+    ) {}
 
     /**
      * Evaluate a competitor price change and raise any resulting alerts.

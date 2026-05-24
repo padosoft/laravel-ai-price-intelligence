@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Enums\Frequency;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
@@ -22,9 +24,11 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property string $status
  * @property int $priority
  * @property array<string, mixed>|null $options
- * @property \Illuminate\Support\Carbon|null $last_check_at
- * @property \Illuminate\Support\Carbon|null $next_check_at
+ * @property Carbon|null $last_check_at
+ * @property Carbon|null $next_check_at
  * @property float $backoff_factor
+ * @property-read Product|null $product
+ * @property-read Collection<int, CompetitorProduct> $competitorProducts
  */
 final class MonitoringTarget extends PriceIntelligenceModel
 {

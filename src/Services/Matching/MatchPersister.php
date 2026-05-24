@@ -23,8 +23,7 @@ final class MatchPersister
 {
     public function __construct(
         private readonly CompetitorSourceResolver $sources,
-    ) {
-    }
+    ) {}
 
     public function persist(MonitoringTarget $target, string $url, MatchOutcome $outcome): CompetitorProduct|MatchProposal|null
     {

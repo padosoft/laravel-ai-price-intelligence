@@ -23,8 +23,7 @@ final class MarketplaceAdapterFactory
 {
     public function __construct(
         private readonly ProductScraperInterface $scraper,
-    ) {
-    }
+    ) {}
 
     public function make(AdapterCode $code): MarketplaceAdapterInterface
     {

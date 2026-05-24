@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
+use Padosoft\PriceIntelligence\Services\Compliance\RobotsTxtParser;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Padosoft\PriceIntelligence\Services\Compliance\RobotsTxtParser;
 
 final class RobotsTxtParserTest extends TestCase
 {
     private function parser(): RobotsTxtParser
     {
-        return new RobotsTxtParser();
+        return new RobotsTxtParser;
     }
 
     #[Test]

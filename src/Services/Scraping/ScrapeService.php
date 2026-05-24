@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Scraping;
 
+use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
+use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
+use Padosoft\PriceIntelligence\Enums\PromoType;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\ContentSnapshot;
 use Padosoft\PriceIntelligence\Models\FetchLog;
 use Padosoft\PriceIntelligence\Models\PriceObservation;
 use Padosoft\PriceIntelligence\Models\PromoObservation;
 use Padosoft\PriceIntelligence\Models\StockObservation;
+use Padosoft\PriceIntelligence\Services\Alerts\AlertDispatcher;
 use Padosoft\PriceIntelligence\Services\Pricing\PriceNormalizer;
 use Padosoft\PriceIntelligence\Support\Config\Flag;
 
@@ -26,10 +30,9 @@ final class ScrapeService
     public function __construct(
         private readonly MarketplaceAdapterFactory $adapters,
         private readonly PriceNormalizer $normalizer,
-        private readonly \Padosoft\PriceIntelligence\Services\Alerts\AlertDispatcher $alerts,
-        private readonly \Padosoft\PriceIntelligence\Contracts\PiiFilterInterface $pii,
-    ) {
-    }
+        private readonly AlertDispatcher $alerts,
+        private readonly PiiFilterInterface $pii,
+    ) {}
 
     private function redact(?string $text): ?string
     {
@@ -50,7 +53,10 @@ final class ScrapeService
      */
     public function scrapeAndStore(CompetitorProduct $competitor, array $options = []): ProductSnapshot
     {
-        $code = $competitor->source?->adapter_code ?? AdapterCode::Generic;
+        // adapter_code is a non-null column (DB default 'generic', cast to AdapterCode), so the
+        // only fallback case is a missing source — equivalent to the prior ?->adapter_code ?? Generic.
+        $source = $competitor->source;
+        $code = $source !== null ? $source->adapter_code : AdapterCode::Generic;
         $adapter = $this->adapters->make($code);
 
         $previous = PriceObservation::query()
@@ -121,7 +127,7 @@ final class ScrapeService
             'seller_rating' => $snapshot->sellerRating,
         ]);
 
-        if ($snapshot->promoType !== \Padosoft\PriceIntelligence\Enums\PromoType::None) {
+        if ($snapshot->promoType !== PromoType::None) {
             PromoObservation::query()->create([
                 'tenant_id' => $competitor->tenant_id,
                 'competitor_product_id' => $competitor->id,
@@ -154,7 +160,7 @@ final class ScrapeService
         $currency = $product->currency ?? (string) config('price-intelligence.fx.base', 'EUR');
         $base = (string) config('price-intelligence.fx.base', 'EUR');
 
-        return app(\Padosoft\PriceIntelligence\Contracts\FxProviderInterface::class)
+        return app(FxProviderInterface::class)
             ->convert($product->our_price_cents, $currency, $base);
     }
 }

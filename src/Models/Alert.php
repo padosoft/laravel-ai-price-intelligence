@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Enums\AlertType;
 use Padosoft\PriceIntelligence\Enums\Severity;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
@@ -16,7 +17,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property array<string, mixed>|null $payload
  * @property int|null $product_id
  * @property int|null $competitor_product_id
- * @property \Illuminate\Support\Carbon|null $acknowledged_at
+ * @property Carbon|null $acknowledged_at
  */
 final class Alert extends PriceIntelligenceModel
 {

@@ -44,9 +44,9 @@ final class ApiKey extends PriceIntelligenceModel
      */
     public static function issue(int|string $tenantId, string $name, array $scopes = ['*']): array
     {
-        $plaintext = 'pi_' . Str::random(48);
+        $plaintext = 'pi_'.Str::random(48);
 
-        $key = new self();
+        $key = new self;
         $key->forceFill([
             'tenant_id' => $tenantId,
             'name' => $name,

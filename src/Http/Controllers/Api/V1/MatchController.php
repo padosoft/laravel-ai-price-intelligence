@@ -17,8 +17,7 @@ final class MatchController
 {
     public function __construct(
         private readonly MatchPersister $persister,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {

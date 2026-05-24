@@ -20,8 +20,7 @@ final class MatchOutcome
         public readonly int $confidence,
         public readonly MatchMethod $method,
         public readonly array $trail = [],
-    ) {
-    }
+    ) {}
 
     public function isConfirmed(): bool
     {

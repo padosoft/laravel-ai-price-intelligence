@@ -13,13 +13,13 @@ use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 final class FixedFxProvider implements FxProviderInterface
 {
     /**
+     * Rates are expressed against the base currency (the entry equal to 1.0).
+     *
      * @param  array<string, float>  $ratesAgainstBase  e.g. ['EUR'=>1.0,'USD'=>1.08,'GBP'=>0.85]
      */
     public function __construct(
-        private readonly string $base = 'EUR',
         private readonly array $ratesAgainstBase = ['EUR' => 1.0, 'USD' => 1.08, 'GBP' => 0.85],
-    ) {
-    }
+    ) {}
 
     public function convert(int $cents, string $from, string $to): int
     {

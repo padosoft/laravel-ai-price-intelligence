@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Models\ApiKey;
 use Padosoft\PriceIntelligence\Models\Product;
 use Padosoft\PriceIntelligence\Models\Tenant;
+use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class CatalogTest extends TestCase
 {
@@ -60,7 +61,7 @@ final class CatalogTest extends TestCase
             ]])
             ->assertOk();
 
-        app(\Padosoft\PriceIntelligence\Support\Tenant\TenantContext::class)->set($tenant->id);
+        app(TenantContext::class)->set($tenant->id);
         $this->assertNull(Product::query()->sole()->gtin);
     }
 

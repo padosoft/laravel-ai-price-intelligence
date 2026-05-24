@@ -19,8 +19,7 @@ final class MatchScore
         public readonly int $confidence,
         public readonly MatchMethod $method,
         public readonly array $evidence = [],
-    ) {
-    }
+    ) {}
 
     public static function none(MatchMethod $method, array $evidence = []): self
     {

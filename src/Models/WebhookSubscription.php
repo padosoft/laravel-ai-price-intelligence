@@ -12,6 +12,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int|string $tenant_id
  * @property string $url
  * @property array<int, string>|null $events
+ * @property string|null $secret_encrypted
  * @property string|null $secret
  * @property bool $active
  */
@@ -23,11 +24,7 @@ final class WebhookSubscription extends PriceIntelligenceModel
 
     protected $guarded = [];
 
-    /**
-     * Never expose the encrypted secret in array/JSON output.
-     *
-     * @var array<int, string>
-     */
+    // Never expose the encrypted secret in array/JSON output.
     protected $hidden = ['secret_encrypted'];
 
     protected $casts = [

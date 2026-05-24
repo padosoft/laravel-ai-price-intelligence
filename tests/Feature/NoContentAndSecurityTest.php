@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
 use Padosoft\PriceIntelligence\Models\ApiKey;
 use Padosoft\PriceIntelligence\Models\Product;
 use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Models\WebhookSubscription;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class NoContentAndSecurityTest extends TestCase
 {

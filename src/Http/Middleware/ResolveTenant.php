@@ -19,8 +19,7 @@ final class ResolveTenant
 {
     public function __construct(
         private readonly TenantContext $tenantContext,
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next, ?string $requiredScope = null): Response
     {
@@ -32,7 +31,7 @@ final class ResolveTenant
             }
 
             if ($requiredScope !== null && ! $apiKey->hasScope($requiredScope)) {
-                return $this->deny('Missing required scope: ' . $requiredScope, 403);
+                return $this->deny('Missing required scope: '.$requiredScope, 403);
             }
 
             $apiKey->forceFill(['last_used_at' => now()])->save();

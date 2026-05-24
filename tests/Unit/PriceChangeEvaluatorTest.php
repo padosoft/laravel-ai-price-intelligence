@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use Padosoft\PriceIntelligence\Enums\AlertType;
 use Padosoft\PriceIntelligence\Enums\Severity;
 use Padosoft\PriceIntelligence\Services\Alerts\PriceChangeEvaluator;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 final class PriceChangeEvaluatorTest extends TestCase
 {
     private function evaluator(): PriceChangeEvaluator
     {
-        return new PriceChangeEvaluator();
+        return new PriceChangeEvaluator;
     }
 
     #[Test]

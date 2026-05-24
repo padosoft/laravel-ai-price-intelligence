@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\Test;
+use Padosoft\PriceIntelligence\Facades\PriceIntelligence;
 use Padosoft\PriceIntelligence\Models\Product;
 use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class FoundationTest extends TestCase
 {
@@ -60,6 +61,6 @@ final class FoundationTest extends TestCase
     #[Test]
     public function facade_exposes_version(): void
     {
-        $this->assertIsString(\Padosoft\PriceIntelligence\Facades\PriceIntelligence::version());
+        $this->assertIsString(PriceIntelligence::version());
     }
 }

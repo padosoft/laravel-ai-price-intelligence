@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Services\Discovery;
 
 use Padosoft\LaravelAiSearchProviders\SearchProviderManager;
+use Padosoft\PriceIntelligence\Data\MatchOutcome;
 use Padosoft\PriceIntelligence\Data\ProductSnapshot;
+use Padosoft\PriceIntelligence\Enums\MatchMethod;
+use Padosoft\PriceIntelligence\Enums\MatchStatus;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\MonitoringTarget;
 use Padosoft\PriceIntelligence\Services\Matching\MatchingPipeline;
@@ -27,8 +30,7 @@ final class UrlDiscoveryService
         private readonly SearchProviderManager $search,
         private readonly MatchingPipelineFactory $pipelineFactory,
         private readonly MatchPersister $persister,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{confirmed: int, suggested: int, rejected: int, candidates: int}
@@ -57,10 +59,10 @@ final class UrlDiscoveryService
         $confirmed = 0;
 
         foreach ($urls as $url) {
-            $outcome = new \Padosoft\PriceIntelligence\Data\MatchOutcome(
-                status: \Padosoft\PriceIntelligence\Enums\MatchStatus::Confirmed,
+            $outcome = new MatchOutcome(
+                status: MatchStatus::Confirmed,
                 confidence: 100,
-                method: \Padosoft\PriceIntelligence\Enums\MatchMethod::Manual,
+                method: MatchMethod::Manual,
             );
             $this->persister->persist($target, $url, $outcome);
             $confirmed++;
@@ -77,6 +79,10 @@ final class UrlDiscoveryService
     {
         $stats = ['confirmed' => 0, 'suggested' => 0, 'rejected' => 0, 'candidates' => count($candidates)];
         $product = $target->product;
+
+        if ($product === null) {
+            return $stats; // orphaned target — nothing to match against
+        }
 
         foreach ($candidates as $candidate) {
             // Skip already-known confirmed URLs for this target.
@@ -104,6 +110,11 @@ final class UrlDiscoveryService
     private function snapshotsFromSearch(MonitoringTarget $target): array
     {
         $product = $target->product;
+
+        if ($product === null) {
+            return [];
+        }
+
         $domains = (array) (($target->options['given_domains'] ?? []) ?: []);
 
         $query = GeoSearchQueryFactory::make(

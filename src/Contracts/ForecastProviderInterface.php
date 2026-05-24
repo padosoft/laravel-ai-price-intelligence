@@ -14,8 +14,8 @@ use Padosoft\PriceIntelligence\Data\ForecastResult;
 interface ForecastProviderInterface
 {
     /**
-     * @param  array<int, int>  $priceSeriesCents  chronological, oldest first
-     * @return ForecastResult|null  null if there is not enough data
+     * @param  array<int, mixed>  $priceSeriesCents  chronological, oldest first; non-numeric points are skipped
+     * @return ForecastResult|null null if there is not enough data
      */
     public function forecast(array $priceSeriesCents, int $horizonDays): ?ForecastResult;
 }

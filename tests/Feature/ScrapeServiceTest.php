@@ -6,15 +6,17 @@ namespace Padosoft\PriceIntelligence\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
-use PHPUnit\Framework\Attributes\Test;
+use Padosoft\PriceIntelligence\Enums\Frequency;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
+use Padosoft\PriceIntelligence\Models\FetchLog;
+use Padosoft\PriceIntelligence\Models\MonitoringTarget;
 use Padosoft\PriceIntelligence\Models\PriceObservation;
 use Padosoft\PriceIntelligence\Models\Product;
-use Padosoft\PriceIntelligence\Models\MonitoringTarget;
 use Padosoft\PriceIntelligence\Models\Tenant;
 use Padosoft\PriceIntelligence\Services\Scraping\ScrapeService;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class ScrapeServiceTest extends TestCase
 {
@@ -28,7 +30,7 @@ final class ScrapeServiceTest extends TestCase
         $product = Product::create(['external_id' => 'SKU-1', 'name' => 'Phone']);
         $target = MonitoringTarget::create([
             'product_id' => $product->id, 'country' => 'IT',
-            'frequency_preset' => \Padosoft\PriceIntelligence\Enums\Frequency::Daily, 'status' => 'active',
+            'frequency_preset' => Frequency::Daily, 'status' => 'active',
         ]);
 
         return CompetitorProduct::create([
@@ -74,7 +76,7 @@ final class ScrapeServiceTest extends TestCase
         $this->assertFalse($snapshot->reachable);
         $this->assertSame(0, PriceObservation::query()->where('competitor_product_id', $competitor->id)->count());
         // A fetch log is still written for audit, recording the real HTTP status.
-        $log = \Padosoft\PriceIntelligence\Models\FetchLog::query()->sole();
+        $log = FetchLog::query()->sole();
         $this->assertSame(503, $log->status);
     }
 
@@ -91,7 +93,7 @@ final class ScrapeServiceTest extends TestCase
         $product = Product::create(['external_id' => 'SKU-2', 'name' => 'US Phone']);
         $target = MonitoringTarget::create([
             'product_id' => $product->id, 'country' => 'US',
-            'frequency_preset' => \Padosoft\PriceIntelligence\Enums\Frequency::Daily, 'status' => 'active',
+            'frequency_preset' => Frequency::Daily, 'status' => 'active',
         ]);
         $competitor = CompetitorProduct::create([
             'tenant_id' => $tenant->id, 'monitoring_target_id' => $target->id,

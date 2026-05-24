@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\Test;
-use Padosoft\PriceIntelligence\Tests\TestCase;
 use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Models\Product;
@@ -15,16 +13,18 @@ use Padosoft\PriceIntelligence\Services\Matching\Steps\EmbeddingSemanticMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\ExactGtinMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\MpnBrandMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\NormalizedNameMatcher;
+use Padosoft\PriceIntelligence\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class MatchingPipelineTest extends TestCase
 {
     private function pipeline(): MatchingPipeline
     {
         return new MatchingPipeline([
-            new ExactGtinMatcher(),
-            new MpnBrandMatcher(),
-            new NormalizedNameMatcher(),
-            new EmbeddingSemanticMatcher(new FakeEmbeddingProvider()),
+            new ExactGtinMatcher,
+            new MpnBrandMatcher,
+            new NormalizedNameMatcher,
+            new EmbeddingSemanticMatcher(new FakeEmbeddingProvider),
         ], [60, 85]);
     }
 

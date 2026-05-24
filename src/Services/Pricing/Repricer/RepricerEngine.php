@@ -21,8 +21,7 @@ final class RepricerEngine implements RepricerEngineInterface
 {
     public function __construct(
         private readonly StrategyCalculator $calculator,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int, int>  $competitorPricesCents

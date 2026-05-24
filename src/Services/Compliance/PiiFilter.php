@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Compliance;
 
+use Padosoft\PiiRedactor\Facades\Pii;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 
 /**
@@ -16,7 +17,7 @@ final class PiiFilter implements PiiFilterInterface
     public function redact(string $text): string
     {
         if ($this->hasRedactorPackage()) {
-            return (string) \Padosoft\PiiRedactor\Facades\Pii::redact($text);
+            return (string) Pii::redact($text);
         }
 
         return $this->regexFallback($text);
@@ -29,7 +30,7 @@ final class PiiFilter implements PiiFilterInterface
 
     private function hasRedactorPackage(): bool
     {
-        return class_exists(\Padosoft\PiiRedactor\Facades\Pii::class);
+        return class_exists(Pii::class);
     }
 
     private function regexFallback(string $text): string
