@@ -73,7 +73,12 @@ final class ResolveTenant
             return null;
         }
 
-        return ApiKey::query()->where('key_hash', ApiKey::hash($plaintext))->first();
+        // Authentication is inherently cross-tenant (we resolve the tenant FROM the key),
+        // so bypass the tenant global scope for this hash lookup.
+        return ApiKey::query()
+            ->withoutGlobalScope('pi_tenant')
+            ->where('key_hash', ApiKey::hash($plaintext))
+            ->first();
     }
 
     private function deny(string $detail, int $status): Response

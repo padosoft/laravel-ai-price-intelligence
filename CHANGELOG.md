@@ -6,6 +6,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-24
+
+Admin-facing REST API expansion (consumed by `padosoft/laravel-ai-price-intelligence-admin`).
+Full PHPUnit suite green (PHP 8.3/8.4), Pint + PHPStan level 5 clean.
+
+### Added
+- **Identity**: `GET /tenants/me` — resolved tenant + toggleable feature flags + caller abilities.
+- **Dashboard**: `GET /stats` — tenant-scoped KPIs (products, active targets, confirmed competitors,
+  pending matches, alerts 24h/unacked, anomalies 24h).
+- **Observations**: `GET /observations/prices` (price history, from/to filters), `GET /competitor-products/{id}`
+  (detail + latest price/stock/promo/content snapshots).
+- **Intelligence**: `GET /forecasts`, `/anomalies`, `/reviews`, `/narratives`, `/assortment-gaps`,
+  `/content-gaps`. New models + migration for narratives / assortment_gaps / content_gaps.
+- **Pricing**: `GET/POST/PATCH/DELETE /rules`, `POST /rules/{id}/simulate` (dry-run, no persistence),
+  `GET /rule-decisions`.
+- **System**: `GET/POST/DELETE /api-keys` (plaintext returned once; DELETE = revoke),
+  `GET /audit/fetch-logs`, `POST /targets/{id}/scrape:now`, `GET /alerts/stream` (Server-Sent Events).
+
 ## [1.0.0] - 2026-05-24
 
 First public release. Enterprise Product & Price Intelligence / Competitor Monitoring for Laravel.
@@ -40,5 +58,6 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/padosoft/laravel-ai-price-intelligence/releases/tag/v1.0.0

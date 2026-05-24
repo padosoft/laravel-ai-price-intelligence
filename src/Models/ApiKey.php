@@ -6,10 +6,15 @@ namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
  * Machine-to-machine API key. The plaintext token is shown once at creation;
  * only its SHA-256 hash is stored.
+ *
+ * Tenant-scoped: management queries (list/revoke) only see the current tenant's keys.
+ * The pi_tenant global scope is a no-op while no tenant is set, so the ResolveTenant
+ * middleware can still look a key up by hash before the tenant is resolved.
  *
  * @property int $id
  * @property int|string $tenant_id
@@ -22,6 +27,8 @@ use Illuminate\Support\Str;
  */
 final class ApiKey extends PriceIntelligenceModel
 {
+    use BelongsToTenant;
+
     protected static string $configKey = 'api_keys';
 
     protected $guarded = [];

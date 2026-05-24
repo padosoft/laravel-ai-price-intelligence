@@ -7,6 +7,9 @@ namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Padosoft\PriceIntelligence\Enums\Frequency;
+use Padosoft\PriceIntelligence\Enums\MatchStatus;
+use Padosoft\PriceIntelligence\Jobs\ScrapeCompetitorProductJob;
+use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\MonitoringTarget;
 use Padosoft\PriceIntelligence\Models\Product;
 
@@ -89,5 +92,25 @@ final class TargetController
         $target->save();
 
         return response()->json(['data' => $target]);
+    }
+
+    /**
+     * Force an immediate scrape of every confirmed competitor product on the target.
+     * Work is queued (one job per competitor product); returns the number dispatched.
+     */
+    public function scrapeNow(int $id): JsonResponse
+    {
+        $target = MonitoringTarget::query()->findOrFail($id);
+
+        $competitorIds = CompetitorProduct::query()
+            ->where('monitoring_target_id', $target->id)
+            ->where('match_status', MatchStatus::Confirmed)
+            ->pluck('id');
+
+        foreach ($competitorIds as $competitorId) {
+            ScrapeCompetitorProductJob::dispatch((int) $competitorId, $target->tenant_id);
+        }
+
+        return response()->json(['data' => ['queued' => $competitorIds->count()]], 202);
     }
 }
