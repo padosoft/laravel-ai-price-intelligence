@@ -13,6 +13,7 @@ use Padosoft\PriceIntelligence\Models\PriceObservation;
 use Padosoft\PriceIntelligence\Models\PromoObservation;
 use Padosoft\PriceIntelligence\Models\StockObservation;
 use Padosoft\PriceIntelligence\Services\Pricing\PriceNormalizer;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 
 /**
  * Fetches a competitor product, normalizes its price and persists the resulting
@@ -26,7 +27,22 @@ final class ScrapeService
         private readonly MarketplaceAdapterFactory $adapters,
         private readonly PriceNormalizer $normalizer,
         private readonly \Padosoft\PriceIntelligence\Services\Alerts\AlertDispatcher $alerts,
+        private readonly \Padosoft\PriceIntelligence\Contracts\PiiFilterInterface $pii,
     ) {
+    }
+
+    private function redact(?string $text): ?string
+    {
+        if ($text === null || $text === '') {
+            return $text;
+        }
+
+        // GDPR: strip PII from the scraped free-text fields (title, description) before
+        // persisting them. Flag::enabled treats 'auto'/unrecognized as on and only falsy
+        // values ('false'/'0'/0/false) as off.
+        return Flag::enabled('price-intelligence.pii.enabled', true)
+            ? $this->pii->redact($text)
+            : $text;
     }
 
     /**
@@ -85,8 +101,8 @@ final class ScrapeService
             'tenant_id' => $competitor->tenant_id,
             'competitor_product_id' => $competitor->id,
             'captured_at' => $now,
-            'title' => $snapshot->title,
-            'description_md' => $snapshot->description,
+            'title' => $this->redact($snapshot->title),
+            'description_md' => $this->redact($snapshot->description),
             'attributes' => $snapshot->attributes,
             'og' => $snapshot->og,
             'jsonld' => $snapshot->jsonld,
