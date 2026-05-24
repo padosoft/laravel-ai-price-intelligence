@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Compliance;
 
-use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Cache\RateLimiter;
 
 /**
- * Per-domain "gentleman" rate limiter using a fixed one-minute window in the
- * cache. attempt() returns false when the domain has hit its limit for the
- * current minute, so callers can defer the fetch.
+ * Per-domain "gentleman" rate limiter built on Laravel's RateLimiter, which uses
+ * an atomic hit counter with a managed decay window (no read-check-write race and
+ * a correctly-maintained TTL). attempt() returns false when the domain has hit
+ * its per-minute limit, so callers can defer the fetch.
  */
 final class DomainRateLimiter
 {
+    private const WINDOW_SECONDS = 60;
+
     public function __construct(
-        private readonly Cache $cache,
+        private readonly RateLimiter $limiter,
     ) {
     }
 
@@ -27,18 +30,12 @@ final class DomainRateLimiter
         }
 
         $key = $this->key($host);
-        $current = (int) $this->cache->get($key, 0);
 
-        if ($current >= $limit) {
+        if ($this->limiter->tooManyAttempts($key, $limit)) {
             return false;
         }
 
-        // Initialize the window with a 60s TTL on first hit, then increment.
-        if ($current === 0) {
-            $this->cache->put($key, 1, now()->addSeconds(60));
-        } else {
-            $this->cache->increment($key);
-        }
+        $this->limiter->hit($key, self::WINDOW_SECONDS);
 
         return true;
     }
@@ -46,13 +43,12 @@ final class DomainRateLimiter
     public function remaining(string $host, ?int $perMinute = null): int
     {
         $limit = $perMinute ?? (int) config('price-intelligence.compliance.rate_limit.default_rpm', 30);
-        $current = (int) $this->cache->get($this->key($host), 0);
 
-        return max(0, $limit - $current);
+        return max(0, $this->limiter->remaining($this->key($host), $limit));
     }
 
     private function key(string $host): string
     {
-        return 'pi:ratelimit:' . strtolower($host) . ':' . now()->format('YmdHi');
+        return 'pi:ratelimit:' . strtolower($host);
     }
 }

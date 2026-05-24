@@ -72,11 +72,14 @@ final class RobotsTxtParser
             $collecting = false;
 
             if (($field === 'disallow' || $field === 'allow') && $currentUas !== []) {
+                // An empty value carries no path pattern: an empty Disallow means
+                // "allow all" and an empty Allow is meaningless — skip both, so an empty
+                // Allow can't compile to a catch-all regex overriding real Disallow rules.
+                if ($value === '') {
+                    continue;
+                }
+
                 foreach ($currentUas as $ua) {
-                    // An empty Disallow means "allow all" — skip adding a rule.
-                    if ($field === 'disallow' && $value === '') {
-                        continue;
-                    }
                     $groups[$ua][] = [$field, $value];
                 }
             }

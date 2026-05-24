@@ -80,7 +80,9 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
         $this->app->bind(ReviewSentimentInterface::class, static fn (): ReviewSentimentInterface => new LexiconSentimentAnalyzer());
 
-        $this->app->singleton(DomainRateLimiter::class, static fn ($app): DomainRateLimiter => new DomainRateLimiter($app->make('cache.store')));
+        $this->app->singleton(DomainRateLimiter::class, static fn ($app): DomainRateLimiter => new DomainRateLimiter(
+            $app->make(\Illuminate\Cache\RateLimiter::class),
+        ));
 
         // EU AI Act bridge: null-object unless a real bridge is bound (e.g. by
         // padosoft/laravel-ai-act-compliance or the host). Never hard-fails.
