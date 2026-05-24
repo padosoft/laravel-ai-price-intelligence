@@ -54,7 +54,9 @@ Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the r
 `.claude/rules/`, and any skills with the new knowledge so it persists for future work.
 
 ## Distilled lessons (carry into future work)
-- **PowerShell, not bash** for php/composer/phpunit/pint/phpstan (PHP 8.4 via Herd; not on bash PATH).
+- **Shell for php/composer/phpunit/pint/phpstan**: on the Windows Herd dev box these tools are on the
+  PowerShell PATH but not the bash PATH, so use PowerShell there. On Linux/CI (and any setup where `php`
+  is on the bash PATH and `pwsh` may be absent), use bash. Pick whichever shell actually resolves `php`.
 - **Local Copilot review**: `copilot --autopilot --yolo -p "/review the changes on this branch vs
   origin/main (git diff origin/main...HEAD); list concrete bugs; reply 'NO ISSUES' if none."` — Premium,
   a few minutes; it even runs code to verify. Run to NO ISSUES before pushing.
