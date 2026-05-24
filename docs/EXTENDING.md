@@ -43,7 +43,10 @@ Register a callable in the container (config-cache safe):
 
 ```php
 $this->app->bind('price-intelligence.repricer.custom.beat_buybox', fn () =>
-    fn ($product, array $prices, ?int $current, array $params): int => /* ... */ $suggested
+    function ($product, array $prices, ?int $current, array $params): int {
+        // $prices is already cleaned (positive, sorted ascending); undercut the cheapest by 1 cent.
+        return max(1, ($prices[0] ?? $current ?? 0) - 1);
+    }
 );
 ```
 

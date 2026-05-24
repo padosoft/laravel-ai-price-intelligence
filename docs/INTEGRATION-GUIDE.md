@@ -41,12 +41,14 @@ All endpoints are under `config('price-intelligence.api.prefix')` (default `api/
 | POST | `/matches/{id}/reject` | 204 |
 | POST | `/competitor-products` | manually attach a URL to a target |
 
-## Observations & analytics
+## Alerts
 
-- `GET /observations/prices?target_id=&from=&to=&aggregate=daily`
-- `GET /forecasts?target_id=&horizon=14`
-- `GET /anomalies?since=24h`
-- `GET /alerts?unacknowledged=1` · `POST /alerts/{id}/ack`
+- `GET /alerts?unacknowledged=1&type=` — cursor-paginated
+- `POST /alerts/{id}/ack`
+
+> **Analytics read endpoints** (`/observations/prices`, `/forecasts`, `/anomalies`, …) are on the
+> roadmap. Today, forecasts/anomalies are produced and stored (`pi_forecasts`, `pi_anomalies`) and
+> surfaced via webhooks/events and the admin panel; query the models directly if you need them now.
 
 ## Webhooks (outbound, HMAC-signed)
 

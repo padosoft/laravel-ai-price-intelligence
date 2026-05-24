@@ -58,7 +58,7 @@ It is **boundary-respecting**: it provides intelligence; your platform keeps the
 - 🕷️ **Scraping**: JSON-LD + OpenGraph extraction, generic HTTP + Browsershot, **marketplace adapters**
   (Amazon, eBay, Google Shopping, Idealo, Trovaprezzi).
 - 💶 **Price normalization**: multi-currency FX to a base currency, time-series observations.
-- ⏱️ **Scheduling** with adaptive backoff + per-tenant Horizon queues.
+- ⏱️ **Scheduling** with adaptive backoff + dedicated Horizon queues (`pi-discovery`, `pi-scrape`, …).
 - 🚨 **Alerts + HMAC-signed webhooks**: price drop/raise, undercut, stock-out.
 - 🤖 **AI layer**: forecasting, anomaly detection, GDPR-safe review sentiment (pluggable, toggleable).
 - 💸 **Optional no-code repricer** (off by default, advisory-only).
@@ -97,7 +97,7 @@ use Padosoft\PriceIntelligence\Models\ApiKey;
 
 ```php
 // 1. Sync the catalog (bulk, idempotent on external_id)
-Http::withHeaders(['X-Api-Key' => $key])->post("$base/api/v1/catalog/products:bulk", [
+Http::withHeaders(['X-Api-Key' => $plaintext])->post("$base/api/v1/catalog/products:bulk", [
     'products' => [[
         'external_id' => 'SKU-123', 'gtin' => '8001234567890',
         'brand' => 'Acme', 'model' => 'X1', 'name' => 'Acme X1 64GB',
@@ -107,7 +107,7 @@ Http::withHeaders(['X-Api-Key' => $key])->post("$base/api/v1/catalog/products:bu
 ]);
 
 // 2. Create a monitoring target (per product × country)
-Http::withHeaders(['X-Api-Key' => $key])->post("$base/api/v1/targets", [
+Http::withHeaders(['X-Api-Key' => $plaintext])->post("$base/api/v1/targets", [
     'product_external_id' => 'SKU-123', 'country' => 'IT', 'frequency' => 'daily',
     // 'given_urls' => ['https://www.amazon.it/dp/B0...'],  // skip AI discovery
 ]);
