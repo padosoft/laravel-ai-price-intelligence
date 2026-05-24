@@ -7,6 +7,7 @@ use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AlertController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\CatalogController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\IntelligenceController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\MatchController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ObservationController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TargetController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TenantController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\WebhookController;
@@ -43,8 +44,12 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::post('/matches/{id}/reject', [MatchController::class, 'reject'])->whereNumber('id')->name('price-intelligence.matches.reject');
     Route::post('/competitor-products', [MatchController::class, 'storeCompetitorProduct'])->name('price-intelligence.competitor-products.store');
 
+    Route::get('/observations/prices', [ObservationController::class, 'prices'])->name('price-intelligence.observations.prices');
+    Route::get('/competitor-products/{id}', [ObservationController::class, 'show'])->whereNumber('id')->name('price-intelligence.competitor-products.show');
+
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
     Route::get('/anomalies', [IntelligenceController::class, 'anomalies'])->name('price-intelligence.anomalies.index');
+    Route::get('/reviews', [IntelligenceController::class, 'reviews'])->name('price-intelligence.reviews.index');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('price-intelligence.alerts.index');
     Route::post('/alerts/{id}/ack', [AlertController::class, 'acknowledge'])->whereNumber('id')->name('price-intelligence.alerts.ack');

@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Padosoft\PriceIntelligence\Models\Anomaly;
 use Padosoft\PriceIntelligence\Models\Forecast;
+use Padosoft\PriceIntelligence\Models\ReviewInsight;
 
 /**
  * Read endpoints for the AI/derived signals the admin's Intelligence screens consume.
@@ -38,5 +39,20 @@ final class IntelligenceController
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($anomalies);
+    }
+
+    /**
+     * Aggregated, anonymous review-sentiment insights (GDPR-safe module). Returns an
+     * empty set when the review_insight feature is disabled in core config.
+     */
+    public function reviews(Request $request): JsonResponse
+    {
+        $reviews = ReviewInsight::query()
+            ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
+            ->when($request->filled('period'), fn ($q) => $q->where('period', $request->string('period')->toString()))
+            ->orderByDesc('generated_at')
+            ->cursorPaginate((int) $request->integer('per_page', 50));
+
+        return response()->json($reviews);
     }
 }
