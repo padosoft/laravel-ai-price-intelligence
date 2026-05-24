@@ -49,15 +49,17 @@ final class ReviewAggregator
             throw ReviewInsightDisabledException::moduleOff();
         }
 
-        if (! $this->pii->isStrong()) {
-            throw ReviewInsightDisabledException::weakPii();
-        }
-
+        // Domain opt-in is the most specific gate — check it before PII strength so a
+        // non-opted-in domain reports the precise reason.
         $host = $competitor->source?->host;
         $allowed = (array) config('price-intelligence.review_insight.allowed_domains', []);
 
         if ($host === null || ! in_array($host, $allowed, true)) {
             throw ReviewInsightDisabledException::domainNotAllowed((string) $host);
+        }
+
+        if (! $this->pii->isStrong()) {
+            throw ReviewInsightDisabledException::weakPii();
         }
     }
 

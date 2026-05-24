@@ -10,12 +10,15 @@ final class ReviewInsightDisabledException extends RuntimeException
 {
     public static function moduleOff(): self
     {
-        return new self('Review insight module is disabled (review_insight.enabled = false).');
+        return new self('Review insight module is disabled (set price-intelligence.review_insight.enabled = true).');
     }
 
     public static function domainNotAllowed(string $host): self
     {
-        return new self("Review scraping is not opted-in for domain: {$host}.");
+        return new self(
+            "Review insight pipeline is not opted-in for domain: {$host} "
+            . '(add it to price-intelligence.review_insight.allowed_domains).'
+        );
     }
 
     public static function weakPii(): self

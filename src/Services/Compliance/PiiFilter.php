@@ -16,10 +16,7 @@ final class PiiFilter implements PiiFilterInterface
     public function redact(string $text): string
     {
         if ($this->hasRedactorPackage()) {
-            /** @var object $facade */
-            $facade = \Padosoft\PiiRedactor\Facades\Pii::class;
-
-            return (string) $facade::redact($text);
+            return (string) \Padosoft\PiiRedactor\Facades\Pii::redact($text);
         }
 
         return $this->regexFallback($text);

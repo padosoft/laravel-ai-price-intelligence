@@ -8,7 +8,7 @@ use Padosoft\PriceIntelligence\Data\SentimentResult;
 
 /**
  * Analyzes a set of (already PII-redacted) review texts into an anonymous
- * aggregate. Default driver is a deterministic lexicon-based Fake; hosts can
+ * aggregate. Default driver is a deterministic lexicon-based analyzer; hosts can
  * rebind an LLM-backed implementation.
  */
 interface ReviewSentimentInterface
