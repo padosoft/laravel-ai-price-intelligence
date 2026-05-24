@@ -11,6 +11,7 @@ use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\IntelligenceController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\MatchController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ObservationController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\RuleController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\StatsController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TargetController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TenantController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\WebhookController;
@@ -30,6 +31,7 @@ Route::get('/health', static fn (): array => [
 
 Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/tenants/me', [TenantController::class, 'me'])->name('price-intelligence.tenants.me');
+    Route::get('/stats', [StatsController::class, 'dashboard'])->name('price-intelligence.stats.dashboard');
 
     Route::get('/catalog/products', [CatalogController::class, 'index'])->name('price-intelligence.catalog.index');
     Route::get('/catalog/products/{id}', [CatalogController::class, 'show'])->whereNumber('id')->name('price-intelligence.catalog.show');
@@ -56,6 +58,7 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/reviews', [IntelligenceController::class, 'reviews'])->name('price-intelligence.reviews.index');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('price-intelligence.alerts.index');
+    Route::get('/alerts/stream', [AlertController::class, 'stream'])->name('price-intelligence.alerts.stream');
     Route::post('/alerts/{id}/ack', [AlertController::class, 'acknowledge'])->whereNumber('id')->name('price-intelligence.alerts.ack');
 
     Route::get('/rules', [RuleController::class, 'index'])->name('price-intelligence.rules.index');
