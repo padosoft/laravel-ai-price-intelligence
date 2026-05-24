@@ -32,8 +32,9 @@
 - `declare(strict_types=1)` everywhere; `final` classes by default.
 - Table names resolved from `config('price-intelligence.tables.*')` via `PriceIntelligenceModel`.
 - Migrations are **idempotent**: guard with `if (Schema::hasTable($table)) return;`.
-- Tenant isolation: `Models\Concerns\BelongsToTenant` (global scope + auto-fill). Models that are
-  looked up *before* tenant context exists (e.g. `ApiKey`) must NOT use the trait.
+- Tenant isolation: `Models\Concerns\BelongsToTenant` (global scope + auto-fill). The scope is a
+  no-op when no tenant is set, so models looked up *before* tenant context exists (e.g. `ApiKey` by
+  hash) can still use the trait — just call `->withoutGlobalScope('pi_tenant')` on those auth lookups.
 - DTOs are readonly `final` classes with `fromArray()` / `toArray()` (mirrors `SearchQueryData`).
 
 ## Domain notes
@@ -129,9 +130,10 @@
   - Doc/comment fixes (MpnNormalizer, PriceParser).
   **Meta-lesson**: the review caught ~15 real issues the passing test suite did not. The strict
   per-phase Copilot loop is worth it.
-- **Admin panel API endpoints (2026-05-24)**: `ApiKey` intentionally omits `BelongsToTenant` so
-  `ResolveTenant` middleware can look it up before tenant context is set. Any controller that manages
-  `ApiKey` records must **manually** add `->where('tenant_id', $tenantContext->id())` — the global
-  scope will NOT protect these queries. `ApiKeyController::index()` and `::revoke()` both lacked this
-  filter, exposing all tenants' key metadata and allowing cross-tenant revocation. Fixed by adding
-  explicit `where('tenant_id', ...)` to both methods and covering with two new isolation tests.
+- **Admin panel API endpoints (2026-05-24)**: `ApiKey` **uses `BelongsToTenant`** so management
+  queries (`ApiKeyController::index()`/`::revoke()`) are tenant-isolated automatically. Because the
+  `pi_tenant` global scope is a no-op while no tenant is set, and authentication is inherently
+  cross-tenant (the tenant is resolved *from* the key), the hash lookups in `ResolveTenant` and
+  `TenantController::me()` call `->withoutGlobalScope('pi_tenant')` explicitly — otherwise a leftover
+  tenant context (shared worker / single test process) would scope the lookup and reject another
+  tenant's valid key. Lesson: prefer the global scope for isolation; bypass it only on auth lookups.

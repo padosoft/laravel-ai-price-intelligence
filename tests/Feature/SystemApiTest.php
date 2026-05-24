@@ -70,10 +70,15 @@ final class SystemApiTest extends TestCase
             ->assertJsonStructure(['data' => ['id', 'name', 'scopes', 'plaintext']]);
         $newId = $created->json('data.id');
 
-        // The list never exposes the hash or plaintext.
-        $this->withHeader('X-Api-Key', $key)->getJson('/api/v1/api-keys')
+        // The list never exposes the hash or plaintext — assert the keys are absent
+        // from every returned item, not just a specific value fragment.
+        $items = $this->withHeader('X-Api-Key', $key)->getJson('/api/v1/api-keys')
             ->assertOk()
-            ->assertJsonMissing(['key_hash' => true]);
+            ->json('data');
+        foreach ($items as $item) {
+            $this->assertArrayNotHasKey('key_hash', $item);
+            $this->assertArrayNotHasKey('plaintext', $item);
+        }
 
         $this->withHeader('X-Api-Key', $key)->deleteJson("/api/v1/api-keys/{$newId}")
             ->assertOk()->assertJsonPath('data.id', $newId);
@@ -131,8 +136,11 @@ final class SystemApiTest extends TestCase
             ->deleteJson("/api/v1/api-keys/{$keyModelA->id}")
             ->assertNotFound();
 
-        // Confirm the target key was NOT revoked.
-        $this->assertNull(ApiKey::query()->find($keyModelA->id)?->revoked_at);
+        // Confirm the target key was NOT revoked. Bypass the tenant scope (context is
+        // tenant B) so we actually fetch tenant A's row instead of getting null.
+        $victim = ApiKey::query()->withoutGlobalScope('pi_tenant')->find($keyModelA->id);
+        $this->assertNotNull($victim);
+        $this->assertNull($victim->revoked_at);
     }
 
     #[Test]

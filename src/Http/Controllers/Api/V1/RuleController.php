@@ -45,14 +45,14 @@ final class RuleController
         $rule = RepricingRule::query()->findOrFail($id);
         $validated = $this->validateRule($request, creating: false);
 
-        $rule->fill(array_filter([
-            'name' => $validated['name'] ?? null,
-            'target_filter' => $validated['target_filter'] ?? null,
-            'strategy' => $validated['strategy'] ?? null,
-            'parameters' => $validated['parameters'] ?? null,
-            'priority' => $validated['priority'] ?? null,
-            'status' => $validated['status'] ?? null,
-        ], static fn ($v): bool => $v !== null));
+        // Apply only the keys the client actually sent (PATCH semantics), preserving an
+        // explicit null so target_filter/parameters can be cleared.
+        $updatable = ['name', 'target_filter', 'strategy', 'parameters', 'priority', 'status'];
+        foreach ($updatable as $field) {
+            if (array_key_exists($field, $validated)) {
+                $rule->setAttribute($field, $validated[$field]);
+            }
+        }
         $rule->save();
 
         return response()->json(['data' => $rule]);
