@@ -37,8 +37,9 @@ final class ScrapeService
             return $text;
         }
 
-        // GDPR: strip any PII from scraped content before persisting. Flag::enabled treats
-        // 'auto'/unrecognized as on and only falsy values ('false'/'0'/0/false) as off.
+        // GDPR: strip PII from the scraped free-text fields (title, description) before
+        // persisting them. Flag::enabled treats 'auto'/unrecognized as on and only falsy
+        // values ('false'/'0'/0/false) as off.
         return Flag::enabled('price-intelligence.pii.enabled', true)
             ? $this->pii->redact($text)
             : $text;

@@ -46,6 +46,13 @@ final class RobotsTxtParserTest extends TestCase
     }
 
     #[Test]
+    public function comment_lines_do_not_terminate_a_group(): void
+    {
+        $robots = "User-agent: *\n# a comment\nDisallow: /private";
+        $this->assertFalse($this->parser()->isAllowed($robots, '/private/x'));
+    }
+
+    #[Test]
     public function wildcards_and_end_anchor_work(): void
     {
         $robots = "User-agent: *\nDisallow: /*.pdf\$";

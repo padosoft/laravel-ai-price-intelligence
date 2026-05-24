@@ -46,15 +46,19 @@ final class RobotsTxtParser
         $currentUas = [];
         $collecting = false;
 
-        foreach ($lines as $line) {
-            $line = trim(preg_replace('/#.*$/', '', $line) ?? '');
-
-            if ($line === '') {
-                // A blank line terminates the current user-agent group (robots convention).
+        foreach ($lines as $rawLine) {
+            // A truly blank line terminates the current group; a comment-only line does not.
+            if (trim($rawLine) === '') {
                 $currentUas = [];
                 $collecting = false;
 
                 continue;
+            }
+
+            $line = trim(preg_replace('/#.*$/', '', $rawLine) ?? '');
+
+            if ($line === '') {
+                continue; // comment-only line — ignore, do not terminate the group
             }
 
             [$field, $value] = $this->splitDirective($line);
