@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AlertController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ApiKeyController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AuditController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\CatalogController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\IntelligenceController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\MatchController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ObservationController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\RuleController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TargetController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TenantController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\WebhookController;
@@ -53,6 +56,18 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('price-intelligence.alerts.index');
     Route::post('/alerts/{id}/ack', [AlertController::class, 'acknowledge'])->whereNumber('id')->name('price-intelligence.alerts.ack');
+
+    Route::get('/rules', [RuleController::class, 'index'])->name('price-intelligence.rules.index');
+    Route::post('/rules', [RuleController::class, 'store'])->name('price-intelligence.rules.store');
+    Route::patch('/rules/{id}', [RuleController::class, 'update'])->whereNumber('id')->name('price-intelligence.rules.update');
+    Route::delete('/rules/{id}', [RuleController::class, 'destroy'])->whereNumber('id')->name('price-intelligence.rules.destroy');
+    Route::get('/rule-decisions', [RuleController::class, 'decisions'])->name('price-intelligence.rule-decisions.index');
+
+    Route::get('/api-keys', [ApiKeyController::class, 'index'])->name('price-intelligence.api-keys.index');
+    Route::post('/api-keys', [ApiKeyController::class, 'store'])->name('price-intelligence.api-keys.store');
+    Route::delete('/api-keys/{id}', [ApiKeyController::class, 'revoke'])->whereNumber('id')->name('price-intelligence.api-keys.revoke');
+
+    Route::get('/audit/fetch-logs', [AuditController::class, 'fetchLogs'])->name('price-intelligence.audit.fetch-logs');
 
     Route::get('/webhook-subscriptions', [WebhookController::class, 'index'])->name('price-intelligence.webhooks.index');
     Route::post('/webhook-subscriptions', [WebhookController::class, 'store'])->name('price-intelligence.webhooks.store');
