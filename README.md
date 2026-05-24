@@ -44,7 +44,8 @@ stack**, open-source and self-hostable:
   **AI search** discover them.
 - The package **matches** the right competitor product (GTIN → MPN → name → embedding → optional
   vision LLM), **scrapes** price/stock/content, **normalizes** prices (multi-currency FX), stores
-  **time-series**, runs **AI** (forecast, anomaly, sentiment) and emits **signed webhooks + events**.
+  **time-series**, runs **AI** (forecast, anomaly, sentiment) and emits **webhooks + events**
+  (webhooks are HMAC-signed when the subscription has a secret).
 - Your ecommerce reads those signals for **dynamic pricing**, **MAP enforcement**, **assortment** and
   **merchandising** — the package never applies prices for you (advisory by design).
 
@@ -59,7 +60,7 @@ It is **boundary-respecting**: it provides intelligence; your platform keeps the
   (Amazon, eBay, Google Shopping, Idealo, Trovaprezzi).
 - 💶 **Price normalization**: multi-currency FX to a base currency, time-series observations.
 - ⏱️ **Scheduling** with adaptive backoff + dedicated Horizon queues (`pi-discovery`, `pi-scrape`, …).
-- 🚨 **Alerts + HMAC-signed webhooks**: price drop/raise, undercut, stock-out.
+- 🚨 **Alerts + webhooks** (HMAC-signed when a subscription secret is set): price drop/raise, undercut, stock-out.
 - 🤖 **AI layer**: forecasting, anomaly detection, GDPR-safe review sentiment (pluggable, toggleable).
 - 💸 **Optional no-code repricer** (off by default, advisory-only).
 - 🛡️ **Compliance**: robots.txt policy, gentleman rate-limiting, PII redaction, **EU AI Act** disclosure + bridge.

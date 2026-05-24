@@ -7,7 +7,9 @@ How an ecommerce host integrates `laravel-ai-price-intelligence`.
 - **API key (machine-to-machine)**: send `X-Api-Key: <plaintext>`. Issue with
   `ApiKey::issue($tenantId, $name, $scopes)` (the plaintext is shown once).
 - **Sanctum (UI)**: bearer token; the tenant is resolved from the authenticated user via
-  `config('price-intelligence.api.tenant_resolver')` (defaults to `$user->tenant_id`).
+  `config('price-intelligence.api.tenant_resolver')` (defaults to `$user->tenant_id`). Sanctum is
+  not enabled by default — the package's `api.middleware` is just `['api']`; add Sanctum (and any
+  auth middleware) in your host app if you want session/bearer auth alongside the API-key path.
 
 All endpoints are under `config('price-intelligence.api.prefix')` (default `api/v1`).
 
@@ -36,7 +38,7 @@ All endpoints are under `config('price-intelligence.api.prefix')` (default `api/
 
 | Method | Endpoint | Notes |
 |---|---|---|
-| GET | `/matches?status=pending` | review queue (60–85% confidence) |
+| GET | `/matches?status=pending` | review queue (60–84% confidence; ≥85 auto-confirms) |
 | POST | `/matches/{id}/approve` | promote to a confirmed competitor product |
 | POST | `/matches/{id}/reject` | 204 |
 | POST | `/competitor-products` | manually attach a URL to a target |
@@ -50,10 +52,12 @@ All endpoints are under `config('price-intelligence.api.prefix')` (default `api/
 > roadmap. Today, forecasts/anomalies are produced and stored (`pi_forecasts`, `pi_anomalies`) and
 > surfaced via webhooks/events and the admin panel; query the models directly if you need them now.
 
-## Webhooks (outbound, HMAC-signed)
+## Webhooks (outbound)
 
-Subscribe via `POST /webhook-subscriptions` (`{url, events[], secret}`). Each delivery carries
-`X-PI-Signature: sha256=<hmac>`; verify with `WebhookSigner::verify($body, $secret, $signature)`.
+Subscribe via `POST /webhook-subscriptions` (`{url, events[], secret}`). **When a `secret` is set**
+(recommended), each delivery carries `X-PI-Signature: sha256=<hmac>`; verify with
+`WebhookSigner::verify($body, $secret, $signature)`. Without a secret the payload is delivered
+unsigned, so always configure one in production.
 
 Events: `price.changed`, `price.dropped`, `price.raised`, `undercut.detected`, `stock.out`,
 `stock.back_in`, `buybox.lost`, `buybox.won`, `map.violated`, `competitor.new_found`,
@@ -69,9 +73,9 @@ If you run the host in the same app, you can also listen to `Padosoft\PriceIntel
 
 ## Scheduling
 
-Run `php artisan piprice:run-due` every minute (the package registers this automatically when the
-scheduler runs) and a Horizon worker for the `pi-*` queues. Prune audit logs with
-`php artisan piprice:audit:prune`.
+The package **already schedules** `piprice:run-due` every minute via its service provider, so you
+only need a running scheduler (`php artisan schedule:work` / cron) and a queue worker for the `pi-*`
+queues. You can also invoke `piprice:run-due` manually. Prune audit logs with `piprice:audit:prune`.
 
 ## Responsibilities
 
