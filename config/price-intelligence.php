@@ -186,6 +186,9 @@ return [
         'prefix' => 'api/v1',
         'middleware' => ['api'],
         'register_routes' => true,
+        // Optional callable/closure to resolve the tenant id from the authenticated
+        // user when using Sanctum (defaults to $user->tenant_id when null).
+        'tenant_resolver' => null,
     ],
 
     /*

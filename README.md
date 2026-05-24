@@ -147,7 +147,8 @@ null-object pattern (no hard requirement). Full design in [`docs/PROJECT.md`](do
 | Review sentiment | **off** | GDPR-safe: per-domain opt-in, mandatory PII redaction, anonymous aggregates only |
 | Visual / content-gap / narrative / assortment / promo | interface-ready | LLM-driven, host-bindable drivers |
 
-Every AI output is flagged `is_ai_generated` and logged in `ai_decision_logs`.
+Every AI output is flagged `is_ai_generated` and logged in the decision-log table (default
+`pi_ai_decision_logs`, configurable).
 
 ## Compliance: GDPR & EU AI Act
 
@@ -155,7 +156,7 @@ Every AI output is flagged `is_ai_generated` and logged in `ai_decision_logs`.
 - **PII redaction** on scraped content via [`padosoft/laravel-pii-redactor`](https://github.com/padosoft/laravel-pii-redactor) when installed.
 - **EU AI Act**: native disclosure (`is_ai_generated`, decision log, human-in-the-loop matching) plus
   an optional bridge to [`padosoft/laravel-ai-act-compliance`](https://github.com/padosoft/laravel-ai-act-compliance).
-- Audit `fetch_logs` with a retention prune command (`piprice:audit:prune`).
+- Audit fetch logs (default table `pi_fetch_logs`) with a retention prune command (`piprice:audit:prune`).
 
 ## Configuration & feature toggles
 
