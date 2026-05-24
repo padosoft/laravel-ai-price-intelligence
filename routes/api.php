@@ -5,8 +5,10 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AlertController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\CatalogController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\IntelligenceController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\MatchController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TargetController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\TenantController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\WebhookController;
 use Padosoft\PriceIntelligence\Http\Middleware\ResolveTenant;
 
@@ -23,6 +25,8 @@ Route::get('/health', static fn (): array => [
 ])->name('price-intelligence.health');
 
 Route::middleware(ResolveTenant::class)->group(function (): void {
+    Route::get('/tenants/me', [TenantController::class, 'me'])->name('price-intelligence.tenants.me');
+
     Route::get('/catalog/products', [CatalogController::class, 'index'])->name('price-intelligence.catalog.index');
     Route::get('/catalog/products/{id}', [CatalogController::class, 'show'])->whereNumber('id')->name('price-intelligence.catalog.show');
     Route::post('/catalog/products:bulk', [CatalogController::class, 'bulkUpsert'])->name('price-intelligence.catalog.bulk');
@@ -38,6 +42,9 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::post('/matches/{id}/approve', [MatchController::class, 'approve'])->whereNumber('id')->name('price-intelligence.matches.approve');
     Route::post('/matches/{id}/reject', [MatchController::class, 'reject'])->whereNumber('id')->name('price-intelligence.matches.reject');
     Route::post('/competitor-products', [MatchController::class, 'storeCompetitorProduct'])->name('price-intelligence.competitor-products.store');
+
+    Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
+    Route::get('/anomalies', [IntelligenceController::class, 'anomalies'])->name('price-intelligence.anomalies.index');
 
     Route::get('/alerts', [AlertController::class, 'index'])->name('price-intelligence.alerts.index');
     Route::post('/alerts/{id}/ack', [AlertController::class, 'acknowledge'])->whereNumber('id')->name('price-intelligence.alerts.ack');
