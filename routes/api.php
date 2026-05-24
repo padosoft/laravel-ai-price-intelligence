@@ -41,6 +41,7 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::post('/targets', [TargetController::class, 'store'])->name('price-intelligence.targets.store');
     Route::patch('/targets/{id}', [TargetController::class, 'update'])->whereNumber('id')->name('price-intelligence.targets.update');
     Route::post('/targets/{id}/discover:now', [MatchController::class, 'discoverNow'])->whereNumber('id')->name('price-intelligence.targets.discover');
+    Route::post('/targets/{id}/scrape:now', [TargetController::class, 'scrapeNow'])->whereNumber('id')->name('price-intelligence.targets.scrape');
 
     Route::get('/matches', [MatchController::class, 'index'])->name('price-intelligence.matches.index');
     Route::post('/matches/{id}/approve', [MatchController::class, 'approve'])->whereNumber('id')->name('price-intelligence.matches.approve');
@@ -60,6 +61,7 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/rules', [RuleController::class, 'index'])->name('price-intelligence.rules.index');
     Route::post('/rules', [RuleController::class, 'store'])->name('price-intelligence.rules.store');
     Route::patch('/rules/{id}', [RuleController::class, 'update'])->whereNumber('id')->name('price-intelligence.rules.update');
+    Route::post('/rules/{id}/simulate', [RuleController::class, 'simulate'])->whereNumber('id')->name('price-intelligence.rules.simulate');
     Route::delete('/rules/{id}', [RuleController::class, 'destroy'])->whereNumber('id')->name('price-intelligence.rules.destroy');
     Route::get('/rule-decisions', [RuleController::class, 'decisions'])->name('price-intelligence.rule-decisions.index');
 

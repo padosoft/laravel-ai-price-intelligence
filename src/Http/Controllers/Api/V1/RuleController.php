@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Padosoft\PriceIntelligence\Enums\RuleStrategy;
 use Padosoft\PriceIntelligence\Models\RepricingRule;
 use Padosoft\PriceIntelligence\Models\RuleDecision;
+use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
 
 /**
  * No-code repricing rules (advisory only — the engine never applies prices). Backs the
@@ -62,6 +63,48 @@ final class RuleController
         RepricingRule::query()->findOrFail($id)->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Dry-run preview: compute the rule's suggested prices for caller-provided samples
+     * WITHOUT persisting or firing events, and regardless of the repricer.enabled flag
+     * (it's a what-if preview). Custom strategies aren't simulated (host-resolved).
+     */
+    public function simulate(Request $request, int $id, StrategyCalculator $calculator): JsonResponse
+    {
+        $rule = RepricingRule::query()->findOrFail($id);
+
+        $validated = $request->validate([
+            'samples' => ['required', 'array', 'min:1', 'max:500'],
+            'samples.*.product_id' => ['nullable', 'integer'],
+            'samples.*.current_price_cents' => ['nullable', 'integer', 'min:0'],
+            'samples.*.competitor_prices_cents' => ['required', 'array'],
+            'samples.*.competitor_prices_cents.*' => ['integer', 'min:0'],
+        ]);
+
+        $params = (array) ($rule->parameters ?? []);
+        $custom = $rule->strategy === RuleStrategy::Custom;
+
+        $decisions = array_map(function (array $sample) use ($rule, $calculator, $params, $custom): array {
+            $current = isset($sample['current_price_cents']) ? (int) $sample['current_price_cents'] : null;
+            /** @var array<int, int> $prices */
+            $prices = array_map('intval', $sample['competitor_prices_cents']);
+            $suggested = $custom ? null : $calculator->suggest($rule->strategy, $prices, $current, $params);
+
+            return [
+                'product_id' => $sample['product_id'] ?? null,
+                'current_price_cents' => $current,
+                'suggested_price_cents' => $suggested,
+                'changed' => $suggested !== null && $suggested !== $current,
+            ];
+        }, $validated['samples']);
+
+        return response()->json(['data' => [
+            'rule_id' => $rule->id,
+            'strategy' => $rule->strategy->value,
+            'custom_not_simulated' => $custom,
+            'decisions' => $decisions,
+        ]]);
     }
 
     public function decisions(Request $request): JsonResponse
