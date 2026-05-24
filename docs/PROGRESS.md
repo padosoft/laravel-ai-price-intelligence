@@ -8,10 +8,10 @@
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before
 the admin panel (user builds the admin template in parallel).
 
-**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **102 tests green**. CI green (8.3/8.4).
+**Test command**: `vendor\bin\phpunit` via PowerShell. Current: **121 tests green**. CI green (8.3/8.4).
 
-**Merged**: PR #1 (0–7), PR #2 (phase 8 AI), PR #3 (phase 9 review sentiment) — all via the full
-local-Copilot → push → CI → GitHub-Copilot → auto-merge loop. `main` @ 2923757.
+**Merged**: PR #1 (0–7), #2 (phase 8 AI), #3 (phase 9 review sentiment), #4 (phase 10 repricer) —
+all via the full local-Copilot → push → CI → GitHub-Copilot → auto-merge loop. `main` @ 82786eb.
 
 **STRICT per-phase workflow (mandatory from now on)** — see AGENTS.md / .claude/rules:
 one PR per phase; local loop (phpunit + local `copilot` CLI review → fix) until clean → push →
@@ -62,7 +62,10 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   LexiconSentimentAnalyzer, PiiFilterInterface + PiiFilter (laravel-pii-redactor or regex fallback),
   ReviewAggregator (off-by-default, per-domain opt-in, mandatory PII redaction, anonymous aggregates
   only), ReviewInsight model/migration, refusal exception.
-- [ ] Phase 10 — Repricer engine (opt, off default)
+- [x] **Phase 10 — Repricer engine** (PR #4 merged): StrategyCalculator (match_cheapest/undercut_pct/
+  beat_top_n/match_with_floor/dynamic_demand/custom) with margin floor, max-change clamp, charm
+  rounding; RepricerEngine (off by default, advisory-only, RepricingSuggested event); container-resolved
+  custom strategies. ~10 Copilot rounds of pricing edge-case hardening.
 - [ ] Phase 11 — Compliance hardening (robots, rate-limit, PiiFilter, AiActBridge, audit)
 - [ ] Phase 12 — Docs finali + README + COMPETITIVE-MATRIX + openapi.json
 - [ ] Phase 13 — Release v1.0 alpha prep (CHANGELOG, phpstan, pint, CI)
