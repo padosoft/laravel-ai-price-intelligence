@@ -96,8 +96,11 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   laravel/ai embedding driver — each logging to `ai_decision_logs`, all fixture-tested with an
   opt-in live suite (`tests/Live`, `PI_LIVE_LLM=1`). 198 PHPUnit green. Plan:
   docs/superpowers/plans/2026-05-25-b1-llm-provider-layer.md.
-- [ ] **B2 — Marketplace API adapters → core v1.4.0**: Amazon SP-API + Keepa, eBay, Google Shopping
-  SERP, Farfetch multi-driver (`scrape` default + `retailed`/`apify` opt-in). Generic scraper fallback.
+- [x] **B2 — Marketplace API adapters → core v1.4.0**: AbstractApiAdapter (API-or-scrape fetch);
+  Amazon `sp_api`(LWA)/`keepa`/`auto`, eBay Browse, Google Shopping SERP, new Farfetch multi-driver
+  (`scrape` default + `retailed`/`apify`). Clients under `Services/Scraping/Marketplaces/Api/`,
+  Http::fake-tested + opt-in live suite. Graceful scrape fallback when creds absent. 216 PHPUnit green.
+  Plan: docs/superpowers/plans/2026-05-25-b2-marketplace-adapters.md.
 - [ ] **B3 — API gaps + enterprise scale → core v1.5.0**: `/observations/prices` host filter; stock/promo
   history endpoints; `GET /ai-decisions`; facet/host-count endpoints; bulk CSV/Excel export; tenant
   settings-write; chunk/batch jobs + daily-aggregate materialization + index review.
@@ -105,6 +108,8 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   enterprise UX (pagination/virtualization/facets); SSE bearer/polling fallback; release hygiene → admin v1.1.0.
 
 ### Next action
-**B1 COMPLETE — tag core v1.3.0 + GitHub release**, then start **B2** (marketplace adapters), whose
-plan is written next from the B-phases spec §3 (CORE/B2). `aws/aws-sdk-php` is already installed
-(pulled transitively by `laravel/ai`) for the Amazon SP-API driver.
+**B2 COMPLETE — tag core v1.4.0 + GitHub release**, then start **B3 — API gaps + enterprise scale →
+core v1.5.0**: `/observations/prices` host filter; `GET /observations/stock` & `/observations/promos`
+history; `GET /ai-decisions`; facet/host-count endpoints; bulk CSV/Excel export (queued/streamed);
+tenant settings-write (`PATCH /tenants/me/settings`); chunk/batch jobs + daily-aggregate
+materialization + hot-table index review. Plan from the B-phases spec §3 (CORE/B3).

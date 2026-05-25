@@ -138,6 +138,25 @@ price normalization → time-series storage → AI layer → alerts + signed web
 Everything is **pluggable via Interface + Driver**; optional dependencies are wired with the
 null-object pattern (no hard requirement). Full design in [`docs/PROJECT.md`](docs/PROJECT.md).
 
+### Marketplace adapters
+
+Each marketplace resolves a `driver` from `config('price-intelligence.marketplaces.*')`. Amazon/eBay/
+Google default to `auto`, but the **effective default behavior is scraping (JSON-LD/OpenGraph, no
+keys) until you configure API credentials** — then the real API path lights up. Any missing
+credential or API failure **falls back to scraping**, so it never breaks a run.
+
+| Marketplace | Drivers | API path |
+|---|---|---|
+| Amazon | `auto` · `sp_api` · `keepa` · `scrape` | SP-API Product Pricing (LWA token) / Keepa price+history |
+| eBay | `auto` · `api` · `scrape` | Browse API (client-credentials OAuth) |
+| Google Shopping | `auto` · `serp` · `scrape` | SerpApi-compatible `google_product` lookup |
+| Farfetch | `scrape` · `retailed` · `apify` | retailed.io / Apify actor (luxury) |
+| Idealo, Trovaprezzi, generic | `scrape` | JSON-LD extractor |
+
+Set e.g. `PI_AMAZON_DRIVER=keepa` + `PI_KEEPA_KEY=…`, or `PI_EBAY_CLIENT_ID/SECRET`, or
+`PI_SERPAPI_KEY`, or `PI_FARFETCH_DRIVER=retailed` + `PI_RETAILED_KEY`. No extra Composer packages
+are required — the adapters call each API directly over HTTP.
+
 ## AI features
 
 | Feature | Default | Notes |

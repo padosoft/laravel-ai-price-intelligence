@@ -43,6 +43,7 @@ final class ProductSnapshot
         public readonly ?string $htmlHash = null,
         public readonly bool $reachable = true,
         public readonly ?int $httpStatus = null,
+        public readonly ?string $externalRef = null,
     ) {}
 
     public function withReachable(bool $reachable): self
@@ -71,6 +72,7 @@ final class ProductSnapshot
             htmlHash: $this->htmlHash,
             reachable: $reachable,
             httpStatus: $this->httpStatus,
+            externalRef: $this->externalRef,
         );
     }
 
@@ -102,6 +104,7 @@ final class ProductSnapshot
             htmlHash: $clone->htmlHash,
             reachable: $clone->reachable,
             httpStatus: $status,
+            externalRef: $clone->externalRef,
         );
     }
 
@@ -138,6 +141,7 @@ final class ProductSnapshot
             'promo_type' => $this->promoType->value,
             'html_hash' => $this->htmlHash,
             'reachable' => $this->reachable,
+            'external_ref' => $this->externalRef,
         ];
     }
 }

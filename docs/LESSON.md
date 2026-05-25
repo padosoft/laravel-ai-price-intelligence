@@ -220,3 +220,52 @@
 - **Opt-in providers belong in `suggest`, not `require`**: `laravel-ai-regolo` (and its transitive
   aws-sdk-php via laravel/ai) shouldn't be forced on every consumer. `laravel/ai` is the hard dep;
   Regolo is documented + suggested, installed only when `PI_LLM_PROVIDER=regolo`.
+
+## B2 — Marketplace API adapters (core v1.4.0)
+- **API-or-scrape via `AbstractApiAdapter`**: API adapters extend the scrape adapter and override
+  `fetch()` to try `apiFetch()` first, falling back to `parent::fetch()` (scrape) when driver=`scrape`,
+  creds are missing, or the API throws/returns an unreachable snapshot. `apiFetch` exceptions are
+  caught + `report()`ed (guarded by `function_exists`) — never fail the cascade. This mirrors B1's
+  "fake is the fallback" philosophy: zero-config still works (scrape), credentials light up the API.
+- **No AWS SigV4 needed for SP-API anymore** — Amazon **deprecated the IAM/AWS SigV4 requirement in
+  2023** ("Removing IAM/AWS SigV4 from the SP-API authentication model"). Modern SP-API authenticates
+  with just the LWA access token (`x-amz-access-token` header) obtained from the refresh-token grant
+  at `api.amazon.com/auth/o2/token`. So the whole client is plain `Http` facade → `Http::fake`-testable,
+  no `aws/aws-sdk-php` SigV4 dance. (aws-sdk is present transitively via laravel/ai but unused here.)
+  Both Copilot and Codex flagged "SP-API requires SigV4" from older training data — **pushed back**
+  with the 2023 deprecation citation rather than adding dead signing code. Reviewer knowledge can lag
+  vendor changes; verify against current docs before churning.
+- **Every client uses the `Http` facade and returns a uniform `ApiProductResult`** (→ `toSnapshot()`),
+  so each is fixture-tested with `Http::fake([...])` + `Http::assertSent()` for headers/query, with no
+  extra seam. Clients return `null` when their key/token is absent (the adapter then scrapes).
+- **Keepa prices are already integer cents** (e.g. `5499` = €54.99); `-1` = unavailable. `stats.current[0]`
+  is the Amazon price. Reused `Support\Pricing\PriceParser::parse()` (returns `{cents, currency}`) for
+  SERP/Farfetch major-unit price strings to stay consistent with EU formatting.
+- **Farfetch** added as `AdapterCode::Farfetch` (first-class); `scrape` default already works via the
+  JSON-LD `HtmlProductExtractor`. Commercial `retailed`/`apify` drivers are opt-in (key/token) and a
+  judgment call kept them out of the hard deps — config-only.
+- **No new hard composer deps** for B2 — all marketplace APIs are plain REST. Credentials are env/config.
+
+## B2 local /review findings (2026-05-25) — all fixed before push
+- **`auto` driver `??` cascade doesn't fall through on zero-offer SP-API result**: `AmazonSpApiClient::fetchOffers()`
+  returns a non-null `ApiProductResult(priceCents: null)` when the API is reachable but the product has no listed
+  offers. The original `spApi->fetchOffers() ?? keepa->fetchByAsin()` only falls through on `null`, so Keepa was
+  never tried in that scenario. Fixed by extracting an `autoFetch()` method that explicitly checks `priceCents !== null`
+  before accepting the SP-API result. **Lesson**: when cascading two API clients with `??`, ensure the first can't
+  return a non-null "empty" result that silently suppresses the fallback.
+- **No OAuth token caching in `AmazonSpApiClient` / `EbayBrowseClient`**: every fetch made a fresh LWA/eBay CC
+  token grant (2 HTTP calls per product). LWA has a 15 req/s rate limit; eBay CC tokens live 7200 s and can be
+  shared. Fixed by using `Cache::get` + `Cache::put` (only caching on success, slightly under TTL: 3500 s / 7000 s).
+  Cache key includes client-id + endpoint hash to support multiple tenants. **Lesson**: OAuth CC/refresh tokens are
+  reusable — always cache them, and only on success so a transient failure doesn't poison the cache.
+- **`FarfetchClient::map()` missed `'SOLD_OUT'` availability variant**: used `in_array` with a hardcoded list of
+  mixed-case strings; adding new variants would require updating the list in two places. Fixed by normalising with
+  `strtolower()` and comparing only lowercase tokens `['out_of_stock', 'sold_out']`. **Lesson**: normalise availability
+  strings to lowercase before comparing — API providers are inconsistent with casing.
+- **`ApiProductResult->externalRef` populated but never consumed**: clients stored the API-canonical ref (e.g., Keepa's
+  `$product['asin']`) in `externalRef`, but `AbstractApiAdapter` only used `$this->externalRef(url)` (URL regex) when
+  updating `external_ref` on the model. For non-standard URLs where the regex fails, the API-returned ref was silently
+  dropped. Fixed by adding `externalRef` to `ProductSnapshot` (propagated via `ApiProductResult::toSnapshot()`) and
+  updating `AbstractApiAdapter` to use `$this->externalRef(url) ?? $snapshot->externalRef`. **Lesson**: when an API
+  returns a canonical identifier, propagate it all the way to the persistence layer rather than discarding it after
+  the DTO boundary.
