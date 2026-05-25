@@ -136,4 +136,54 @@ final class DiscoveryTest extends TestCase
 
         $this->assertSame('approved', $proposal->fresh()->status);
     }
+
+    #[Test]
+    public function discovery_caches_candidate_metadata_on_review_proposals(): void
+    {
+        $this->fakeProvider([
+            ['title' => 'Nike Air Force 1 Mid Trail', 'page_url' => 'https://www.idealo.it/p/af1mid', 'image_url' => 'https://img/2.jpg'],
+        ]);
+
+        $target = $this->seedProductAndTarget();
+        app(UrlDiscoveryService::class)->discover($target);
+
+        $proposal = MatchProposal::query()->where('candidate_url', 'https://www.idealo.it/p/af1mid')->first();
+
+        $this->assertNotNull($proposal);
+        $this->assertSame('Nike Air Force 1 Mid Trail', $proposal->candidate_title);
+        $this->assertSame('https://img/2.jpg', $proposal->candidate_image_url);
+        // The source resolver normalizes the host (strips the www. prefix).
+        $this->assertSame('idealo.it', $proposal->candidate_host);
+    }
+
+    #[Test]
+    public function matches_index_returns_proposals_with_the_matched_product(): void
+    {
+        $tenant = Tenant::create(['code' => 't1', 'name' => 't1']);
+        app(TenantContext::class)->set($tenant->id);
+        $product = Product::create(['external_id' => 'SKU-7', 'name' => 'Acme X1 Pro', 'brand' => 'Acme']);
+        $target = MonitoringTarget::create([
+            'product_id' => $product->id, 'country' => 'IT',
+            'frequency_preset' => Frequency::Daily, 'status' => 'active',
+        ]);
+        MatchProposal::create([
+            'tenant_id' => $tenant->id,
+            'monitoring_target_id' => $target->id,
+            'candidate_url' => 'https://www.amazon.it/dp/B0XYZ',
+            'candidate_title' => 'Acme X1 Pro 128GB',
+            'candidate_host' => 'www.amazon.it',
+            'candidate_price_cents' => 75900,
+            'confidence' => 72,
+            'status' => 'pending',
+        ]);
+
+        [, $plaintext] = ApiKey::issue($tenant->id, 'k', ['*']);
+
+        $this->withHeader('X-Api-Key', $plaintext)
+            ->getJson('/api/v1/matches?status=pending')
+            ->assertOk()
+            ->assertJsonPath('data.0.candidate_title', 'Acme X1 Pro 128GB')
+            ->assertJsonPath('data.0.candidate_price_cents', 75900)
+            ->assertJsonPath('data.0.target.product.name', 'Acme X1 Pro');
+    }
 }

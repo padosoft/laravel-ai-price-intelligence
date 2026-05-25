@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Services\Matching;
 
 use Padosoft\PriceIntelligence\Data\MatchOutcome;
+use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Enums\MatchStatus;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
@@ -25,7 +26,7 @@ final class MatchPersister
         private readonly CompetitorSourceResolver $sources,
     ) {}
 
-    public function persist(MonitoringTarget $target, string $url, MatchOutcome $outcome): CompetitorProduct|MatchProposal|null
+    public function persist(MonitoringTarget $target, string $url, MatchOutcome $outcome, ?ProductSnapshot $candidate = null): CompetitorProduct|MatchProposal|null
     {
         $source = $this->sources->resolveForUrl($url);
 
@@ -52,6 +53,10 @@ final class MatchPersister
                     'confidence' => $outcome->confidence,
                     'source' => 'ai',
                     'status' => 'pending',
+                    'candidate_title' => $candidate?->title,
+                    'candidate_image_url' => $candidate?->images[0] ?? null,
+                    'candidate_price_cents' => $candidate?->priceCents,
+                    'candidate_host' => $source->host ?? parse_url($url, PHP_URL_HOST) ?: null,
                 ],
             );
         }

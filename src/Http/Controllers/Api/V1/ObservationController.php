@@ -38,6 +38,33 @@ final class ObservationController
         return response()->json($prices);
     }
 
+    /**
+     * Confirmed competitor listings the admin's Competitors screen renders. Each row carries
+     * the matched product (via target), the source host, and the latest price observation so
+     * the UI can compute the delta versus our retail price without N extra requests.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $request->validate([
+            'status' => ['nullable', 'string', 'in:confirmed,suggested,rejected,dead'],
+            'host' => ['nullable', 'string', 'max:191'],
+            'monitoring_target_id' => ['nullable', 'integer'],
+            'product_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
+        ]);
+
+        $competitors = CompetitorProduct::query()
+            ->with(['target.product', 'source', 'latestPrice'])
+            ->where('match_status', $request->string('status', 'confirmed')->toString())
+            ->when($request->filled('monitoring_target_id'), fn ($q) => $q->where('monitoring_target_id', $request->integer('monitoring_target_id')))
+            ->when($request->filled('host'), fn ($q) => $q->whereHas('source', fn ($s) => $s->where('host', $request->string('host')->toString())))
+            ->when($request->filled('product_id'), fn ($q) => $q->whereHas('target', fn ($t) => $t->where('product_id', $request->integer('product_id'))))
+            ->orderByDesc('id')
+            ->cursorPaginate((int) $request->integer('per_page', 50));
+
+        return response()->json($competitors);
+    }
+
     public function show(int $id): JsonResponse
     {
         $competitor = CompetitorProduct::query()->with(['target', 'source'])->findOrFail($id);

@@ -96,7 +96,7 @@ final class UrlDiscoveryService
             }
 
             $outcome = $pipeline->match($product, $candidate);
-            $this->persister->persist($target, $candidate->url, $outcome);
+            $this->persister->persist($target, $candidate->url, $outcome, $candidate);
 
             $stats[$outcome->status->value] = ($stats[$outcome->status->value] ?? 0) + 1;
         }
