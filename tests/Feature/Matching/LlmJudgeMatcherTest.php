@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Tests\Feature\Matching;
 
+use Padosoft\PriceIntelligence\Contracts\BorderlineOnlyStep;
 use Padosoft\PriceIntelligence\Contracts\LlmProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\MatchStepInterface;
 use Padosoft\PriceIntelligence\Data\LlmResult;
@@ -96,6 +97,30 @@ final class LlmJudgeMatcherTest extends TestCase
 
         $this->assertSame(0, $llm->calls, 'judge must not run when best >= high');
         $this->assertSame(92, $outcome->confidence);
+    }
+
+    #[Test]
+    public function pipeline_survives_a_throwing_borderline_step(): void
+    {
+        $throwingJudge = new class implements BorderlineOnlyStep, MatchStepInterface
+        {
+            public function applicable(Product $product, ProductSnapshot $candidate): bool
+            {
+                return true;
+            }
+
+            public function score(Product $product, ProductSnapshot $candidate): MatchScore
+            {
+                throw new \RuntimeException('flaky LLM / undecodable JSON');
+            }
+        };
+        $weak = $this->fixedStep(64, MatchMethod::NormalizedName);
+
+        $pipeline = new MatchingPipeline([$weak, $throwingJudge], [60, 85]);
+        $outcome = $pipeline->match(new Product(['name' => 'Widget']), new ProductSnapshot(url: 'https://x/p', title: 'Widget'));
+
+        // The deterministic step's score stands; the throwing judge is swallowed (reported, non-fatal).
+        $this->assertSame(64, $outcome->confidence);
     }
 
     #[Test]

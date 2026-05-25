@@ -54,11 +54,16 @@ final class MatchingPipeline
 
             try {
                 $score = $step->score($product, $candidate);
-            } catch (RuntimeException) {
-                // A flaky LLM or decode failure must not fail the pipeline; treat as no-match.
+            } catch (RuntimeException $e) {
+                // A flaky LLM or JSON-decode failure must not fail the whole cascade; report it
+                // for observability and fall back to the deterministic steps' best score.
+                report($e);
+
                 continue;
             }
+
             $trail[] = $score->toArray();
+
             if ($score->confidence > $best->confidence) {
                 $best = $score;
             }
