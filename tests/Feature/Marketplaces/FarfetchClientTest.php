@@ -78,4 +78,24 @@ final class FarfetchClientTest extends TestCase
 
         Http::assertSent(fn ($r) => str_contains($r->url(), 'run-sync-get-dataset-items') && str_contains($r->url(), 'token=tok'));
     }
+
+    #[Test]
+    public function retailed_handles_a_scalar_price_string_without_error(): void
+    {
+        config()->set('price-intelligence.marketplaces.farfetch.retailed', [
+            'key' => 'rk',
+            'endpoint' => 'https://app.retailed.io/api/v1/scraper/farfetch/product',
+        ]);
+
+        Http::fake(['app.retailed.io/*' => Http::response([
+            'title' => 'Scarf',
+            'price' => '€120,00', // scalar, not an object — must not TypeError
+        ], 200)]);
+
+        $result = app(FarfetchClient::class)->fetchViaRetailed('https://www.farfetch.com/it/shopping/x-item-9.aspx');
+
+        $this->assertNotNull($result);
+        $this->assertSame(12000, $result->priceCents);
+        $this->assertSame('EUR', $result->currency);
+    }
 }

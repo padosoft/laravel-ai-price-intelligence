@@ -45,13 +45,19 @@ final class SerpShoppingClient
             ?? $response->json('sellers_results.online_sellers.0.base_price');
         $parsed = is_string($priceText) ? PriceParser::parse($priceText) : null;
 
+        // SERP has no stock concept: if no price could be parsed there's nothing useful here, so
+        // return null and let AbstractApiAdapter fall back to scraping the product page.
+        if ($parsed === null) {
+            return null;
+        }
+
         $image = data_get($product, 'media.0.link');
         $title = data_get($product, 'title');
 
         return new ApiProductResult(
             priceCents: $parsed['cents'] ?? null,
             currency: $parsed['currency'] ?? null,
-            available: $parsed !== null,
+            available: true,
             title: is_string($title) ? $title : null,
             images: is_string($image) ? [$image] : [],
             externalRef: $productId,

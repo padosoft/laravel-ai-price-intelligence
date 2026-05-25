@@ -50,4 +50,17 @@ final class SerpShoppingClientTest extends TestCase
             && str_contains($r->url(), 'product_id=123')
             && str_contains($r->url(), 'api_key=serpkey'));
     }
+
+    #[Test]
+    public function it_returns_null_when_no_price_can_be_parsed(): void
+    {
+        config()->set('price-intelligence.marketplaces.google_shopping.serp.key', 'serpkey');
+
+        Http::fake(['serpapi.com/*' => Http::response([
+            'product_results' => ['title' => 'No Price Product'],
+        ], 200)]);
+
+        // No parsable price → null, so the adapter falls back to scraping.
+        $this->assertNull(app(SerpShoppingClient::class)->fetchByProductId('123'));
+    }
 }

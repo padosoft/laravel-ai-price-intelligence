@@ -70,7 +70,9 @@ final class FarfetchClient
         $priceCents = null;
         $currency = null;
 
-        $amount = $data['price']['amount'] ?? $data['priceValue'] ?? $data['price'] ?? null;
+        // `price` may be an object ({amount, currency}) or a scalar; use data_get to avoid a
+        // TypeError on the scalar shape.
+        $amount = data_get($data, 'price.amount') ?? $data['priceValue'] ?? (is_array($data['price'] ?? null) ? null : ($data['price'] ?? null));
         if (is_numeric($amount)) {
             $priceCents = (int) round((float) $amount * 100);
         } elseif (is_string($amount)) {
@@ -79,11 +81,13 @@ final class FarfetchClient
             $currency = $parsed['currency'] ?? null;
         }
 
-        $currency ??= $data['price']['currency'] ?? $data['currency'] ?? null;
+        $currency ??= data_get($data, 'price.currency') ?? $data['currency'] ?? null;
 
+        // Only an explicit out-of-stock verdict marks the product unavailable. When the price can't
+        // be parsed (and there's no explicit OOS), leave available=true so AbstractApiAdapter falls
+        // through to scraping instead of recording a false "unavailable".
         $availability = $data['availability'] ?? null;
-        $available = $priceCents !== null
-            && ! in_array(strtolower((string) $availability), ['out_of_stock', 'sold_out'], true);
+        $available = ! in_array(strtolower((string) $availability), ['out_of_stock', 'sold_out'], true);
 
         $images = [];
         if (isset($data['images']) && is_array($data['images'])) {
