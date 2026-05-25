@@ -42,7 +42,10 @@ abstract class AbstractApiAdapter extends AbstractScrapeAdapter
                 $snapshot = null;
             }
 
-            if ($snapshot !== null && $snapshot->reachable) {
+            // Accept the API result only if it carries a usable signal: a price, or an explicit
+            // "unavailable" verdict (out of stock). A reachable-but-empty response (price null AND
+            // still "available") is treated as a miss and falls through to scraping a parsable page.
+            if ($snapshot !== null && $snapshot->reachable && ($snapshot->priceCents !== null || ! $snapshot->available)) {
                 $ref = $this->externalRef($competitorProduct->url) ?? $snapshot->externalRef;
                 if ($ref !== null && $competitorProduct->external_ref === null) {
                     $competitorProduct->forceFill(['external_ref' => $ref])->save();

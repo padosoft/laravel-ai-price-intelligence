@@ -41,18 +41,18 @@ final class SerpShoppingClient
             return null;
         }
 
-        $priceText = $product['prices'][0]
-            ?? $response->json('sellers_results.online_sellers.0.base_price')
-            ?? null;
+        $priceText = data_get($product, 'prices.0')
+            ?? $response->json('sellers_results.online_sellers.0.base_price');
         $parsed = is_string($priceText) ? PriceParser::parse($priceText) : null;
 
-        $image = $product['media'][0]['link'] ?? null;
+        $image = data_get($product, 'media.0.link');
+        $title = data_get($product, 'title');
 
         return new ApiProductResult(
             priceCents: $parsed['cents'] ?? null,
             currency: $parsed['currency'] ?? null,
             available: $parsed !== null,
-            title: is_string($product['title'] ?? null) ? $product['title'] : null,
+            title: is_string($title) ? $title : null,
             images: is_string($image) ? [$image] : [],
             externalRef: $productId,
         );

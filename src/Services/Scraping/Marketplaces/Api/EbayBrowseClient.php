@@ -49,12 +49,26 @@ final class EbayBrowseClient
         return new ApiProductResult(
             priceCents: $priceCents,
             currency: is_string($currency) ? $currency : null,
-            available: $priceCents !== null && $status !== 'OUT_OF_STOCK',
+            available: $priceCents !== null && $status !== 'OUT_OF_STOCK' && ! $this->hasEnded($response->json('itemEndDate')),
             title: is_string($title) ? $title : null,
             brand: is_string($brand) ? $brand : null,
             images: is_string($image) ? [$image] : [],
             externalRef: $legacyId,
         );
+    }
+
+    /**
+     * @param  mixed  $itemEndDate  ISO-8601 listing end time from the Browse response, if present.
+     */
+    private function hasEnded(mixed $itemEndDate): bool
+    {
+        if (! is_string($itemEndDate) || $itemEndDate === '') {
+            return false;
+        }
+
+        $ts = strtotime($itemEndDate);
+
+        return $ts !== false && $ts <= time();
     }
 
     private function token(string $endpoint, string $clientId, string $clientSecret): ?string

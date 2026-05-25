@@ -34,7 +34,7 @@ final class LiveMarketplaceSmokeTest extends TestCase
     #[Test]
     public function keepa_returns_a_product(): void
     {
-        if (config('price-intelligence.marketplaces.amazon.keepa.key') === null) {
+        if (empty(config('price-intelligence.marketplaces.amazon.keepa.key'))) {
             $this->markTestSkipped('No Keepa key configured.');
         }
 

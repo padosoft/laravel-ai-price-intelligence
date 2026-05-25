@@ -34,19 +34,22 @@ final class KeepaClient
             return null;
         }
 
-        $current = $product['stats']['current'][0] ?? -1;
+        $current = data_get($product, 'stats.current.0', -1);
         $priceCents = is_numeric($current) && (int) $current >= 0 ? (int) $current : null;
 
-        $ean = $product['eanList'][0] ?? null;
+        $ean = data_get($product, 'eanList.0');
+        $title = data_get($product, 'title');
+        $brand = data_get($product, 'brand');
+        $resultAsin = data_get($product, 'asin');
 
         return new ApiProductResult(
             priceCents: $priceCents,
             currency: $this->currencyForDomain($domain),
             available: $priceCents !== null,
-            title: is_string($product['title'] ?? null) ? $product['title'] : null,
-            brand: is_string($product['brand'] ?? null) ? $product['brand'] : null,
+            title: is_string($title) ? $title : null,
+            brand: is_string($brand) ? $brand : null,
             gtin: is_string($ean) ? $ean : null,
-            externalRef: is_string($product['asin'] ?? null) ? $product['asin'] : $asin,
+            externalRef: is_string($resultAsin) ? $resultAsin : $asin,
         );
     }
 

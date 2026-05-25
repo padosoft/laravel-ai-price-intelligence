@@ -140,9 +140,10 @@ null-object pattern (no hard requirement). Full design in [`docs/PROJECT.md`](do
 
 ### Marketplace adapters
 
-Each marketplace resolves a `driver` from `config('price-intelligence.marketplaces.*')`. The default
-is always **scrape** (JSON-LD/OpenGraph, no keys); configuring API credentials lights up a real API
-path, and any missing credential or API failure **falls back to scraping** — it never breaks a run.
+Each marketplace resolves a `driver` from `config('price-intelligence.marketplaces.*')`. Amazon/eBay/
+Google default to `auto`, but the **effective default behavior is scraping (JSON-LD/OpenGraph, no
+keys) until you configure API credentials** — then the real API path lights up. Any missing
+credential or API failure **falls back to scraping**, so it never breaks a run.
 
 | Marketplace | Drivers | API path |
 |---|---|---|

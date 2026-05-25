@@ -227,10 +227,14 @@
   creds are missing, or the API throws/returns an unreachable snapshot. `apiFetch` exceptions are
   caught + `report()`ed (guarded by `function_exists`) — never fail the cascade. This mirrors B1's
   "fake is the fallback" philosophy: zero-config still works (scrape), credentials light up the API.
-- **No AWS SigV4 needed for SP-API anymore**: modern SP-API authenticates with just the LWA access
-  token (`x-amz-access-token` header) obtained from the refresh-token grant at
-  `api.amazon.com/auth/o2/token`. So the whole client is plain `Http` facade → `Http::fake`-testable,
+- **No AWS SigV4 needed for SP-API anymore** — Amazon **deprecated the IAM/AWS SigV4 requirement in
+  2023** ("Removing IAM/AWS SigV4 from the SP-API authentication model"). Modern SP-API authenticates
+  with just the LWA access token (`x-amz-access-token` header) obtained from the refresh-token grant
+  at `api.amazon.com/auth/o2/token`. So the whole client is plain `Http` facade → `Http::fake`-testable,
   no `aws/aws-sdk-php` SigV4 dance. (aws-sdk is present transitively via laravel/ai but unused here.)
+  Both Copilot and Codex flagged "SP-API requires SigV4" from older training data — **pushed back**
+  with the 2023 deprecation citation rather than adding dead signing code. Reviewer knowledge can lag
+  vendor changes; verify against current docs before churning.
 - **Every client uses the `Http` facade and returns a uniform `ApiProductResult`** (→ `toSnapshot()`),
   so each is fixture-tested with `Http::fake([...])` + `Http::assertSent()` for headers/query, with no
   extra seam. Clients return `null` when their key/token is absent (the adapter then scrapes).

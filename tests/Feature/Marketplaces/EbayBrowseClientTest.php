@@ -62,6 +62,27 @@ final class EbayBrowseClientTest extends TestCase
     }
 
     #[Test]
+    public function ended_listing_is_unavailable(): void
+    {
+        $this->creds();
+
+        Http::fake([
+            'api.ebay.com/identity/v1/oauth2/token' => Http::response(['access_token' => 'tok'], 200),
+            'api.ebay.com/buy/browse/*' => Http::response([
+                'title' => 'Ended Auction',
+                'price' => ['value' => '10.00', 'currency' => 'EUR'],
+                'estimatedAvailabilities' => [['estimatedAvailabilityStatus' => 'IN_STOCK']],
+                'itemEndDate' => '2020-01-01T00:00:00.000Z',
+            ], 200),
+        ]);
+
+        $result = app(EbayBrowseClient::class)->fetchByLegacyId('1');
+
+        $this->assertNotNull($result);
+        $this->assertFalse($result->available, 'a listing past its end date must be unavailable');
+    }
+
+    #[Test]
     public function out_of_stock_is_unavailable(): void
     {
         $this->creds();

@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Http;
 use Padosoft\PriceIntelligence\Data\ApiProductResult;
 
 /**
- * Amazon SP-API pricing client. Modern SP-API needs only an LWA access token
- * (no AWS SigV4): exchange the refresh token, then call Product Pricing with the
- * x-amz-access-token header. Returns null when credentials are absent.
+ * Amazon SP-API pricing client.
+ *
+ * NOTE on auth: Amazon **deprecated the AWS Signature V4 (SigV4) requirement** for SP-API in 2023
+ * ("Removing IAM/AWS SigV4 from the SP-API authentication model"). Modern requests authenticate with
+ * only the LWA access token in the `x-amz-access-token` header — no AWS credentials/region/service
+ * signing. This client therefore exchanges the refresh token for an LWA access token (cached just
+ * under its TTL) and calls Product Pricing with that bearer header. Returns null when credentials
+ * are absent. If an integrator targets a legacy/grandfathered endpoint that still mandates SigV4,
+ * they can register a custom adapter via config('price-intelligence.adapters').
  */
 final class AmazonSpApiClient
 {

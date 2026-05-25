@@ -34,6 +34,9 @@ final class ApiProductResult
             brand: $this->brand,
             buyboxSeller: $this->buyboxSeller,
             externalRef: $this->externalRef,
+            // A constructed API result implies a successful upstream call; record 200 so
+            // FetchLog.status is comparable between scrape and API drivers.
+            httpStatus: 200,
         );
     }
 }

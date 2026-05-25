@@ -63,7 +63,9 @@ final class MarketplaceApiAdapterTest extends TestCase
         $snapshot = app(ScrapeService::class)->scrapeAndStore($competitor);
 
         $this->assertSame(5499, $snapshot->priceCents);
-        $this->assertSame('amazon', FetchLog::query()->sole()->driver);
+        $log = FetchLog::query()->sole();
+        $this->assertSame('amazon', $log->driver);
+        $this->assertSame(200, $log->status, 'API-sourced fetches record HTTP 200 like scrape fetches');
     }
 
     #[Test]
