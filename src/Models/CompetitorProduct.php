@@ -64,6 +64,7 @@ final class CompetitorProduct extends PriceIntelligenceModel
      */
     public function latestPrice(): HasOne
     {
-        return $this->hasOne(PriceObservation::class, 'competitor_product_id')->latestOfMany('captured_at');
+        return $this->hasOne(PriceObservation::class, 'competitor_product_id')
+            ->ofMany(['captured_at' => 'max', 'id' => 'max']);
     }
 }

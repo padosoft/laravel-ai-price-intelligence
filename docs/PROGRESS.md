@@ -3,6 +3,20 @@
 > Live tracker so any session (or subagent) can resume instantly after an interruption.
 > Update after every meaningful step. Source of truth for "where am I".
 
+## Current status — 2026-05-25
+
+**Post-v1.0 admin-driven backfill** (core gaps surfaced while wiring the admin panel; backfilled
+in the core first per the CORE-GAP-BACKFILL policy, then consumed by the admin):
+- **v1.1.0** (tagged): `/tenants/me`, `/stats`, `/observations/prices`, `/competitor-products/{id}`,
+  `/forecasts`, `/anomalies`, `/reviews`, `/narratives`, `/assortment-gaps`, `/content-gaps`,
+  `/rules` CRUD + simulate + `/rule-decisions`, `/api-keys` (apikeys:manage), `/audit/fetch-logs`,
+  `/targets/{id}/scrape:now`, `/alerts/stream` (SSE). ApiKey tenant-scoped.
+- **v1.2.0** (branch `feat/core-v1.2-competitor-products-list`, IN REVIEW): `GET /competitor-products`
+  (confirmed listings + matched product + source host + latest price, filters status/host/target/
+  product) for the admin Competitors screen; cached candidate metadata
+  (title/image/price/host) on MatchProposal so the matches-review screen renders candidates without
+  an extra fetch; `GET /matches` eager-loads `target.product`. 169 tests green.
+
 ## Current status — 2026-05-23
 
 **Roadmap**: see `docs/PROJECT.md` §18 (Phases 0–13). Building the **core** package fully before

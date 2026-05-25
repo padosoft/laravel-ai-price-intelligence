@@ -129,11 +129,13 @@ final class ObservationApiTest extends TestCase
     public function competitor_products_can_be_filtered_by_host(): void
     {
         $key = $this->auth();
+        $product = Product::query()->create(['external_id' => 'EX-HOST', 'name' => 'Host Filter Product']);
+        $target = MonitoringTarget::query()->create(['product_id' => $product->id, 'country' => 'IT', 'status' => 'active', 'priority' => 10]);
         $amazon = CompetitorSource::query()->create(['host' => 'amazon.it', 'adapter_code' => 'generic', 'robots_policy' => 'respect']);
         $media = CompetitorSource::query()->create(['host' => 'mediaworld.it', 'adapter_code' => 'generic', 'robots_policy' => 'respect']);
         foreach ([$amazon, $media] as $src) {
             CompetitorProduct::query()->create([
-                'monitoring_target_id' => 1,
+                'monitoring_target_id' => $target->id,
                 'competitor_source_id' => $src->id,
                 'url' => 'https://'.$src->host.'/p',
                 'match_status' => MatchStatus::Confirmed,
