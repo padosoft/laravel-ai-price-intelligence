@@ -142,3 +142,42 @@
   `TenantController::me()` call `->withoutGlobalScope('pi_tenant')` explicitly — otherwise a leftover
   tenant context (shared worker / single test process) would scope the lookup and reject another
   tenant's valid key. Lesson: prefer the global scope for isolation; bypass it only on auth lookups.
+
+## B1 — LLM provider layer (laravel/ai + laravel-ai-regolo, core v1.3.0)
+- **Installed `laravel/ai` resolved to v0.6.8** (not v0.7) because `padosoft/laravel-ai-regolo`
+  v1.0.0 pins the v0.6.8 embedding contract. Require string `"^0.6.8 || ^0.7"` lets Composer pick.
+  `laravel/ai` pulls **aws/aws-sdk-php** transitively (Bedrock) — already present for B2's Amazon SP-API.
+- **Verified v0.6.8 API surface before coding** (don't trust the v0.7 blog/docs): the `agent()`
+  helper is in `vendor/laravel/ai/functions.php` → `Laravel\Ai\agent(instructions, messages, tools,
+  schema)`; `Promptable::prompt(string $prompt, array $attachments = [], Lab|array|string|null
+  $provider = null, ?string $model = null, ?int $timeout = null)` — **provider accepts a plain string
+  config-key** (so `'regolo'` works without the Lab enum). `Embeddings::for([$t])->dimensions($n)
+  ->generate($provider, $model)` returns `EmbeddingsResponse` with a public `->embeddings` (float[][]).
+  `AgentResponse->text` + `->__toString()` + `->usage->{promptTokens,completionTokens}` (non-null ints).
+  `Files\Image::fromUrl($url)`. Lesson: grep the installed vendor source for signatures, version drift is real.
+- **Seam pattern keeps CI fully offline**: `AgentRunner`/`EmbeddingRunner` interfaces wrap the only
+  two laravel/ai call sites. `LaravelAiLlmProvider`/`LaravelAiEmbeddingProvider` are unit-tested with
+  stub runners (no Http::fake even needed); the real `LaravelAi*Runner` adapters are thin (no logic to
+  test) and exercised only by the opt-in `tests/Live` suite (`PI_LIVE_LLM=1`).
+- **`tests/Live` is auto-excluded from CI** by simply not adding it to any `<testsuite>` in
+  phpunit.xml.dist (the no-arg `phpunit` runs only the named suites Unit/Feature/E2E). The
+  `markTestSkipped` guard is the second safety; run it on demand via `phpunit tests/Live`.
+- **One impl per feature, fake = the fallback**: feature services depend only on
+  `LlmProviderInterface`; the "statistical/fake fallback when no provider is configured" is the
+  `FakeLlmProvider` being the default binding (returns feature-shaped JSON keyed by `options['feature']`).
+  Avoids a Fake+Real class pair per feature.
+- **`completeJson()` strips a ```json fence** before `json_decode` (models often wrap JSON) and throws
+  `RuntimeException` on undecodable output so callers can fall back deterministically.
+- **Borderline-only LLM judge**: added an empty marker interface `BorderlineOnlyStep`; `MatchingPipeline`
+  skips such a step unless the running best confidence is in `[high-45, high)` (default band [60,85] →
+  judge runs only for best in [40,85)). The judge returns MAX-merged confidence, so a fake judge
+  returning 0 never lowers a real score — existing matching tests stay green.
+- **Dead-config discipline (continuing the Phase-8 lesson)**: routing all LLM features through the
+  single `ai.llm.driver` made `ai.narrative.driver`, `ai.promo_detection.driver`, `matching.visual`,
+  and `matching.llm.model` dead — removed them rather than leave a config the code ignores.
+- **`$product->attributes` from OUTSIDE the model** triggers `__get` → the cast `attributes` column
+  (Eloquent's protected `$attributes` is inaccessible from outside scope), consistent with
+  `ProductResource`. Inside a model method `$this->attributes` would be the raw array — don't read it there.
+- **PHPStan parallel worker crashed once on Windows** ("severe error … while running parallel worker")
+  but `--no-progress` (effectively single-pass) reported `No errors`. Transient Windows worker flake,
+  not a real error; re-run before trusting a worker crash.
