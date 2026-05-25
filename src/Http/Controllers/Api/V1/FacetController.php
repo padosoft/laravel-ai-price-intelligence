@@ -37,10 +37,11 @@ final class FacetController
 
     public function categories(Request $request): JsonResponse
     {
-        // categories is a JSON array per product; catalog category cardinality is low, so we
-        // aggregate in PHP over a lean lazy cursor (memory stays bounded regardless of catalog size).
+        // categories is a JSON array per product; aggregate in PHP over a streaming cursor() —
+        // a single unbuffered query (constant memory, no OFFSET scans), so runtime stays predictable
+        // as the catalog grows. Category cardinality is low, so the $counts map stays small.
         $counts = [];
-        Product::query()->select('categories')->lazy()->each(function (Product $p) use (&$counts): void {
+        Product::query()->select('categories')->cursor()->each(function (Product $p) use (&$counts): void {
             foreach ((array) $p->categories as $cat) {
                 if (is_string($cat) && $cat !== '') {
                     $counts[$cat] = ($counts[$cat] ?? 0) + 1;
