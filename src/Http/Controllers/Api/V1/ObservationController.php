@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Http\Controllers\Api\V1;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
@@ -13,8 +14,10 @@ use Padosoft\PriceIntelligence\Models\PromoObservation;
 use Padosoft\PriceIntelligence\Models\StockObservation;
 
 /**
- * Time-series read endpoints (price history) and the competitor-product detail view
- * the admin's Competitor Detail screen consumes. All queries are tenant-scoped.
+ * Read side of competitor products: the time-series price history, the listings index
+ * (admin Competitors screen) and the single-listing detail (admin Competitor Detail screen).
+ * Writes — manually attaching a URL to a target — live in MatchController as a matching action.
+ * All queries are tenant-scoped.
  */
 final class ObservationController
 {
@@ -72,11 +75,30 @@ final class ObservationController
         return response()->json([
             'data' => [
                 'competitor_product' => $competitor,
-                'latest_price' => PriceObservation::query()->where('competitor_product_id', $id)->latest('captured_at')->first(),
-                'latest_stock' => StockObservation::query()->where('competitor_product_id', $id)->latest('captured_at')->first(),
-                'latest_promo' => PromoObservation::query()->where('competitor_product_id', $id)->latest('captured_at')->first(),
-                'latest_content' => ContentSnapshot::query()->where('competitor_product_id', $id)->latest('captured_at')->first(),
+                'latest_price' => $this->latestFor(PriceObservation::class, $id),
+                'latest_stock' => $this->latestFor(StockObservation::class, $id),
+                'latest_promo' => $this->latestFor(PromoObservation::class, $id),
+                'latest_content' => $this->latestFor(ContentSnapshot::class, $id),
             ],
         ]);
+    }
+
+    /**
+     * Latest observation row for a competitor product, tie-broken on id so a bulk scrape
+     * that lands several rows on the same captured_at resolves to the same "latest" row the
+     * listings index shows via CompetitorProduct::latestPrice().
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  class-string<TModel>  $model
+     * @return TModel|null
+     */
+    private function latestFor(string $model, int $competitorProductId): ?Model
+    {
+        return $model::query()
+            ->where('competitor_product_id', $competitorProductId)
+            ->orderByDesc('captured_at')
+            ->orderByDesc('id')
+            ->first();
     }
 }
