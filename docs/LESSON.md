@@ -181,3 +181,19 @@
 - **PHPStan parallel worker crashed once on Windows** ("severe error … while running parallel worker")
   but `--no-progress` (effectively single-pass) reported `No errors`. Transient Windows worker flake,
   not a real error; re-run before trusting a worker crash.
+
+## B1 review findings (2026-05-25) — fixed before push
+- **Per-feature LLM toggles were dead config**: `ai.visual_match.enabled`, `ai.content_gap.enabled`,
+  `ai.narrative.enabled`, `ai.promo_detection.enabled` existed in the published config and were
+  surfaced in `TenantController` capabilities map, but the ServiceProvider never checked them —
+  setting any to `false` had zero effect (live LLM still called). Fixed by adding null-object drivers
+  (`NullNarrativeWriter`, `NullContentGapAnalyzer`, `NullPromoDetector`, `NullVisualMatcher`) and
+  guarding each binding with `Flag::enabled()`, mirroring the `NullForecaster`/`NullAnomalyDetector`
+  pattern. **Lesson**: every config toggle that callers can set must have a matching guard in the
+  ServiceProvider binding; otherwise the toggle silently does nothing.
+- **`MatchingPipeline` did not catch `RuntimeException` from steps**: `LlmJudgeMatcher::score()`
+  (and any future LLM step) throws `RuntimeException` on a malformed LLM response. The pipeline had
+  no try/catch, so one bad LLM output would propagate to the job and exhaust all retries. Fixed by
+  wrapping `$step->score()` in a try/catch that `continue`s to the next step, treating the exception
+  as a zero-confidence result. **Lesson**: any step that may throw (LLM, network) needs a graceful
+  fallback inside the pipeline loop, not just at the job level.
