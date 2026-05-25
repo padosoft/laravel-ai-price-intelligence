@@ -29,8 +29,8 @@ final class AiDecisionController
             ->when($request->filled('feature'), fn ($q) => $q->where('feature', $request->string('feature')->toString()))
             ->when($request->filled('subject_type'), fn ($q) => $q->where('subject_type', $request->string('subject_type')->toString()))
             ->when($request->filled('subject_id'), fn ($q) => $q->where('subject_id', $request->integer('subject_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('created_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<=', $request->date('to')))
+            ->when($request->filled('from'), fn ($q) => $q->where('created_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 

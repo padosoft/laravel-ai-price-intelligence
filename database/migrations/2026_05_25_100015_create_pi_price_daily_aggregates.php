@@ -32,7 +32,7 @@ return new class extends Migration
             $b->unsignedInteger('samples')->default(0);
             $b->string('currency', 3)->nullable();
             $b->timestamps();
-            $b->unique(['competitor_product_id', 'day'], 'pi_pda_cp_day_uq');
+            $b->unique(['competitor_product_id', 'day', 'currency'], 'pi_pda_cp_day_cur_uq');
         });
     }
 

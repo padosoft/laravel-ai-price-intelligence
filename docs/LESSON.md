@@ -291,3 +291,17 @@
 - **Daily-aggregate command is scale-safe** because the reduction is in SQL (`GROUP BY tenant,
   competitor_product, currency`), so the result set is distinct groups, not raw rows. Runs globally
   in console (tenant global scope is a no-op when no tenant is set) and groups by tenant_id.
+
+## B3 local /review findings (2026-05-25) — all fixed
+- **Daily-aggregate unique key must include `currency`**: the original key was `(competitor_product_id, day)`.
+  When one competitor product has observations in ≥ 2 currencies on the same day, the second `updateOrCreate`
+  matches the first row and overwrites its currency/prices — silent data loss. Fix: extend the unique key to
+  `(competitor_product_id, day, currency)` and add `currency` to the `updateOrCreate` match criteria.
+- **`to` date filter off-by-one** across all date-filtered endpoints (`ObservationController`,
+  `ExportController`, `AiDecisionController`): `$request->date('to')` on a date-only string resolves to
+  midnight (`00:00:00`), so `WHERE captured_at <= '2024-01-31 00:00:00'` excludes records from the full
+  target day. Fix: use a half-open range `>= startOfDay / < addDay()->startOfDay()` for both `from` and `to`.
+- **`whereDate()` defeats the new B3 composite index**: `whereDate('captured_at', $day)` emits
+  `DATE(captured_at) = ?` which wraps the column in a function, preventing MySQL from using the
+  `(competitor_product_id, captured_at)` index added in B3. Fix: use an explicit range
+  (`>= $dayStart / < $dayEnd`) so the index is available for the nightly aggregate command.

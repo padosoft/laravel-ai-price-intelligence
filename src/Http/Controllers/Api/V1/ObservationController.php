@@ -34,8 +34,8 @@ final class ObservationController
         $prices = PriceObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
-            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderByDesc('captured_at')
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 100));
@@ -56,8 +56,8 @@ final class ObservationController
         $rows = StockObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
-            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderByDesc('captured_at')
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 100));
@@ -78,8 +78,8 @@ final class ObservationController
         $rows = PromoObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
             ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
-            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderByDesc('captured_at')
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 100));

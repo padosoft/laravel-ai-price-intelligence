@@ -47,8 +47,8 @@ final class ExportController
 
         $query = PriceObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderBy('id');
 
         $rows = (function () use ($query) {

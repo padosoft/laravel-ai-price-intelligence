@@ -27,8 +27,12 @@ final class MaterializeDailyAggregatesCommand extends Command
             ? Carbon::parse($option)->toDateString()
             : now()->subDay()->toDateString();
 
+        $dayStart = Carbon::parse($day)->startOfDay();
+        $dayEnd = $dayStart->copy()->addDay();
+
         PriceObservation::query()
-            ->whereDate('captured_at', $day)
+            ->where('captured_at', '>=', $dayStart)
+            ->where('captured_at', '<', $dayEnd)
             ->whereNotNull('price_cents')
             ->select('tenant_id', 'competitor_product_id', 'currency')
             ->selectRaw('MIN(price_cents) as min_p, MAX(price_cents) as max_p, ROUND(AVG(price_cents)) as avg_p, COUNT(*) as samples')
@@ -36,7 +40,7 @@ final class MaterializeDailyAggregatesCommand extends Command
             ->get()
             ->each(function (PriceObservation $row) use ($day): void {
                 PriceDailyAggregate::query()->updateOrCreate(
-                    ['competitor_product_id' => (int) $row->competitor_product_id, 'day' => $day],
+                    ['competitor_product_id' => (int) $row->competitor_product_id, 'day' => $day, 'currency' => $row->currency],
                     [
                         'tenant_id' => $row->tenant_id,
                         'currency' => $row->currency,
