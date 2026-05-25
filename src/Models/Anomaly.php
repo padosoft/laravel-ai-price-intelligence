@@ -17,6 +17,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property array<string, mixed>|null $evidence
  * @property bool $is_ai_generated
  * @property Carbon $detected_at
+ * @property Carbon|null $acknowledged_at
  */
 final class Anomaly extends PriceIntelligenceModel
 {
@@ -33,4 +34,10 @@ final class Anomaly extends PriceIntelligenceModel
         'detected_at' => 'datetime',
         'acknowledged_at' => 'datetime',
     ];
+
+    /** Mark this anomaly as reviewed (admin "acknowledge"); idempotent on the timestamp. */
+    public function acknowledge(): void
+    {
+        $this->forceFill(['acknowledged_at' => now()])->save();
+    }
 }

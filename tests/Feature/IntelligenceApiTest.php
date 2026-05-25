@@ -79,6 +79,53 @@ final class IntelligenceApiTest extends TestCase
     }
 
     #[Test]
+    public function a_single_anomaly_can_be_acknowledged(): void
+    {
+        $key = $this->auth();
+        $anomaly = Anomaly::query()->create([
+            'competitor_product_id' => 1,
+            'type' => 'price_error',
+            'severity' => Severity::High,
+            'evidence' => [],
+            'is_ai_generated' => false,
+            'detected_at' => now(),
+        ]);
+
+        $this->assertNull($anomaly->acknowledged_at);
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson("/api/v1/anomalies/{$anomaly->id}/ack")
+            ->assertOk()
+            ->assertJsonPath('data.id', $anomaly->id);
+
+        $this->assertNotNull($anomaly->fresh()->acknowledged_at);
+    }
+
+    #[Test]
+    public function anomalies_can_be_bulk_acknowledged_and_already_acked_are_skipped(): void
+    {
+        $key = $this->auth();
+        $a = Anomaly::query()->create(['competitor_product_id' => 1, 'type' => 'outlier', 'severity' => Severity::Low, 'evidence' => [], 'is_ai_generated' => false, 'detected_at' => now()]);
+        $b = Anomaly::query()->create(['competitor_product_id' => 2, 'type' => 'outlier', 'severity' => Severity::Low, 'evidence' => [], 'is_ai_generated' => false, 'detected_at' => now(), 'acknowledged_at' => now()]);
+
+        // Two ids submitted, but `$b` is already acked → only `$a` is counted.
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson('/api/v1/anomalies:ack', ['ids' => [$a->id, $b->id]])
+            ->assertOk()
+            ->assertJsonPath('data.acknowledged', 1);
+
+        $this->assertNotNull($a->fresh()->acknowledged_at);
+    }
+
+    #[Test]
+    public function bulk_acknowledge_requires_ids(): void
+    {
+        $key = $this->auth();
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson('/api/v1/anomalies:ack', [])
+            ->assertStatus(422);
+    }
+
+    #[Test]
     public function malformed_integer_filters_are_rejected(): void
     {
         $key = $this->auth();

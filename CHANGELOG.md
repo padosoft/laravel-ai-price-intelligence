@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-05-25
+
+Admin-driven backfill (gap-backfill policy): anomaly **acknowledgement** endpoints, so the admin
+Anomalies screen has no dead buttons. 243 PHPUnit green (PHP 8.3/8.4), Pint + PHPStan level 5 clean.
+
+### Added
+- `POST /anomalies/{id}/ack` — mark a single anomaly reviewed (idempotent), returning the row.
+- `POST /anomalies:ack` — bulk-acknowledge by `ids[]`; only unacknowledged rows are touched, returns
+  `{ acknowledged: <count> }`.
+- `Anomaly::acknowledge()` model helper (mirrors `Alert::acknowledge()`).
+
 ## [1.5.0] - 2026-05-25
 
 B-phase **B3**: remaining REST API gaps + enterprise-scale primitives. 239 PHPUnit green

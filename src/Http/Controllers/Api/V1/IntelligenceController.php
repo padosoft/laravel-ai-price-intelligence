@@ -62,6 +62,37 @@ final class IntelligenceController
     }
 
     /**
+     * Mark a single anomaly as reviewed (admin "acknowledge"). Idempotent — re-acking just
+     * refreshes the timestamp.
+     */
+    public function acknowledgeAnomaly(int $id): JsonResponse
+    {
+        $anomaly = Anomaly::query()->findOrFail($id);
+        $anomaly->acknowledge();
+
+        return response()->json(['data' => $anomaly]);
+    }
+
+    /**
+     * Bulk-acknowledge anomalies by id (admin "Bulk acknowledge"). Only unacknowledged rows
+     * are touched; returns the number actually acknowledged.
+     */
+    public function acknowledgeAnomalies(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $count = Anomaly::query()
+            ->whereIn('id', $validated['ids'])
+            ->whereNull('acknowledged_at')
+            ->update(['acknowledged_at' => now()]);
+
+        return response()->json(['data' => ['acknowledged' => $count]]);
+    }
+
+    /**
      * Aggregated, anonymous review-sentiment insights (GDPR-safe module). Returns an
      * empty set when the review_insight feature is disabled in core config.
      */
