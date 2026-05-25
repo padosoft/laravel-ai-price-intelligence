@@ -109,6 +109,10 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   docs/superpowers/plans/2026-05-25-b3-api-gaps-scale.md.
 - [ ] **B4–B8 (admin)**: real Laravel+DB test harness + visual regression; wire placeholder actions;
   enterprise UX (pagination/virtualization/facets); SSE bearer/polling fallback; release hygiene → admin v1.1.0.
+- [x] **v1.6.0 (core) — admin gap-backfill (B5)**: anomaly acknowledgement endpoints
+  `POST /anomalies/{id}/ack` (idempotent no-op when already acked) + `POST /anomalies:ack`
+  (bulk by ids[], skips acked, returns count) + `Anomaly::acknowledge()`. So the admin Anomalies
+  screen has no dead buttons. 243 PHPUnit green; PR #16. Triggered during admin B5 wiring.
 
 ### Next action
 **B3 COMPLETE — tag core v1.5.0 + GitHub release. CORE B-phases (B1-B3) DONE.** Then move to the
