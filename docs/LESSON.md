@@ -269,3 +269,25 @@
   updating `AbstractApiAdapter` to use `$this->externalRef(url) ?? $snapshot->externalRef`. **Lesson**: when an API
   returns a canonical identifier, propagate it all the way to the persistence layer rather than discarding it after
   the DTO boundary.
+
+## B3 — API gaps + enterprise scale (core v1.5.0)
+- **Dynamic `selectRaw` aliases trip PHPStan** when the query returns Eloquent models: `$row->min_p`
+  on a `PriceObservation`/`CompetitorProduct` is "access to undefined property". Use
+  `$row->getAttribute('min_p')` (keeps the model's global tenant scope, unlike `->toBase()` which
+  strips Eloquent scopes — important for tenant-scoped facets). Type the closure param
+  (`fn (PriceObservation $row) => …`) so PHPStan is happy.
+- **`updateOrCreate` + a `date`-cast column silently re-inserts**: the cast stores `'Y-m-d 00:00:00'`
+  but the WHERE binding for the lookup is the raw `'Y-m-d'` string (casts don't apply to where
+  bindings) → no match → UNIQUE violation on re-run. Fix: store `day` as a **plain `Y-m-d` string**
+  (drop the `date` cast) so write/read/lookup all use the same value. Idempotency test caught it.
+- **PHPStan flags nullsafe on non-nullable**: `$o->captured_at?->toIso8601String()` where the model
+  `@property Carbon $captured_at` is non-nullable → `nullsafe.neverNull`. Use `->`.
+- **OOM-safe export without a queue**: `response()->streamDownload()` over an Eloquent `cursor()`
+  (wrapped in a generator) streams 100k+ rows without materializing them — simpler than a queued
+  job + temp file + polling, and satisfies the enterprise acceptance criterion. CSV via `league/csv`
+  `Writer::createFromStream(fopen('php://output','w'))`. Promoted league/csv to `require` (runtime).
+- **A private test helper named `seed()` fatals** — it collides with Testbench's public `seed()`.
+  Name domain helpers `seedX()`.
+- **Daily-aggregate command is scale-safe** because the reduction is in SQL (`GROUP BY tenant,
+  competitor_product, currency`), so the result set is distinct groups, not raw rows. Runs globally
+  in console (tenant global scope is a no-op when no tenant is set) and groups by tenant_id.

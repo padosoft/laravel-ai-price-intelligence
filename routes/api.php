@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AiDecisionController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AlertController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ApiKeyController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\AuditController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\CatalogController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ExportController;
+use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\FacetController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\IntelligenceController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\MatchController;
 use Padosoft\PriceIntelligence\Http\Controllers\Api\V1\ObservationController;
@@ -31,6 +34,7 @@ Route::get('/health', static fn (): array => [
 
 Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/tenants/me', [TenantController::class, 'me'])->name('price-intelligence.tenants.me');
+    Route::patch('/tenants/me/settings', [TenantController::class, 'updateSettings'])->name('price-intelligence.tenants.settings.update');
     Route::get('/stats', [StatsController::class, 'dashboard'])->name('price-intelligence.stats.dashboard');
 
     Route::get('/catalog/products', [CatalogController::class, 'index'])->name('price-intelligence.catalog.index');
@@ -51,8 +55,18 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::post('/competitor-products', [MatchController::class, 'storeCompetitorProduct'])->name('price-intelligence.competitor-products.store');
 
     Route::get('/observations/prices', [ObservationController::class, 'prices'])->name('price-intelligence.observations.prices');
+    Route::get('/observations/stock', [ObservationController::class, 'stock'])->name('price-intelligence.observations.stock');
+    Route::get('/observations/promos', [ObservationController::class, 'promos'])->name('price-intelligence.observations.promos');
+    Route::get('/observations/prices:export', [ExportController::class, 'prices'])->name('price-intelligence.observations.prices.export');
     Route::get('/competitor-products', [ObservationController::class, 'index'])->name('price-intelligence.competitor-products.index');
     Route::get('/competitor-products/{id}', [ObservationController::class, 'show'])->whereNumber('id')->name('price-intelligence.competitor-products.show');
+
+    Route::get('/catalog/products:export', [ExportController::class, 'products'])->name('price-intelligence.catalog.export');
+
+    Route::get('/ai-decisions', [AiDecisionController::class, 'index'])->name('price-intelligence.ai-decisions.index');
+
+    Route::get('/facets/hosts', [FacetController::class, 'hosts'])->name('price-intelligence.facets.hosts');
+    Route::get('/facets/categories', [FacetController::class, 'categories'])->name('price-intelligence.facets.categories');
 
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
     Route::get('/anomalies', [IntelligenceController::class, 'anomalies'])->name('price-intelligence.anomalies.index');

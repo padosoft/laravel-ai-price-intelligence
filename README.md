@@ -157,6 +157,20 @@ Set e.g. `PI_AMAZON_DRIVER=keepa` + `PI_KEEPA_KEY=…`, or `PI_EBAY_CLIENT_ID/SE
 `PI_SERPAPI_KEY`, or `PI_FARFETCH_DRIVER=retailed` + `PI_RETAILED_KEY`. No extra Composer packages
 are required — the adapters call each API directly over HTTP.
 
+### Analytics, facets & export
+
+- **History**: `GET /observations/prices` (now with a `?host=` filter), `GET /observations/stock`,
+  `GET /observations/promos` — cursor-paginated time series.
+- **AI decision log**: `GET /ai-decisions` (filter by feature/subject/date) backs the EU AI Act
+  Compliance screen.
+- **Facets** (computed in SQL): `GET /facets/hosts` (confirmed-competitor count per host) and
+  `GET /facets/categories`.
+- **Bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export` stream CSV
+  via a database cursor — OOM-safe for 100k+ rows. (Excel is opt-in via `phpoffice/phpspreadsheet`.)
+- **Tenant settings**: read in `GET /tenants/me` and writable via `PATCH /tenants/me/settings`.
+- **Daily aggregates**: `piprice:aggregates:daily` materializes per-day min/max/avg into
+  `pi_price_daily_aggregates` (scheduled nightly) so long histories stay cheap as raw rows age out.
+
 ## AI features
 
 | Feature | Default | Notes |

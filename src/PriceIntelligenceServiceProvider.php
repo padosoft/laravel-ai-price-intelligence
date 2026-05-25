@@ -7,6 +7,7 @@ namespace Padosoft\PriceIntelligence;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use Padosoft\PriceIntelligence\Console\Commands\ImportCatalogCommand;
+use Padosoft\PriceIntelligence\Console\Commands\MaterializeDailyAggregatesCommand;
 use Padosoft\PriceIntelligence\Console\Commands\PruneAuditLogsCommand;
 use Padosoft\PriceIntelligence\Console\Commands\RunDueTargetsCommand;
 use Padosoft\PriceIntelligence\Contracts\AiActBridgeInterface;
@@ -179,12 +180,17 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
                 ImportCatalogCommand::class,
                 RunDueTargetsCommand::class,
                 PruneAuditLogsCommand::class,
+                MaterializeDailyAggregatesCommand::class,
             ]);
 
             $this->app->booted(function (): void {
                 /** @var Schedule $schedule */
                 $schedule = $this->app->make(Schedule::class);
                 $schedule->command('piprice:run-due')->everyMinute()->withoutOverlapping();
+
+                if (Flag::enabled('price-intelligence.storage.aggregates.enabled', true)) {
+                    $schedule->command('piprice:aggregates:daily')->dailyAt('02:30')->withoutOverlapping();
+                }
             });
         }
     }

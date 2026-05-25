@@ -17,6 +17,7 @@ return [
         'competitor_products' => 'pi_competitor_products',
         'match_proposals' => 'pi_match_proposals',
         'price_observations' => 'pi_price_observations',
+        'price_daily_aggregates' => 'pi_price_daily_aggregates',
         'content_snapshots' => 'pi_content_snapshots',
         'stock_observations' => 'pi_stock_observations',
         'promo_observations' => 'pi_promo_observations',

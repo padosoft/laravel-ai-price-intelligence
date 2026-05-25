@@ -101,15 +101,18 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   (`scrape` default + `retailed`/`apify`). Clients under `Services/Scraping/Marketplaces/Api/`,
   Http::fake-tested + opt-in live suite. Graceful scrape fallback when creds absent. 216 PHPUnit green.
   Plan: docs/superpowers/plans/2026-05-25-b2-marketplace-adapters.md.
-- [ ] **B3 — API gaps + enterprise scale → core v1.5.0**: `/observations/prices` host filter; stock/promo
-  history endpoints; `GET /ai-decisions`; facet/host-count endpoints; bulk CSV/Excel export; tenant
-  settings-write; chunk/batch jobs + daily-aggregate materialization + index review.
+- [x] **B3 — API gaps + enterprise scale → core v1.5.0**: `/observations/prices` host filter + stock/promo
+  history endpoints; `GET /ai-decisions`; `/facets/hosts` + `/facets/categories` (SQL/lazy groupBy);
+  streamed CSV export (`/catalog/products:export`, `/observations/prices:export`, cursor+streamDownload,
+  OOM-safe); `PATCH /tenants/me/settings` + settings in `me()`; daily-aggregate table + `piprice:aggregates:daily`
+  (nightly) + composite index review. league/csv → require. 239 PHPUnit green. Plan:
+  docs/superpowers/plans/2026-05-25-b3-api-gaps-scale.md.
 - [ ] **B4–B8 (admin)**: real Laravel+DB test harness + visual regression; wire placeholder actions;
   enterprise UX (pagination/virtualization/facets); SSE bearer/polling fallback; release hygiene → admin v1.1.0.
 
 ### Next action
-**B2 COMPLETE — tag core v1.4.0 + GitHub release**, then start **B3 — API gaps + enterprise scale →
-core v1.5.0**: `/observations/prices` host filter; `GET /observations/stock` & `/observations/promos`
-history; `GET /ai-decisions`; facet/host-count endpoints; bulk CSV/Excel export (queued/streamed);
-tenant settings-write (`PATCH /tenants/me/settings`); chunk/batch jobs + daily-aggregate
-materialization + hot-table index review. Plan from the B-phases spec §3 (CORE/B3).
+**B3 COMPLETE — tag core v1.5.0 + GitHub release. CORE B-phases (B1-B3) DONE.** Then move to the
+**admin** B-phases against core ^1.5: **B4** (real Laravel+DB test harness + visual regression),
+**B5** (wire placeholder actions/forms — consumes B3 export/settings/facets), **B6** (enterprise UX:
+pagination/virtualization/facet chips/ai-decision viewer), **B7** (SSE bearer/polling fallback),
+**B8** (release hygiene → admin v1.1.0). Admin repo: `../laravel-ai-price-intelligence-admin`.
