@@ -49,7 +49,7 @@ final class Anomaly extends PriceIntelligenceModel
         $now = now();
 
         self::query()
-            ->withoutGlobalScope('pi_tenant')
+            ->withoutTenantScope()
             ->whereKey($this->getKey())
             ->where('tenant_id', $this->tenant_id)
             ->whereNull('acknowledged_at')
