@@ -25,14 +25,17 @@ final class TenantSettingsTest extends TestCase
     }
 
     #[Test]
-    public function me_exposes_settings_defaulting_to_empty(): void
+    public function me_exposes_settings_as_an_empty_object_when_unset(): void
     {
         [, $key] = $this->authTenant();
 
-        $this->withHeader('X-Api-Key', $key)
+        $response = $this->withHeader('X-Api-Key', $key)
             ->getJson('/api/v1/tenants/me')
-            ->assertOk()
-            ->assertJsonPath('data.tenant.settings', []);
+            ->assertOk();
+
+        // Settings serialize as a JSON object ({}), not an array ([]), so clients can always treat
+        // them as a map. (assertJsonPath would decode {} to [] and hide the distinction.)
+        $this->assertStringContainsString('"settings":{}', $response->getContent());
     }
 
     #[Test]
