@@ -12,6 +12,7 @@ use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Enums\MatchStatus;
 use Padosoft\PriceIntelligence\Models\Product;
+use RuntimeException;
 
 /**
  * Runs the cascade of match steps in order, short-circuiting on a conclusive
@@ -51,9 +52,13 @@ final class MatchingPipeline
                 continue;
             }
 
-            $score = $step->score($product, $candidate);
+            try {
+                $score = $step->score($product, $candidate);
+            } catch (RuntimeException) {
+                // A flaky LLM or decode failure must not fail the pipeline; treat as no-match.
+                continue;
+            }
             $trail[] = $score->toArray();
-
             if ($score->confidence > $best->confidence) {
                 $best = $score;
             }

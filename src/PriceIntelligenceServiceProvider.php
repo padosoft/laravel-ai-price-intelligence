@@ -29,7 +29,11 @@ use Padosoft\PriceIntelligence\Services\Ai\Llm\FakeLlmProvider;
 use Padosoft\PriceIntelligence\Services\Ai\Llm\LaravelAiLlmProvider;
 use Padosoft\PriceIntelligence\Services\Ai\NarrativeWriter;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
+use Padosoft\PriceIntelligence\Services\Ai\NullContentGapAnalyzer;
 use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
+use Padosoft\PriceIntelligence\Services\Ai\NullNarrativeWriter;
+use Padosoft\PriceIntelligence\Services\Ai\NullPromoDetector;
+use Padosoft\PriceIntelligence\Services\Ai\NullVisualMatcher;
 use Padosoft\PriceIntelligence\Services\Ai\PromoDetector;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
@@ -70,25 +74,33 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
                 : new FakeLlmProvider;
         });
 
-        $this->app->bind(NarrativeWriterInterface::class, static fn ($app): NarrativeWriterInterface => new NarrativeWriter(
-            $app->make(LlmProviderInterface::class),
-            $app->make(AiDecisionLogger::class),
-        ));
+        $this->app->bind(NarrativeWriterInterface::class, static fn ($app): NarrativeWriterInterface => Flag::enabled('price-intelligence.ai.narrative.enabled', true)
+            ? new NarrativeWriter(
+                $app->make(LlmProviderInterface::class),
+                $app->make(AiDecisionLogger::class),
+            )
+            : new NullNarrativeWriter);
 
-        $this->app->bind(ContentGapAnalyzerInterface::class, static fn ($app): ContentGapAnalyzerInterface => new ContentGapAnalyzer(
-            $app->make(LlmProviderInterface::class),
-            $app->make(AiDecisionLogger::class),
-        ));
+        $this->app->bind(ContentGapAnalyzerInterface::class, static fn ($app): ContentGapAnalyzerInterface => Flag::enabled('price-intelligence.ai.content_gap.enabled', true)
+            ? new ContentGapAnalyzer(
+                $app->make(LlmProviderInterface::class),
+                $app->make(AiDecisionLogger::class),
+            )
+            : new NullContentGapAnalyzer);
 
-        $this->app->bind(PromoDetectorInterface::class, static fn ($app): PromoDetectorInterface => new PromoDetector(
-            $app->make(LlmProviderInterface::class),
-            $app->make(AiDecisionLogger::class),
-        ));
+        $this->app->bind(PromoDetectorInterface::class, static fn ($app): PromoDetectorInterface => Flag::enabled('price-intelligence.ai.promo_detection.enabled', true)
+            ? new PromoDetector(
+                $app->make(LlmProviderInterface::class),
+                $app->make(AiDecisionLogger::class),
+            )
+            : new NullPromoDetector);
 
-        $this->app->bind(VisualMatcherInterface::class, static fn ($app): VisualMatcherInterface => new VisualMatcher(
-            $app->make(LlmProviderInterface::class),
-            $app->make(AiDecisionLogger::class),
-        ));
+        $this->app->bind(VisualMatcherInterface::class, static fn ($app): VisualMatcherInterface => Flag::enabled('price-intelligence.ai.visual_match.enabled', true)
+            ? new VisualMatcher(
+                $app->make(LlmProviderInterface::class),
+                $app->make(AiDecisionLogger::class),
+            )
+            : new NullVisualMatcher);
 
         $this->app->bind(EmbeddingProviderInterface::class, static function ($app): EmbeddingProviderInterface {
             // Default offline-safe driver; switch to laravel/ai via config or rebind in the host.
