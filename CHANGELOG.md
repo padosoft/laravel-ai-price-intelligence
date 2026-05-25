@@ -6,6 +6,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-25
+
+Admin A4 backfill (consumed by `padosoft/laravel-ai-price-intelligence-admin`). 169 PHPUnit green
+(PHP 8.3/8.4), Pint + PHPStan level 5 clean.
+
+### Added
+- **Competitors list**: `GET /competitor-products` — paginated listings (confirmed by default,
+  filterable by `status` / `host` / `monitoring_target_id` / `product_id`), each row eager-loading
+  the matched product (`target.product`), the source host, and the latest price observation so the
+  admin can compute the price delta without N extra requests.
+- **Match candidate metadata**: cached the discovery snapshot (`candidate_title`,
+  `candidate_image_url`, `candidate_price_cents`, `candidate_host`) on `MatchProposal` so the
+  matches-review screen renders candidates without a second fetch; `GET /matches` eager-loads
+  `target.product`.
+
+### Changed
+- `CompetitorProduct::latestPrice()` resolves via `ofMany(['captured_at'=>'max','id'=>'max'])` and
+  the competitor-product detail (`show()`) tie-breaks `latest_*` rows on `id` — deterministic
+  "latest" row under timestamp ties (bulk scrapes), consistent between list and detail.
+
 ## [1.1.0] - 2026-05-24
 
 Admin-facing REST API expansion (consumed by `padosoft/laravel-ai-price-intelligence-admin`).
@@ -58,6 +78,7 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/padosoft/laravel-ai-price-intelligence/releases/tag/v1.0.0
