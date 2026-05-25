@@ -133,6 +133,54 @@ final class IntelligenceApiTest extends TestCase
     }
 
     #[Test]
+    public function bulk_acknowledge_rejects_oversized_or_invalid_ids(): void
+    {
+        $key = $this->auth();
+        // Non-positive ids are rejected.
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson('/api/v1/anomalies:ack', ['ids' => [0, -1]])
+            ->assertStatus(422);
+        // Oversized batch (> 5000) is rejected.
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson('/api/v1/anomalies:ack', ['ids' => range(1, 5001)])
+            ->assertStatus(422);
+    }
+
+    #[Test]
+    public function acknowledge_is_tenant_isolated(): void
+    {
+        // Tenant A owns the anomaly.
+        $this->auth();
+        $anomaly = Anomaly::query()->create([
+            'competitor_product_id' => 1,
+            'type' => 'price_error',
+            'severity' => Severity::High,
+            'evidence' => [],
+            'is_ai_generated' => false,
+            'detected_at' => now(),
+        ]);
+        $tenantAId = $anomaly->tenant_id;
+
+        // Tenant B must not be able to ack tenant A's anomaly.
+        $tenantB = Tenant::create(['code' => 'b', 'name' => 'B']);
+        [, $keyB] = ApiKey::issue($tenantB->id, 'kb', ['*']);
+        app(TenantContext::class)->set($tenantB->id);
+
+        $this->withHeader('X-Api-Key', $keyB)
+            ->postJson("/api/v1/anomalies/{$anomaly->id}/ack")
+            ->assertNotFound();
+
+        $this->withHeader('X-Api-Key', $keyB)
+            ->postJson('/api/v1/anomalies:ack', ['ids' => [$anomaly->id]])
+            ->assertOk()
+            ->assertJsonPath('data.acknowledged', 0);
+
+        // Tenant A's anomaly is still unacknowledged.
+        app(TenantContext::class)->set($tenantAId);
+        $this->assertNull($anomaly->fresh()->acknowledged_at);
+    }
+
+    #[Test]
     public function malformed_integer_filters_are_rejected(): void
     {
         $key = $this->auth();

@@ -81,8 +81,8 @@ final class IntelligenceController
     public function acknowledgeAnomalies(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer'],
+            'ids' => ['required', 'array', 'min:1', 'max:5000'],
+            'ids.*' => ['integer', 'min:1', 'distinct'],
         ]);
 
         // Compute the timestamp once; bump updated_at alongside since the query-builder update
