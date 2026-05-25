@@ -97,7 +97,14 @@ final class IntelligenceApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $anomaly->id);
 
-        $this->assertNotNull($anomaly->fresh()->acknowledged_at);
+        $first = $anomaly->fresh()->acknowledged_at;
+        $this->assertNotNull($first);
+
+        // Idempotent: re-acking is a no-op and preserves the original timestamp.
+        $this->withHeader('X-Api-Key', $key)
+            ->postJson("/api/v1/anomalies/{$anomaly->id}/ack")
+            ->assertOk();
+        $this->assertTrue($first->equalTo($anomaly->fresh()->acknowledged_at));
     }
 
     #[Test]
@@ -139,5 +146,8 @@ final class IntelligenceApiTest extends TestCase
     {
         $this->getJson('/api/v1/forecasts')->assertUnauthorized();
         $this->getJson('/api/v1/anomalies')->assertUnauthorized();
+        // The new acknowledgement write routes must also be guarded.
+        $this->postJson('/api/v1/anomalies/1/ack')->assertUnauthorized();
+        $this->postJson('/api/v1/anomalies:ack', ['ids' => [1]])->assertUnauthorized();
     }
 }

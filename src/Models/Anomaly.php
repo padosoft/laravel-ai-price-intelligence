@@ -35,9 +35,17 @@ final class Anomaly extends PriceIntelligenceModel
         'acknowledged_at' => 'datetime',
     ];
 
-    /** Mark this anomaly as reviewed (admin "acknowledge"); idempotent on the timestamp. */
+    /**
+     * Mark this anomaly as reviewed (admin "acknowledge"). Idempotent: a no-op when already
+     * acknowledged, so the original review timestamp is preserved (matches the bulk endpoint,
+     * which only touches rows whose acknowledged_at is null).
+     */
     public function acknowledge(): void
     {
+        if ($this->acknowledged_at !== null) {
+            return;
+        }
+
         $this->forceFill(['acknowledged_at' => now()])->save();
     }
 }

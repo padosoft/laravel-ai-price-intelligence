@@ -62,8 +62,9 @@ final class IntelligenceController
     }
 
     /**
-     * Mark a single anomaly as reviewed (admin "acknowledge"). Idempotent — re-acking just
-     * refreshes the timestamp.
+     * Mark a single anomaly as reviewed (admin "acknowledge"). Idempotent — acking an
+     * already-acknowledged anomaly is a no-op (the original timestamp is kept) and still
+     * returns 200 with the row.
      */
     public function acknowledgeAnomaly(int $id): JsonResponse
     {
