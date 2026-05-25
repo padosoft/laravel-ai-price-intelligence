@@ -85,8 +85,8 @@ final class IntelligenceController
             'ids.*' => ['integer', 'min:1', 'distinct'],
         ]);
 
-        // Compute the timestamp once; bump updated_at alongside since the query-builder update
-        // bypasses Eloquent's automatic timestamp handling.
+        // Compute the timestamp once and set updated_at explicitly to the same instant so it
+        // matches acknowledged_at exactly (rather than relying on the builder's own now()).
         $now = now();
         $count = Anomaly::query()
             ->whereIn('id', $validated['ids'])

@@ -38,16 +38,20 @@ final class Anomaly extends PriceIntelligenceModel
     /**
      * Mark this anomaly as reviewed (admin "acknowledge"). Idempotent and race-safe: a single
      * atomic `WHERE acknowledged_at IS NULL` UPDATE sets the timestamp only if not already set,
-     * so concurrent requests can't overwrite the original review time. `updated_at` is bumped
-     * alongside (the query builder doesn't auto-manage timestamps). The instance is refreshed to
-     * reflect the stored state (whether this call or a concurrent one set it).
+     * so concurrent requests can't overwrite the original review time. The update is scoped to
+     * this instance's own tenant (bypassing the ambient TenantContext global scope) so it stays
+     * deterministic even if called from a multi-tenant job context. `updated_at` is set
+     * explicitly to the same instant so it matches `acknowledged_at` exactly. The instance is
+     * refreshed to reflect the stored state (whether this call or a concurrent one set it).
      */
     public function acknowledge(): void
     {
         $now = now();
 
         self::query()
+            ->withoutGlobalScope('pi_tenant')
             ->whereKey($this->getKey())
+            ->where('tenant_id', $this->tenant_id)
             ->whereNull('acknowledged_at')
             ->update(['acknowledged_at' => $now, 'updated_at' => $now]);
 
