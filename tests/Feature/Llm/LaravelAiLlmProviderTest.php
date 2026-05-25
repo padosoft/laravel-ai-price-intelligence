@@ -66,7 +66,7 @@ final class LaravelAiLlmProviderTest extends TestCase
     }
 
     #[Test]
-    public function completeJson_decodes_strict_json(): void
+    public function complete_json_decodes_strict_json(): void
     {
         $runner = $this->runnerReturning('{"has_promo": true, "effective_discount_pct": 15}');
         $provider = new LaravelAiLlmProvider($runner);
@@ -77,7 +77,7 @@ final class LaravelAiLlmProviderTest extends TestCase
     }
 
     #[Test]
-    public function completeJson_strips_markdown_fence_before_decoding(): void
+    public function complete_json_strips_markdown_fence_before_decoding(): void
     {
         $runner = $this->runnerReturning("```json\n{\"confidence\": 72}\n```");
         $provider = new LaravelAiLlmProvider($runner);
@@ -88,7 +88,7 @@ final class LaravelAiLlmProviderTest extends TestCase
     }
 
     #[Test]
-    public function completeJson_throws_on_undecodable_output(): void
+    public function complete_json_throws_on_undecodable_output(): void
     {
         $runner = $this->runnerReturning('I cannot help with that.');
         $provider = new LaravelAiLlmProvider($runner);

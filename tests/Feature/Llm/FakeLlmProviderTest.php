@@ -26,7 +26,7 @@ final class FakeLlmProviderTest extends TestCase
     }
 
     #[Test]
-    public function completeJson_returns_feature_shaped_payload(): void
+    public function complete_json_returns_feature_shaped_payload(): void
     {
         $provider = new FakeLlmProvider;
 
