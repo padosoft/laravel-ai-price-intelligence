@@ -37,7 +37,7 @@ final class MaterializeDailyAggregatesCommand extends Command
             ->select('tenant_id', 'competitor_product_id', 'currency')
             ->selectRaw('MIN(price_cents) as min_p, MAX(price_cents) as max_p, ROUND(AVG(price_cents)) as avg_p, COUNT(*) as samples')
             ->groupBy('tenant_id', 'competitor_product_id', 'currency')
-            ->get()
+            ->cursor()
             ->each(function (PriceObservation $row) use ($day): void {
                 // Coalesce a null observation currency to the table's '' sentinel so the unique key
                 // (competitor_product_id, day, currency) has no nullable component (keeps idempotency).

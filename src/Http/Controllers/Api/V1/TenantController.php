@@ -29,8 +29,8 @@ final class TenantController
         return response()->json([
             'data' => [
                 'tenant' => $tenant !== null
-                    ? ['id' => $tenant->id, 'code' => $tenant->code, 'name' => $tenant->name, 'settings' => $tenant->settings ?? []]
-                    : ['id' => $tenantId, 'code' => null, 'name' => null, 'settings' => []],
+                    ? ['id' => $tenant->id, 'code' => $tenant->code, 'name' => $tenant->name, 'settings' => (object) ($tenant->settings ?? [])]
+                    : ['id' => $tenantId, 'code' => null, 'name' => null, 'settings' => (object) []],
                 'features' => $this->features(),
                 'abilities' => $this->abilities($request),
             ],
@@ -54,7 +54,7 @@ final class TenantController
             'settings' => array_merge((array) $tenant->settings, $validated['settings']),
         ])->save();
 
-        return response()->json(['data' => ['settings' => $tenant->settings]]);
+        return response()->json(['data' => ['settings' => (object) ($tenant->settings ?? [])]]);
     }
 
     /**

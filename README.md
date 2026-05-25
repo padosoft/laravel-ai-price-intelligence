@@ -163,8 +163,8 @@ are required — the adapters call each API directly over HTTP.
   `GET /observations/promos` — cursor-paginated time series.
 - **AI decision log**: `GET /ai-decisions` (filter by feature/subject/date) backs the EU AI Act
   Compliance screen.
-- **Facets** (computed in SQL): `GET /facets/hosts` (confirmed-competitor count per host) and
-  `GET /facets/categories`.
+- **Facets**: `GET /facets/hosts` (confirmed-competitor count per host, SQL `GROUP BY`) and
+  `GET /facets/categories` (per-category product counts, aggregated over a lazy cursor).
 - **Bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export` stream CSV
   via a database cursor — OOM-safe for 100k+ rows. (Excel is opt-in via `phpoffice/phpspreadsheet`.)
 - **Tenant settings**: read in `GET /tenants/me` and writable via `PATCH /tenants/me/settings`.
