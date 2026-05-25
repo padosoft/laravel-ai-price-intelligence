@@ -11,6 +11,7 @@ use Padosoft\PriceIntelligence\Services\Matching\Steps\ExactGtinMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\LlmJudgeMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\MpnBrandMatcher;
 use Padosoft\PriceIntelligence\Services\Matching\Steps\NormalizedNameMatcher;
+use Padosoft\PriceIntelligence\Support\Config\Flag;
 
 /**
  * Assembles the matching cascade in cost order: cheap deterministic steps first
@@ -34,11 +35,11 @@ final class MatchingPipelineFactory
             new NormalizedNameMatcher,
         ];
 
-        if ((bool) config('price-intelligence.matching.embeddings.enabled', true) !== false) {
+        if (Flag::enabled('price-intelligence.matching.embeddings.enabled', true)) {
             $steps[] = new EmbeddingSemanticMatcher($this->embeddings);
         }
 
-        if ((bool) config('price-intelligence.matching.llm.enabled', true) !== false) {
+        if (Flag::enabled('price-intelligence.matching.llm.enabled', true)) {
             $steps[] = new LlmJudgeMatcher($this->llm);
         }
 

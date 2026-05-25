@@ -197,3 +197,21 @@
   wrapping `$step->score()` in a try/catch that `continue`s to the next step, treating the exception
   as a zero-confidence result. **Lesson**: any step that may throw (LLM, network) needs a graceful
   fallback inside the pipeline loop, not just at the job level.
+
+### B1 PR #13 — GitHub Copilot + Codex review findings (all fixed before merge)
+- **LLM judge must gate confidence on the verdict**: a `{same_product:false, confidence:95}` reply
+  means "95% sure they DIFFER" — returning 95 as MatchScore confidence would wrongly promote it to
+  `confirmed`. Zero the confidence when `same_product` is false (both reviewers flagged, Codex P1).
+- **Use `Flag::enabled()` not `(bool) config()` for env-driven toggles**: `(bool) 'false'` is `true`,
+  so a host disabling `matching.llm.enabled`/`embeddings.enabled` via env would still get paid LLM/
+  embedding steps. `Support\Config\Flag::enabled()` parses string booleans correctly — already used
+  for the `ai.*` toggles; apply it consistently.
+- **Scope exception swallowing to the flaky step only**: catching `RuntimeException` around *every*
+  pipeline step hides real bugs in deterministic matchers. Wrap only `BorderlineOnlyStep` steps in
+  try/catch+report(); let deterministic steps throw.
+- **Band-consistent borderline gate**: `isUncertain()` should reuse the configured `[low, high)`
+  (the "suggested"/admin-review band) rather than a magic `high-45`, so a host changing the band
+  doesn't silently change which candidates hit the judge.
+- **Opt-in providers belong in `suggest`, not `require`**: `laravel-ai-regolo` (and its transitive
+  aws-sdk-php via laravel/ai) shouldn't be forced on every consumer. `laravel/ai` is the hard dep;
+  Regolo is documented + suggested, installed only when `PI_LLM_PROVIDER=regolo`.

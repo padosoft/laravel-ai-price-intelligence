@@ -46,20 +46,25 @@ final class MatchingPipeline
                 continue;
             }
 
-            // Expensive borderline-only steps (e.g. the LLM judge) run only when the best
-            // score so far is uncertain, so confident or hopeless candidates skip the call.
-            if ($step instanceof BorderlineOnlyStep && ! $this->isUncertain($best->confidence)) {
-                continue;
-            }
+            if ($step instanceof BorderlineOnlyStep) {
+                // Expensive borderline-only steps (e.g. the LLM judge) run only when the best
+                // score so far is uncertain, so confident or rejected candidates skip the call.
+                if (! $this->isUncertain($best->confidence)) {
+                    continue;
+                }
 
-            try {
+                try {
+                    $score = $step->score($product, $candidate);
+                } catch (RuntimeException $e) {
+                    // A flaky external judge (e.g. LLM timeout / undecodable JSON) must not fail the
+                    // cascade; report it and fall back to the deterministic steps' best score.
+                    report($e);
+
+                    continue;
+                }
+            } else {
+                // Deterministic steps are trusted: let real bugs surface instead of silently degrading.
                 $score = $step->score($product, $candidate);
-            } catch (RuntimeException $e) {
-                // A flaky LLM or JSON-decode failure must not fail the whole cascade; report it
-                // for observability and fall back to the deterministic steps' best score.
-                report($e);
-
-                continue;
             }
 
             $trail[] = $score->toArray();
@@ -83,10 +88,11 @@ final class MatchingPipeline
 
     private function isUncertain(int $confidence): bool
     {
-        [, $high] = $this->confidenceBand;
-        $floor = max(0, $high - 45); // default band [60,85] => run judge for best in [40, 85)
+        // The judge adjudicates the configured "suggested" band: run it only when the best score so
+        // far would land in [low, high) (admin-review territory), consistent with decide().
+        [$low, $high] = $this->confidenceBand;
 
-        return $confidence >= $floor && $confidence < $high;
+        return $confidence >= $low && $confidence < $high;
     }
 
     private function decide(int $confidence): MatchStatus

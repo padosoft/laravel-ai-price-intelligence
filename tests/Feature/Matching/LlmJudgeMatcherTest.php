@@ -86,6 +86,22 @@ final class LlmJudgeMatcherTest extends TestCase
     }
 
     #[Test]
+    public function judge_zeroes_confidence_when_model_says_not_the_same_product(): void
+    {
+        // A confident "these differ" ({same_product:false, confidence:95}) must NOT become a 95% match.
+        $llm = $this->llmReturning(95, false);
+        $judge = new LlmJudgeMatcher($llm);
+
+        $score = $judge->score(
+            new Product(['name' => 'Widget', 'brand' => 'Acme']),
+            new ProductSnapshot(url: 'https://x/p', title: 'Totally Different Thing'),
+        );
+
+        $this->assertSame(0, $score->confidence);
+        $this->assertFalse($score->evidence['same_product']);
+    }
+
+    #[Test]
     public function pipeline_skips_judge_when_best_is_already_confident(): void
     {
         $llm = $this->llmReturning(78, true);

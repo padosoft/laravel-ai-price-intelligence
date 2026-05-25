@@ -33,14 +33,20 @@ final class LlmJudgeMatcher implements BorderlineOnlyStep, MatchStepInterface
         );
 
         $json = $result->json ?? [];
-        $confidence = (int) ($json['confidence'] ?? 0);
-        $confidence = max(0, min(100, $confidence));
+        $sameProduct = (bool) ($json['same_product'] ?? false);
+        $confidence = max(0, min(100, (int) ($json['confidence'] ?? 0)));
+
+        // The model's confidence is its certainty about its verdict; the pipeline reads MatchScore
+        // confidence as *match* confidence. A confident "not the same product" must score 0, not high.
+        if (! $sameProduct) {
+            $confidence = 0;
+        }
 
         return new MatchScore(
             confidence: $confidence,
             method: MatchMethod::Llm,
             evidence: [
-                'same_product' => (bool) ($json['same_product'] ?? false),
+                'same_product' => $sameProduct,
                 'rationale' => is_string($json['rationale'] ?? null) ? $json['rationale'] : '',
                 'model' => $result->model,
             ],
