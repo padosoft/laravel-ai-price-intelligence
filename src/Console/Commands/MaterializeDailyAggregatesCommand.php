@@ -39,11 +39,14 @@ final class MaterializeDailyAggregatesCommand extends Command
             ->groupBy('tenant_id', 'competitor_product_id', 'currency')
             ->get()
             ->each(function (PriceObservation $row) use ($day): void {
+                // Coalesce a null observation currency to the table's '' sentinel so the unique key
+                // (competitor_product_id, day, currency) has no nullable component (keeps idempotency).
+                $currency = is_string($row->currency) ? $row->currency : '';
+
                 PriceDailyAggregate::query()->updateOrCreate(
-                    ['competitor_product_id' => (int) $row->competitor_product_id, 'day' => $day, 'currency' => $row->currency],
+                    ['competitor_product_id' => (int) $row->competitor_product_id, 'day' => $day, 'currency' => $currency],
                     [
                         'tenant_id' => $row->tenant_id,
-                        'currency' => $row->currency,
                         'min_price_cents' => (int) $row->getAttribute('min_p'),
                         'max_price_cents' => (int) $row->getAttribute('max_p'),
                         'avg_price_cents' => (int) $row->getAttribute('avg_p'),

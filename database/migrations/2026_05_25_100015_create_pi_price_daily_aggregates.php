@@ -30,7 +30,9 @@ return new class extends Migration
             $b->unsignedBigInteger('max_price_cents')->nullable();
             $b->unsignedBigInteger('avg_price_cents')->nullable();
             $b->unsignedInteger('samples')->default(0);
-            $b->string('currency', 3)->nullable();
+            // Non-nullable with an empty-string sentinel: a nullable component in the unique key
+            // would let SQL treat NULLs as distinct and admit duplicate (cp, day) rows.
+            $b->string('currency', 3)->default('');
             $b->timestamps();
             $b->unique(['competitor_product_id', 'day', 'currency'], 'pi_pda_cp_day_cur_uq');
         });
