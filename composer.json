@@ -33,13 +33,14 @@
     "require": {
         "php": "^8.3",
         "ext-dom": "*",
-        "ext-libxml": "*",
         "ext-json": "*",
+        "ext-libxml": "*",
         "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
         "illuminate/database": "^11.0 || ^12.0 || ^13.0",
         "illuminate/http": "^11.0 || ^12.0 || ^13.0",
         "illuminate/queue": "^11.0 || ^12.0 || ^13.0",
         "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+        "laravel/ai": "^0.6.8 || ^0.7",
         "padosoft/laravel-ai-search-providers": "^1.0 || dev-main"
     },
     "require-dev": {
@@ -58,6 +59,7 @@
         "spatie/browsershot": "Headless Chrome rendering driver for JS-heavy sites",
         "padosoft/laravel-pii-redactor": "GDPR PII redaction on scraped content (auto-wired when present)",
         "padosoft/laravel-ai-act-compliance": "EU AI Act governance bridge (auto-wired when present)",
+        "padosoft/laravel-ai-regolo": "Adds the EU/Italian-sovereign Regolo (Seeweb) provider to the laravel/ai SDK — set PI_LLM_PROVIDER=regolo",
         "stancl/tenancy": "Database-per-tenant mode for very large tenants"
     },
     "autoload": {

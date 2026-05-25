@@ -92,9 +92,17 @@ return [
     */
     'matching' => [
         'confidence_band' => [60, 85],
-        'llm' => ['enabled' => true, 'model' => 'gpt-4o-mini'],
-        'embeddings' => ['driver' => 'fake', 'cache_ttl' => 2592000],
-        'visual' => ['enabled' => true, 'driver' => 'fake'],
+        // Borderline LLM judge step (appended to the cascade when enabled). The model/provider
+        // come from the shared ai.llm.* block below.
+        'llm' => ['enabled' => true],
+        'embeddings' => [
+            // 'fake' (default, offline-deterministic) | 'laravel-ai' (uses the laravel/ai SDK)
+            'driver' => env('PI_EMBEDDINGS_DRIVER', 'fake'),
+            'provider' => env('PI_EMBEDDINGS_PROVIDER', 'openai'),
+            'model' => env('PI_EMBEDDINGS_MODEL', 'text-embedding-3-small'),
+            'dimensions' => (int) env('PI_EMBEDDINGS_DIMENSIONS', 1536),
+            'cache_ttl' => 2592000,
+        ],
         'recompute_on_dom_diff_threshold' => 0.3,
     ],
 
@@ -124,14 +132,24 @@ return [
     |--------------------------------------------------------------------------
     */
     'ai' => [
+        // Shared LLM backing for every AI feature (narrative, content-gap, promo, visual, match-judge).
+        'llm' => [
+            // 'fake' (default, offline deterministic) | 'laravel-ai' (uses the laravel/ai SDK)
+            'driver' => env('PI_LLM_DRIVER', 'fake'),
+            // config/ai.php provider key: openai | anthropic | gemini | regolo | ...
+            'provider' => env('PI_LLM_PROVIDER', 'openai'),
+            'model' => env('PI_LLM_MODEL', 'gpt-4o-mini'),
+            'vision_model' => env('PI_LLM_VISION_MODEL', 'gpt-4o-mini'),
+            'timeout' => (int) env('PI_LLM_TIMEOUT', 120),
+        ],
         'visual_match' => ['enabled' => true],
         'content_gap' => ['enabled' => true],
         // Forecast driver is selected by binding ForecastProviderInterface (Statistical by
         // default); there is no string "driver" switch here to avoid a dead setting.
         'forecast' => ['enabled' => true, 'min_observations' => 14, 'show_confidence_interval' => true],
         'anomaly' => ['enabled' => true],
-        'narrative' => ['enabled' => true, 'driver' => 'fake'],
-        'promo_detection' => ['enabled' => true, 'driver' => 'fake'],
+        'narrative' => ['enabled' => true],
+        'promo_detection' => ['enabled' => true],
         'assortment' => ['enabled' => true],
     ],
 

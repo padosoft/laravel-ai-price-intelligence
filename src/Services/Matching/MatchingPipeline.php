@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Matching;
 
+use Padosoft\PriceIntelligence\Contracts\BorderlineOnlyStep;
 use Padosoft\PriceIntelligence\Contracts\MatchStepInterface;
 use Padosoft\PriceIntelligence\Data\MatchOutcome;
 use Padosoft\PriceIntelligence\Data\MatchScore;
@@ -11,6 +12,7 @@ use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Enums\MatchStatus;
 use Padosoft\PriceIntelligence\Models\Product;
+use RuntimeException;
 
 /**
  * Runs the cascade of match steps in order, short-circuiting on a conclusive
@@ -44,7 +46,31 @@ final class MatchingPipeline
                 continue;
             }
 
-            $score = $step->score($product, $candidate);
+            if ($step instanceof BorderlineOnlyStep) {
+                // Expensive borderline-only steps (e.g. the LLM judge) run only when the best
+                // score so far is uncertain, so confident or rejected candidates skip the call.
+                if (! $this->isUncertain($best->confidence)) {
+                    continue;
+                }
+
+                try {
+                    $score = $step->score($product, $candidate);
+                } catch (RuntimeException $e) {
+                    // A flaky external judge (e.g. LLM timeout / undecodable JSON) must not fail the
+                    // cascade; report it (when the framework helper is available — this package also
+                    // runs on bare illuminate/* without laravel/framework) and fall back to the
+                    // deterministic steps' best score.
+                    if (function_exists('report')) {
+                        report($e);
+                    }
+
+                    continue;
+                }
+            } else {
+                // Deterministic steps are trusted: let real bugs surface instead of silently degrading.
+                $score = $step->score($product, $candidate);
+            }
+
             $trail[] = $score->toArray();
 
             if ($score->confidence > $best->confidence) {
@@ -62,6 +88,15 @@ final class MatchingPipeline
             method: $best->method,
             trail: $trail,
         );
+    }
+
+    private function isUncertain(int $confidence): bool
+    {
+        // The judge adjudicates the configured "suggested" band: run it only when the best score so
+        // far would land in [low, high) (admin-review territory), consistent with decide().
+        [$low, $high] = $this->confidenceBand;
+
+        return $confidence >= $low && $confidence < $high;
     }
 
     private function decide(int $confidence): MatchStatus

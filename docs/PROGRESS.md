@@ -89,9 +89,22 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
 - [x] **Final** — consolidated LESSON.md learnings into AGENTS.md "Distilled lessons" section +
   .claude/rules. CHANGELOG bumped 1.0.0-alpha → 1.0.0.
 
+### B-phase roadmap (post-v1.2.0) — see docs/superpowers/specs/2026-05-25-b-phases-design.md
+- [x] **B1 — LLM provider layer → core v1.3.0**: `laravel/ai` SDK + `laravel-ai-regolo` behind
+  `LlmProviderInterface` (fake default / `laravel-ai` driver, AgentRunner seam); real NarrativeWriter,
+  ContentGapAnalyzer, PromoDetector, vision VisualMatcher, borderline-gated LlmJudgeMatcher, and a
+  laravel/ai embedding driver — each logging to `ai_decision_logs`, all fixture-tested with an
+  opt-in live suite (`tests/Live`, `PI_LIVE_LLM=1`). 198 PHPUnit green. Plan:
+  docs/superpowers/plans/2026-05-25-b1-llm-provider-layer.md.
+- [ ] **B2 — Marketplace API adapters → core v1.4.0**: Amazon SP-API + Keepa, eBay, Google Shopping
+  SERP, Farfetch multi-driver (`scrape` default + `retailed`/`apify` opt-in). Generic scraper fallback.
+- [ ] **B3 — API gaps + enterprise scale → core v1.5.0**: `/observations/prices` host filter; stock/promo
+  history endpoints; `GET /ai-decisions`; facet/host-count endpoints; bulk CSV/Excel export; tenant
+  settings-write; chunk/batch jobs + daily-aggregate materialization + index review.
+- [ ] **B4–B8 (admin)**: real Laravel+DB test harness + visual regression; wire placeholder actions;
+  enterprise UX (pagination/virtualization/facets); SSE bearer/polling fallback; release hygiene → admin v1.1.0.
+
 ### Next action
-**CORE COMPLETE — 13/13 phases merged.** Tag v1.0.0 + GitHub release on the core, then begin the
-admin panel build (`laravel-ai-price-intelligence-admin`) per the saved plan: read the realized
-template at ~/Downloads/ai-price-intelligence-web-panel, composer require the core, implement all
-15 screens, PHP + Vitest + Playwright per screen, strict local-Copilot → CI → GitHub-Copilot loop,
-then tag admin v1.0.0.
+**B1 COMPLETE — tag core v1.3.0 + GitHub release**, then start **B2** (marketplace adapters), whose
+plan is written next from the B-phases spec §3 (CORE/B2). `aws/aws-sdk-php` is already installed
+(pulled transitively by `laravel/ai`) for the Amazon SP-API driver.

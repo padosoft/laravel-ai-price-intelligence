@@ -145,10 +145,28 @@ null-object pattern (no hard requirement). Full design in [`docs/PROJECT.md`](do
 | Price forecasting | on | `StatisticalForecaster` (OLS trend + confidence interval), pluggable |
 | Anomaly detection | on | detrended-residual outliers + price-error (civetta) detection |
 | Review sentiment | **off** | GDPR-safe: per-domain opt-in, mandatory PII redaction, anonymous aggregates only |
-| Visual / content-gap / narrative / assortment / promo | interface-ready | LLM-driven, host-bindable drivers |
+| Narrative / content-gap / promo / visual-match / LLM match-judge | on | Real LLM-backed via the official `laravel/ai` SDK; `fake` deterministic driver is the zero-config default |
 
 Every AI output is flagged `is_ai_generated` and logged in the decision-log table (default
 `pi_ai_decision_logs`, configurable).
+
+### LLM provider
+
+LLM features run through `LlmProviderInterface`. The default driver is **`fake`** — deterministic,
+offline, no API keys, so the package works out of the box and CI never makes a live call. To use a
+real model, install/configure the official [`laravel/ai`](https://github.com/laravel/ai) SDK and set:
+
+```dotenv
+PI_LLM_DRIVER=laravel-ai
+PI_LLM_PROVIDER=openai        # any config/ai.php provider: openai|anthropic|gemini|regolo|...
+PI_LLM_MODEL=gpt-4o-mini
+PI_LLM_VISION_MODEL=gpt-4o-mini
+```
+
+For an EU/Italian-sovereign option, install [`padosoft/laravel-ai-regolo`](https://github.com/padosoft/laravel-ai-regolo)
+and set `PI_LLM_PROVIDER=regolo`. Embeddings have the same switch (`PI_EMBEDDINGS_DRIVER=laravel-ai`,
+`PI_EMBEDDINGS_PROVIDER`, `PI_EMBEDDINGS_MODEL`, `PI_EMBEDDINGS_DIMENSIONS`); the default is the
+deterministic `FakeEmbeddingProvider`.
 
 ## Compliance: GDPR & EU AI Act
 

@@ -6,6 +6,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-25
+
+B-phase **B1**: real, provider-agnostic LLM layer built on the official `laravel/ai` SDK +
+`padosoft/laravel-ai-regolo` (EU/Italian-safe Regolo). 198 PHPUnit green (PHP 8.3/8.4),
+Pint + PHPStan level 5 clean; no live calls in CI.
+
+### Added
+- **`LlmProviderInterface`** with two drivers: `fake` (default, offline-deterministic) and
+  `laravel-ai` (delegates to the `laravel/ai` SDK through an `AgentRunner` seam). Provider/model
+  are config-driven and per-call overridable; `completeJson()` strips markdown fences and decodes
+  strict JSON; `vision()` attaches image URLs.
+- Real LLM-backed **`NarrativeWriter`**, **`ContentGapAnalyzer`**, **`PromoDetector`**, vision
+  **`VisualMatcher`**, and a borderline-gated **`LlmJudgeMatcher`** matching step (runs only when
+  the best cascade score is uncertain).
+- **`laravel/ai` embedding driver** (`LaravelAiEmbeddingProvider`) selectable via
+  `matching.embeddings.driver`; the deterministic `FakeEmbeddingProvider` stays the default.
+- Every AI feature records an `ai_decision_logs` row (model, output, confidence) for EU AI Act
+  auditability.
+- Opt-in live smoke suite (`tests/Live`, gated on `PI_LIVE_LLM=1`), excluded from the default run.
+
+### Config
+- New `ai.llm.{driver,provider,model,vision_model,timeout}` block (shared LLM backing for all AI
+  features) and `matching.embeddings.{driver,provider,model,dimensions}`.
+- Removed superseded dead keys (`ai.narrative.driver`, `ai.promo_detection.driver`,
+  `matching.visual`, `matching.llm.model`) — LLM backing is now the single `ai.llm.driver`.
+
 ## [1.2.0] - 2026-05-25
 
 Admin A4 backfill (consumed by `padosoft/laravel-ai-price-intelligence-admin`). 169 PHPUnit green
