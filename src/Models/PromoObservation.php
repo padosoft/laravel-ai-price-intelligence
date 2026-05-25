@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Enums\PromoType;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
@@ -31,4 +32,9 @@ final class PromoObservation extends PriceIntelligenceModel
         'valid_to' => 'datetime',
         'effective_discount_pct' => 'float',
     ];
+
+    public function competitorProduct(): BelongsTo
+    {
+        return $this->belongsTo(CompetitorProduct::class, 'competitor_product_id');
+    }
 }

@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Padosoft\PriceIntelligence\Services\Export;
+
+use League\Csv\Writer;
+use RuntimeException;
+
+/**
+ * Builds a streaming CSV callback for response()->streamDownload(): writes a header then
+ * each row from a (lazy) iterable straight to php://output, so 100k+ rows never materialize
+ * in memory at once. Cell values are neutralized against CSV/formula injection.
+ */
+final class CsvStreamWriter
+{
+    /**
+     * @param  array<int, string>  $header
+     * @param  iterable<int, array<int, scalar|null>>  $rows
+     */
+    public function callback(array $header, iterable $rows): callable
+    {
+        return static function () use ($header, $rows): void {
+            $stream = fopen('php://output', 'w');
+            if ($stream === false) {
+                throw new RuntimeException('Unable to open php://output for CSV streaming.');
+            }
+
+            try {
+                $csv = Writer::createFromStream($stream);
+                $csv->insertOne($header);
+                foreach ($rows as $row) {
+                    $csv->insertOne(array_map([self::class, 'neutralize'], $row));
+                }
+            } finally {
+                fclose($stream);
+            }
+        };
+    }
+
+    /**
+     * Defang CSV/formula injection: a cell whose first non-whitespace character is = + - @ is
+     * treated as a formula by Excel/Sheets (leading spaces/tabs/newlines are trimmed by the app
+     * before evaluation, so they can't be used to slip past the check). Prefix such values with a
+     * single quote so they render as text.
+     */
+    private static function neutralize(mixed $value): mixed
+    {
+        if (! is_string($value) || $value === '') {
+            return $value;
+        }
+
+        $trimmed = ltrim($value, " \t\r\n");
+
+        return $trimmed !== '' && in_array($trimmed[0], ['=', '+', '-', '@'], true) ? "'".$value : $value;
+    }
+}

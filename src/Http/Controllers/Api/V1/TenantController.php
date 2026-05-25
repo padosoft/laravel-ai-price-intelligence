@@ -29,12 +29,32 @@ final class TenantController
         return response()->json([
             'data' => [
                 'tenant' => $tenant !== null
-                    ? ['id' => $tenant->id, 'code' => $tenant->code, 'name' => $tenant->name]
-                    : ['id' => $tenantId, 'code' => null, 'name' => null],
+                    ? ['id' => $tenant->id, 'code' => $tenant->code, 'name' => $tenant->name, 'settings' => (object) ($tenant->settings ?? [])]
+                    : ['id' => $tenantId, 'code' => null, 'name' => null, 'settings' => (object) []],
                 'features' => $this->features(),
                 'abilities' => $this->abilities($request),
             ],
         ]);
+    }
+
+    /**
+     * Merge a partial settings object into the tenant (admin Settings screen write path).
+     */
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'settings' => ['required', 'array'],
+        ]);
+
+        $tenantId = $this->tenantContext->id();
+        abort_if($tenantId === null, 401, 'No tenant resolved.');
+
+        $tenant = Tenant::query()->findOrFail($tenantId);
+        $tenant->forceFill([
+            'settings' => array_merge((array) $tenant->settings, $validated['settings']),
+        ])->save();
+
+        return response()->json(['data' => ['settings' => (object) ($tenant->settings ?? [])]]);
     }
 
     /**

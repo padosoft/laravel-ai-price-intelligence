@@ -6,6 +6,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-25
+
+B-phase **B3**: remaining REST API gaps + enterprise-scale primitives. 239 PHPUnit green
+(PHP 8.3/8.4), Pint + PHPStan level 5 clean.
+
+### Added
+- `GET /observations/prices` **host filter** (`?host=`), plus new **history endpoints**
+  `GET /observations/stock` and `GET /observations/promos` (cursor-paginated, filter by
+  competitor_product_id / host / from / to).
+- `GET /ai-decisions` — paginated EU AI Act decision log (filter by feature / subject / date) for the
+  admin Compliance screen.
+- **Facet endpoints** computed in SQL/lazy: `GET /facets/hosts` (confirmed-competitor count per host)
+  and `GET /facets/categories` (product count per category).
+- **Streamed bulk CSV export**: `GET /catalog/products:export` and `GET /observations/prices:export`
+  (Eloquent `cursor()` + `streamDownload` — OOM-safe for 100k+ rows). Excel is an opt-in via
+  `phpoffice/phpspreadsheet`.
+- **Tenant settings**: exposed in `GET /tenants/me` (`data.tenant.settings`) and writable via
+  `PATCH /tenants/me/settings` (partial merge, validated).
+- **Daily price aggregates**: `pi_price_daily_aggregates` table + `PriceDailyAggregate` model + the
+  `piprice:aggregates:daily` command (SQL `GROUP BY` reduction, idempotent `updateOrCreate`,
+  scheduled nightly at 02:30 when `storage.aggregates.enabled`).
+- Composite indexes for stock/promo history (`competitor_product_id, captured_at`) and AI-decision
+  subject lookups (`tenant_id, subject_type, subject_id`).
+
+### Changed
+- `league/csv` promoted from `require-dev` to `require` (CSV export is a runtime feature).
+
 ## [1.4.0] - 2026-05-25
 
 B-phase **B2**: real, config-selectable marketplace **API adapters** with graceful scrape fallback.

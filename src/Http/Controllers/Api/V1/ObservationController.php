@@ -24,21 +24,67 @@ final class ObservationController
     public function prices(Request $request): JsonResponse
     {
         $request->validate([
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
             'competitor_product_id' => ['nullable', 'integer'],
+            'host' => ['nullable', 'string', 'max:191'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
         ]);
 
         $prices = PriceObservation::query()
             ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<=', $request->date('to')))
+            ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
             ->orderByDesc('captured_at')
             ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 100));
 
         return response()->json($prices);
+    }
+
+    public function stock(Request $request): JsonResponse
+    {
+        $request->validate([
+            'competitor_product_id' => ['nullable', 'integer'],
+            'host' => ['nullable', 'string', 'max:191'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
+        ]);
+
+        $rows = StockObservation::query()
+            ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
+            ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
+            ->orderByDesc('captured_at')
+            ->orderByDesc('id')
+            ->cursorPaginate((int) $request->integer('per_page', 100));
+
+        return response()->json($rows);
+    }
+
+    public function promos(Request $request): JsonResponse
+    {
+        $request->validate([
+            'competitor_product_id' => ['nullable', 'integer'],
+            'host' => ['nullable', 'string', 'max:191'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
+        ]);
+
+        $rows = PromoObservation::query()
+            ->when($request->filled('competitor_product_id'), fn ($q) => $q->where('competitor_product_id', $request->integer('competitor_product_id')))
+            ->when($request->filled('host'), fn ($q) => $q->whereHas('competitorProduct.source', fn ($s) => $s->where('host', $request->string('host')->toString())))
+            ->when($request->filled('from'), fn ($q) => $q->where('captured_at', '>=', $request->date('from')->startOfDay()))
+            ->when($request->filled('to'), fn ($q) => $q->where('captured_at', '<', $request->date('to')->addDay()->startOfDay()))
+            ->orderByDesc('captured_at')
+            ->orderByDesc('id')
+            ->cursorPaginate((int) $request->integer('per_page', 100));
+
+        return response()->json($rows);
     }
 
     /**

@@ -41,21 +41,20 @@
         "illuminate/queue": "^11.0 || ^12.0 || ^13.0",
         "illuminate/support": "^11.0 || ^12.0 || ^13.0",
         "laravel/ai": "^0.6.8 || ^0.7",
+        "league/csv": "^9.0",
         "padosoft/laravel-ai-search-providers": "^1.0 || dev-main"
     },
     "require-dev": {
         "larastan/larastan": "^3.9",
         "laravel/pint": "^1.29",
         "laravel/sanctum": "^4.0",
-        "league/csv": "^9.0",
         "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
         "phpunit/phpunit": "^11.0 || ^12.0"
     },
     "suggest": {
         "laravel/sanctum": "Bearer token auth for the REST API (^4.0)",
         "laravel/horizon": "Queue dashboard and supervision for high-volume scraping",
-        "league/csv": "CSV catalog import/export (^9.0)",
-        "phpoffice/phpspreadsheet": "Excel catalog import",
+        "phpoffice/phpspreadsheet": "Excel catalog import/export (CSV export ships out of the box)",
         "spatie/browsershot": "Headless Chrome rendering driver for JS-heavy sites",
         "padosoft/laravel-pii-redactor": "GDPR PII redaction on scraped content (auto-wired when present)",
         "padosoft/laravel-ai-act-compliance": "EU AI Act governance bridge (auto-wired when present)",
