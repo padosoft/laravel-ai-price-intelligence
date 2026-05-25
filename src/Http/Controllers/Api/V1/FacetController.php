@@ -37,8 +37,9 @@ final class FacetController
 
     public function brands(Request $request): JsonResponse
     {
-        // Exact per-brand product counts, computed in SQL (admin Catalog brand chips). Grouping on
-        // the `brand` column keeps this constant-cost as the catalog grows to 500k SKU.
+        // Exact per-brand product counts for the admin Catalog brand chips, computed in a single
+        // DB-side aggregation (GROUP BY brand) — one pass over the table, no per-page OFFSET scans
+        // and no N client round-trips, so it stays practical as the catalog grows to 500k SKU.
         $rows = Product::query()
             ->whereNotNull('brand')
             ->where('brand', '!=', '')

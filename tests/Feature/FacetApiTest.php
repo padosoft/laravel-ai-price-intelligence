@@ -76,8 +76,9 @@ final class FacetApiTest extends TestCase
         Product::query()->create(['external_id' => 'A', 'name' => 'A', 'brand' => 'Acme']);
         Product::query()->create(['external_id' => 'B', 'name' => 'B', 'brand' => 'Acme']);
         Product::query()->create(['external_id' => 'C', 'name' => 'C', 'brand' => 'Nova']);
-        // Null/blank brands are excluded from the facet.
+        // Both null and empty-string brands are excluded from the facet.
         Product::query()->create(['external_id' => 'D', 'name' => 'D', 'brand' => null]);
+        Product::query()->create(['external_id' => 'E', 'name' => 'E', 'brand' => '']);
 
         $this->withHeader('X-Api-Key', $key)
             ->getJson('/api/v1/facets/brands')
