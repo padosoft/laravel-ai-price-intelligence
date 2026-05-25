@@ -11,21 +11,30 @@ use Padosoft\PriceIntelligence\Console\Commands\PruneAuditLogsCommand;
 use Padosoft\PriceIntelligence\Console\Commands\RunDueTargetsCommand;
 use Padosoft\PriceIntelligence\Contracts\AiActBridgeInterface;
 use Padosoft\PriceIntelligence\Contracts\AnomalyDetectorInterface;
+use Padosoft\PriceIntelligence\Contracts\ContentGapAnalyzerInterface;
 use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\LlmProviderInterface;
+use Padosoft\PriceIntelligence\Contracts\NarrativeWriterInterface;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Contracts\PromoDetectorInterface;
 use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
+use Padosoft\PriceIntelligence\Contracts\VisualMatcherInterface;
+use Padosoft\PriceIntelligence\Services\Ai\AiDecisionLogger;
+use Padosoft\PriceIntelligence\Services\Ai\ContentGapAnalyzer;
 use Padosoft\PriceIntelligence\Services\Ai\Llm\FakeLlmProvider;
 use Padosoft\PriceIntelligence\Services\Ai\Llm\LaravelAiLlmProvider;
+use Padosoft\PriceIntelligence\Services\Ai\NarrativeWriter;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
+use Padosoft\PriceIntelligence\Services\Ai\PromoDetector;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\StatisticalForecaster;
+use Padosoft\PriceIntelligence\Services\Ai\VisualMatcher;
 use Padosoft\PriceIntelligence\Services\Compliance\DomainRateLimiter;
 use Padosoft\PriceIntelligence\Services\Compliance\NullAiActBridge;
 use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
@@ -60,6 +69,26 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
                 ? new LaravelAiLlmProvider($app->make(AgentRunner::class))
                 : new FakeLlmProvider;
         });
+
+        $this->app->bind(NarrativeWriterInterface::class, static fn ($app): NarrativeWriterInterface => new NarrativeWriter(
+            $app->make(LlmProviderInterface::class),
+            $app->make(AiDecisionLogger::class),
+        ));
+
+        $this->app->bind(ContentGapAnalyzerInterface::class, static fn ($app): ContentGapAnalyzerInterface => new ContentGapAnalyzer(
+            $app->make(LlmProviderInterface::class),
+            $app->make(AiDecisionLogger::class),
+        ));
+
+        $this->app->bind(PromoDetectorInterface::class, static fn ($app): PromoDetectorInterface => new PromoDetector(
+            $app->make(LlmProviderInterface::class),
+            $app->make(AiDecisionLogger::class),
+        ));
+
+        $this->app->bind(VisualMatcherInterface::class, static fn ($app): VisualMatcherInterface => new VisualMatcher(
+            $app->make(LlmProviderInterface::class),
+            $app->make(AiDecisionLogger::class),
+        ));
 
         $this->app->bind(EmbeddingProviderInterface::class, static function ($app): EmbeddingProviderInterface {
             // Default offline-safe driver; switch to laravel/ai via config or rebind in the host.
