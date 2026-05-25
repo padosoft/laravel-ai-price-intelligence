@@ -6,6 +6,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-05-25
+
+Admin-driven backfill (gap-backfill policy): anomaly **acknowledgement** endpoints, so the admin
+Anomalies screen has no dead buttons. 243 PHPUnit green (PHP 8.3/8.4), Pint + PHPStan level 5 clean.
+
+### Added
+- `POST /anomalies/{id}/ack` — mark a single anomaly reviewed (idempotent), returning the row.
+- `POST /anomalies:ack` — bulk-acknowledge by `ids[]`; only unacknowledged rows are touched, returns
+  `{ data: { acknowledged: <count> } }`.
+- `Anomaly::acknowledge()` model helper — idempotent + race-safe (atomic
+  `WHERE acknowledged_at IS NULL` update scoped to the row's own tenant; preserves the original
+  review timestamp). Note: this is intentionally stricter than `Alert::acknowledge()`, which
+  overwrites on each call.
+
 ## [1.5.0] - 2026-05-25
 
 B-phase **B3**: remaining REST API gaps + enterprise-scale primitives. 239 PHPUnit green
@@ -155,7 +169,11 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/padosoft/laravel-ai-price-intelligence/releases/tag/v1.0.0

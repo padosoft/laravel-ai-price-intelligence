@@ -70,6 +70,10 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
 
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
     Route::get('/anomalies', [IntelligenceController::class, 'anomalies'])->name('price-intelligence.anomalies.index');
+    // `:ack` (bulk) is registered before the `{id}/ack` route; distinct paths, but keep the
+    // literal-segment route first for clarity.
+    Route::post('/anomalies:ack', [IntelligenceController::class, 'acknowledgeAnomalies'])->name('price-intelligence.anomalies.ack-bulk');
+    Route::post('/anomalies/{id}/ack', [IntelligenceController::class, 'acknowledgeAnomaly'])->whereNumber('id')->name('price-intelligence.anomalies.ack');
     Route::get('/reviews', [IntelligenceController::class, 'reviews'])->name('price-intelligence.reviews.index');
     Route::get('/narratives', [IntelligenceController::class, 'narratives'])->name('price-intelligence.narratives.index');
     Route::get('/assortment-gaps', [IntelligenceController::class, 'assortmentGaps'])->name('price-intelligence.assortment-gaps.index');
