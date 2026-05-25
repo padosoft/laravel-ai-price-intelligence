@@ -144,9 +144,11 @@
   tenant's valid key. Lesson: prefer the global scope for isolation; bypass it only on auth lookups.
 
 ## B1 — LLM provider layer (laravel/ai + laravel-ai-regolo, core v1.3.0)
-- **Installed `laravel/ai` resolved to v0.6.8** (not v0.7) because `padosoft/laravel-ai-regolo`
-  v1.0.0 pins the v0.6.8 embedding contract. Require string `"^0.6.8 || ^0.7"` lets Composer pick.
-  `laravel/ai` pulls **aws/aws-sdk-php** transitively (Bedrock) — already present for B2's Amazon SP-API.
+- **`laravel/ai` constraint `"^0.6.8 || ^0.7"`** resolves to v0.6.8 in the dev environment.
+  Note: `padosoft/laravel-ai-regolo` is **`suggest`-only** (not required), so it does NOT drive this
+  package's resolution — but a host that installs Regolo v1.0.0 (which pins the v0.6.8 embedding
+  contract) will hold laravel/ai at 0.6.x, so keep the lower bound at 0.6.8. `laravel/ai` pulls
+  **aws/aws-sdk-php** transitively (Bedrock) — already present for B2's Amazon SP-API.
 - **Verified v0.6.8 API surface before coding** (don't trust the v0.7 blog/docs): the `agent()`
   helper is in `vendor/laravel/ai/functions.php` → `Laravel\Ai\agent(instructions, messages, tools,
   schema)`; `Promptable::prompt(string $prompt, array $attachments = [], Lab|array|string|null
@@ -169,9 +171,12 @@
 - **`completeJson()` strips a ```json fence** before `json_decode` (models often wrap JSON) and throws
   `RuntimeException` on undecodable output so callers can fall back deterministically.
 - **Borderline-only LLM judge**: added an empty marker interface `BorderlineOnlyStep`; `MatchingPipeline`
-  skips such a step unless the running best confidence is in `[high-45, high)` (default band [60,85] →
-  judge runs only for best in [40,85)). The judge returns MAX-merged confidence, so a fake judge
-  returning 0 never lowers a real score — existing matching tests stay green.
+  runs such a step only when the running best confidence is in the configured suggested band
+  `[low, high)` (default [60,85)) — the admin-review zone, consistent with `decide()`. The judge
+  returns MAX-merged confidence, so a fake judge returning 0 never lowers a real score. The judge also
+  **zeroes confidence when the model verdict is `same_product=false`** (high certainty-they-differ must
+  not read as a high *match*). Only `BorderlineOnlyStep` exceptions are swallowed (reported); deterministic
+  steps propagate so real bugs surface.
 - **Dead-config discipline (continuing the Phase-8 lesson)**: routing all LLM features through the
   single `ai.llm.driver` made `ai.narrative.driver`, `ai.promo_detection.driver`, `matching.visual`,
   and `matching.llm.model` dead — removed them rather than leave a config the code ignores.
