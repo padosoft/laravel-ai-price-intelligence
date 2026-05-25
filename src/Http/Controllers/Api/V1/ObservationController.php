@@ -42,9 +42,11 @@ final class ObservationController
     }
 
     /**
-     * Confirmed competitor listings the admin's Competitors screen renders. Each row carries
-     * the matched product (via target), the source host, and the latest price observation so
-     * the UI can compute the delta versus our retail price without N extra requests.
+     * Competitor listings the admin's Competitors screen renders — confirmed by default,
+     * narrowable to any match_status via the `status` filter (and by host/target/product).
+     * Each row carries the matched product (via target), the source host, and the latest
+     * price observation so the UI can compute the delta versus our retail price without
+     * N extra requests.
      */
     public function index(Request $request): JsonResponse
     {
