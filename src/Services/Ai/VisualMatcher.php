@@ -28,7 +28,7 @@ final class VisualMatcher implements VisualMatcherInterface
         $json = $result->json ?? [];
         $match = new VisualMatchResult(
             sameProduct: (bool) ($json['same_product'] ?? false),
-            confidence: (int) ($json['confidence'] ?? 0),
+            confidence: max(0, min(100, (int) ($json['confidence'] ?? 0))),
             rationale: is_string($json['rationale'] ?? null) ? $json['rationale'] : '',
             model: $result->model,
         );

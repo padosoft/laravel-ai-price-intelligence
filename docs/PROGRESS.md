@@ -94,7 +94,7 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   `LlmProviderInterface` (fake default / `laravel-ai` driver, AgentRunner seam); real NarrativeWriter,
   ContentGapAnalyzer, PromoDetector, vision VisualMatcher, borderline-gated LlmJudgeMatcher, and a
   laravel/ai embedding driver — each logging to `ai_decision_logs`, all fixture-tested with an
-  opt-in live suite (`tests/Live`, `PI_LIVE_LLM=1`). 194 PHPUnit green. Plan:
+  opt-in live suite (`tests/Live`, `PI_LIVE_LLM=1`). 197 PHPUnit green. Plan:
   docs/superpowers/plans/2026-05-25-b1-llm-provider-layer.md.
 - [ ] **B2 — Marketplace API adapters → core v1.4.0**: Amazon SP-API + Keepa, eBay, Google Shopping
   SERP, Farfetch multi-driver (`scrape` default + `retailed`/`apify` opt-in). Generic scraper fallback.

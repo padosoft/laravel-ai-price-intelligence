@@ -122,7 +122,9 @@ final class LaravelAiLlmProvider implements LlmProviderInterface
         $decoded = json_decode($clean, true);
 
         if (! is_array($decoded)) {
-            throw new RuntimeException('LLM did not return decodable JSON: '.substr($text, 0, 200));
+            // Don't embed the raw model output: callers may report($e) and the response could
+            // contain sensitive prompt/response content. Include only a non-sensitive length hint.
+            throw new RuntimeException('LLM did not return decodable JSON ('.strlen($text).' chars).');
         }
 
         /** @var array<string, mixed> $decoded */
