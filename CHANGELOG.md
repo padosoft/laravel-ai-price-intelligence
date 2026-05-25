@@ -15,7 +15,10 @@ Anomalies screen has no dead buttons. 243 PHPUnit green (PHP 8.3/8.4), Pint + PH
 - `POST /anomalies/{id}/ack` — mark a single anomaly reviewed (idempotent), returning the row.
 - `POST /anomalies:ack` — bulk-acknowledge by `ids[]`; only unacknowledged rows are touched, returns
   `{ data: { acknowledged: <count> } }`.
-- `Anomaly::acknowledge()` model helper (mirrors `Alert::acknowledge()`).
+- `Anomaly::acknowledge()` model helper — idempotent + race-safe (atomic
+  `WHERE acknowledged_at IS NULL` update scoped to the row's own tenant; preserves the original
+  review timestamp). Note: this is intentionally stricter than `Alert::acknowledge()`, which
+  overwrites on each call.
 
 ## [1.5.0] - 2026-05-25
 
