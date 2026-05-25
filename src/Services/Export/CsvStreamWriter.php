@@ -35,8 +35,10 @@ final class CsvStreamWriter
     }
 
     /**
-     * Defang CSV/formula injection: a cell starting with = + - @ (or a leading tab/CR) is treated
-     * as a formula by Excel/Sheets. Prefix such values with a single quote so they render as text.
+     * Defang CSV/formula injection: a cell whose first non-whitespace character is = + - @ is
+     * treated as a formula by Excel/Sheets (leading spaces/tabs/newlines are trimmed by the app
+     * before evaluation, so they can't be used to slip past the check). Prefix such values with a
+     * single quote so they render as text.
      */
     private static function neutralize(mixed $value): mixed
     {
@@ -44,6 +46,8 @@ final class CsvStreamWriter
             return $value;
         }
 
-        return in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true) ? "'".$value : $value;
+        $trimmed = ltrim($value, " \t\r\n");
+
+        return $trimmed !== '' && in_array($trimmed[0], ['=', '+', '-', '@'], true) ? "'".$value : $value;
     }
 }

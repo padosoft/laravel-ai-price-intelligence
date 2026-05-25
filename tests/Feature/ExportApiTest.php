@@ -58,6 +58,20 @@ final class ExportApiTest extends TestCase
     }
 
     #[Test]
+    public function csv_export_neutralizes_formula_injection(): void
+    {
+        $key = $this->auth();
+        Product::query()->create(['external_id' => 'EVIL', 'name' => '=cmd|/c calc', 'currency' => 'EUR']);
+        Product::query()->create(['external_id' => 'WS', 'name' => '  +1+1', 'currency' => 'EUR']);
+
+        $body = $this->withHeader('X-Api-Key', $key)->get('/api/v1/catalog/products:export')->streamedContent();
+
+        // Dangerous leading chars (even after whitespace) are prefixed with a single quote.
+        $this->assertStringContainsString("'=cmd", $body);
+        $this->assertStringContainsString("'  +1+1", $body);
+    }
+
+    #[Test]
     public function export_requires_auth(): void
     {
         $this->get('/api/v1/catalog/products:export')->assertUnauthorized();
