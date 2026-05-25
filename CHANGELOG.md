@@ -6,6 +6,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-05-25
+
+B-phase **B2**: real, config-selectable marketplace **API adapters** with graceful scrape fallback.
+All fixture-tested with `Http::fake`; no live calls in CI. 216 PHPUnit green (PHP 8.3/8.4),
+Pint + PHPStan level 5 clean.
+
+### Added
+- **`AbstractApiAdapter`** — API-or-scrape `fetch()`: runs the configured marketplace driver, falling
+  back to the existing HTML scrape path when the driver is `scrape`, credentials are missing, or the
+  API call fails/returns empty (never throws).
+- **Amazon** drivers `sp_api` (LWA bearer token → Product Pricing, no AWS SigV4), `keepa` (price +
+  EAN/brand), `auto` (SP-API → Keepa → scrape).
+- **eBay** Browse API driver (client-credentials OAuth → `getItemByLegacyId`).
+- **Google Shopping** SERP driver (SerpApi-compatible `google_product` lookup).
+- **Farfetch** — new first-class luxury adapter (`AdapterCode::Farfetch`), drivers `scrape` (default,
+  JSON-LD), `retailed`, `apify`; host auto-mapped by `CompetitorSourceResolver`.
+- `ApiProductResult` DTO + per-provider API clients under `Services/Scraping/Marketplaces/Api/`.
+- Opt-in live marketplace smoke suite (`tests/Live`, `PI_LIVE_MARKETPLACE=1`), excluded from CI.
+
+### Config
+- Extended `marketplaces.*` with per-marketplace `driver` + credential sub-arrays
+  (`amazon.sp_api`/`amazon.keepa`, `ebay`, `google_shopping.serp`, `farfetch.retailed`/`farfetch.apify`).
+  No new hard dependencies — all APIs are plain REST via the `Http` facade.
+
 ## [1.3.0] - 2026-05-25
 
 B-phase **B1**: real, provider-agnostic LLM layer built on the official `laravel/ai` SDK +

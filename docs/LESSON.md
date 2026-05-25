@@ -220,3 +220,24 @@
 - **Opt-in providers belong in `suggest`, not `require`**: `laravel-ai-regolo` (and its transitive
   aws-sdk-php via laravel/ai) shouldn't be forced on every consumer. `laravel/ai` is the hard dep;
   Regolo is documented + suggested, installed only when `PI_LLM_PROVIDER=regolo`.
+
+## B2 — Marketplace API adapters (core v1.4.0)
+- **API-or-scrape via `AbstractApiAdapter`**: API adapters extend the scrape adapter and override
+  `fetch()` to try `apiFetch()` first, falling back to `parent::fetch()` (scrape) when driver=`scrape`,
+  creds are missing, or the API throws/returns an unreachable snapshot. `apiFetch` exceptions are
+  caught + `report()`ed (guarded by `function_exists`) — never fail the cascade. This mirrors B1's
+  "fake is the fallback" philosophy: zero-config still works (scrape), credentials light up the API.
+- **No AWS SigV4 needed for SP-API anymore**: modern SP-API authenticates with just the LWA access
+  token (`x-amz-access-token` header) obtained from the refresh-token grant at
+  `api.amazon.com/auth/o2/token`. So the whole client is plain `Http` facade → `Http::fake`-testable,
+  no `aws/aws-sdk-php` SigV4 dance. (aws-sdk is present transitively via laravel/ai but unused here.)
+- **Every client uses the `Http` facade and returns a uniform `ApiProductResult`** (→ `toSnapshot()`),
+  so each is fixture-tested with `Http::fake([...])` + `Http::assertSent()` for headers/query, with no
+  extra seam. Clients return `null` when their key/token is absent (the adapter then scrapes).
+- **Keepa prices are already integer cents** (e.g. `5499` = €54.99); `-1` = unavailable. `stats.current[0]`
+  is the Amazon price. Reused `Support\Pricing\PriceParser::parse()` (returns `{cents, currency}`) for
+  SERP/Farfetch major-unit price strings to stay consistent with EU formatting.
+- **Farfetch** added as `AdapterCode::Farfetch` (first-class); `scrape` default already works via the
+  JSON-LD `HtmlProductExtractor`. Commercial `retailed`/`apify` drivers are opt-in (key/token) and a
+  judgment call kept them out of the hard deps — config-only.
+- **No new hard composer deps** for B2 — all marketplace APIs are plain REST. Credentials are env/config.

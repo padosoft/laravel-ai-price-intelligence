@@ -78,11 +78,53 @@ return [
     |--------------------------------------------------------------------------
     */
     'marketplaces' => [
-        'amazon' => ['driver' => 'auto', 'rate_limit_rpm' => 20],
-        'ebay' => ['driver' => 'api'],
-        'google_shopping' => ['driver' => 'serp'],
+        'amazon' => [
+            'driver' => env('PI_AMAZON_DRIVER', 'auto'), // auto|sp_api|keepa|scrape
+            'rate_limit_rpm' => (int) env('PI_AMAZON_RPM', 20),
+            'sp_api' => [
+                'client_id' => env('PI_AMAZON_SPAPI_CLIENT_ID'),
+                'client_secret' => env('PI_AMAZON_SPAPI_CLIENT_SECRET'),
+                'refresh_token' => env('PI_AMAZON_SPAPI_REFRESH_TOKEN'),
+                'endpoint' => env('PI_AMAZON_SPAPI_ENDPOINT', 'https://sellingpartnerapi-eu.amazon.com'),
+                'token_endpoint' => env('PI_AMAZON_SPAPI_TOKEN_ENDPOINT', 'https://api.amazon.com/auth/o2/token'),
+                'marketplace_id' => env('PI_AMAZON_MARKETPLACE_ID', 'APJ6JRA9NG5V4'), // amazon.it
+            ],
+            'keepa' => [
+                'key' => env('PI_KEEPA_KEY'),
+                'domain' => (int) env('PI_KEEPA_DOMAIN', 8), // 8 = amazon.it
+                'endpoint' => env('PI_KEEPA_ENDPOINT', 'https://api.keepa.com'),
+            ],
+        ],
+        'ebay' => [
+            'driver' => env('PI_EBAY_DRIVER', 'auto'), // auto|api|scrape
+            'client_id' => env('PI_EBAY_CLIENT_ID'),
+            'client_secret' => env('PI_EBAY_CLIENT_SECRET'),
+            'endpoint' => env('PI_EBAY_ENDPOINT', 'https://api.ebay.com'),
+            'marketplace_id' => env('PI_EBAY_MARKETPLACE_ID', 'EBAY_IT'),
+        ],
+        'google_shopping' => [
+            'driver' => env('PI_GOOGLE_DRIVER', 'auto'), // auto|serp|scrape
+            'serp' => [
+                'key' => env('PI_SERPAPI_KEY'),
+                'endpoint' => env('PI_SERPAPI_ENDPOINT', 'https://serpapi.com/search'),
+                'gl' => env('PI_SERPAPI_GL', 'it'),
+                'hl' => env('PI_SERPAPI_HL', 'it'),
+            ],
+        ],
         'idealo' => ['driver' => 'scrape'],
         'trovaprezzi' => ['driver' => 'scrape'],
+        'farfetch' => [
+            'driver' => env('PI_FARFETCH_DRIVER', 'scrape'), // scrape|retailed|apify
+            'retailed' => [
+                'key' => env('PI_RETAILED_KEY'),
+                'endpoint' => env('PI_RETAILED_ENDPOINT', 'https://app.retailed.io/api/v1/scraper/farfetch/product'),
+            ],
+            'apify' => [
+                'token' => env('PI_APIFY_TOKEN'),
+                'actor' => env('PI_APIFY_FARFETCH_ACTOR', 'autofacts~farfetch'),
+                'endpoint' => env('PI_APIFY_ENDPOINT', 'https://api.apify.com/v2'),
+            ],
+        ],
     ],
 
     /*

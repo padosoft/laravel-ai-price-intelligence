@@ -45,6 +45,7 @@ final class CompetitorSourceResolver
             str_contains($host, 'google.') || str_contains($host, 'shopping.google') => AdapterCode::GoogleShopping,
             str_contains($host, 'idealo.') => AdapterCode::Idealo,
             str_contains($host, 'trovaprezzi.') => AdapterCode::Trovaprezzi,
+            str_contains($host, 'farfetch.') => AdapterCode::Farfetch,
             default => AdapterCode::Generic,
         };
     }

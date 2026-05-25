@@ -8,7 +8,13 @@ use Padosoft\PriceIntelligence\Contracts\MarketplaceAdapterInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\AmazonAdapter;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api\AmazonSpApiClient;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api\EbayBrowseClient;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api\FarfetchClient;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api\KeepaClient;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api\SerpShoppingClient;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\EbayAdapter;
+use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\FarfetchAdapter;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\GenericAdapter;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\GoogleShoppingAdapter;
 use Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\IdealoAdapter;
@@ -43,9 +49,10 @@ final class MarketplaceAdapterFactory
         }
 
         return match ($code) {
-            AdapterCode::Amazon => new AmazonAdapter($this->scraper),
-            AdapterCode::Ebay => new EbayAdapter($this->scraper),
-            AdapterCode::GoogleShopping => new GoogleShoppingAdapter($this->scraper),
+            AdapterCode::Amazon => new AmazonAdapter($this->scraper, app(AmazonSpApiClient::class), app(KeepaClient::class)),
+            AdapterCode::Ebay => new EbayAdapter($this->scraper, app(EbayBrowseClient::class)),
+            AdapterCode::GoogleShopping => new GoogleShoppingAdapter($this->scraper, app(SerpShoppingClient::class)),
+            AdapterCode::Farfetch => new FarfetchAdapter($this->scraper, app(FarfetchClient::class)),
             AdapterCode::Idealo => new IdealoAdapter($this->scraper),
             AdapterCode::Trovaprezzi => new TrovaprezziAdapter($this->scraper),
             AdapterCode::Generic => new GenericAdapter($this->scraper),

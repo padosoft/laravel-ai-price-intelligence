@@ -11,5 +11,6 @@ enum AdapterCode: string
     case GoogleShopping = 'google_shopping';
     case Idealo = 'idealo';
     case Trovaprezzi = 'trovaprezzi';
+    case Farfetch = 'farfetch';
     case Generic = 'generic';
 }
