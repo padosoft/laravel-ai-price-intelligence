@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-05-26
+
+Admin-driven backfill (gap-backfill policy): a **brand facet** so the admin Catalog brand chips are
+exact at 500k-SKU scale (symmetric with `/facets/hosts`), not derived from page 1.
+
+### Added
+- `GET /facets/brands` — exact per-brand product counts computed in SQL (`COUNT(*) … GROUP BY brand`),
+  excluding null/blank brands, ordered by count desc. Returns `{ data: [{ brand, count }] }`.
+
 ## [1.6.0] - 2026-05-25
 
 Admin-driven backfill (gap-backfill policy): anomaly **acknowledgement** endpoints, so the admin
@@ -169,7 +178,8 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.3.0...v1.4.0

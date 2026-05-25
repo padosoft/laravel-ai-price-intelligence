@@ -70,9 +70,30 @@ final class FacetApiTest extends TestCase
     }
 
     #[Test]
+    public function brand_facets_count_products_per_brand(): void
+    {
+        $key = $this->auth();
+        Product::query()->create(['external_id' => 'A', 'name' => 'A', 'brand' => 'Acme']);
+        Product::query()->create(['external_id' => 'B', 'name' => 'B', 'brand' => 'Acme']);
+        Product::query()->create(['external_id' => 'C', 'name' => 'C', 'brand' => 'Nova']);
+        // Null/blank brands are excluded from the facet.
+        Product::query()->create(['external_id' => 'D', 'name' => 'D', 'brand' => null]);
+
+        $this->withHeader('X-Api-Key', $key)
+            ->getJson('/api/v1/facets/brands')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.brand', 'Acme')
+            ->assertJsonPath('data.0.count', 2)
+            ->assertJsonPath('data.1.brand', 'Nova')
+            ->assertJsonPath('data.1.count', 1);
+    }
+
+    #[Test]
     public function facets_require_auth(): void
     {
         $this->getJson('/api/v1/facets/hosts')->assertUnauthorized();
+        $this->getJson('/api/v1/facets/brands')->assertUnauthorized();
         $this->getJson('/api/v1/facets/categories')->assertUnauthorized();
     }
 }

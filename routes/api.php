@@ -66,6 +66,7 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::get('/ai-decisions', [AiDecisionController::class, 'index'])->name('price-intelligence.ai-decisions.index');
 
     Route::get('/facets/hosts', [FacetController::class, 'hosts'])->name('price-intelligence.facets.hosts');
+    Route::get('/facets/brands', [FacetController::class, 'brands'])->name('price-intelligence.facets.brands');
     Route::get('/facets/categories', [FacetController::class, 'categories'])->name('price-intelligence.facets.categories');
 
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');
