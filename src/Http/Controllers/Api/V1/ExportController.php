@@ -39,8 +39,8 @@ final class ExportController
     {
         $request->validate([
             'competitor_product_id' => ['nullable', 'integer'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
         $header = ['competitor_product_id', 'captured_at', 'price_cents', 'currency', 'price_base_cents', 'available'];

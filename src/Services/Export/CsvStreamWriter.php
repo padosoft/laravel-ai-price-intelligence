@@ -26,10 +26,14 @@ final class CsvStreamWriter
                 throw new RuntimeException('Unable to open php://output for CSV streaming.');
             }
 
-            $csv = Writer::createFromStream($stream);
-            $csv->insertOne($header);
-            foreach ($rows as $row) {
-                $csv->insertOne(array_map([self::class, 'neutralize'], $row));
+            try {
+                $csv = Writer::createFromStream($stream);
+                $csv->insertOne($header);
+                foreach ($rows as $row) {
+                    $csv->insertOne(array_map([self::class, 'neutralize'], $row));
+                }
+            } finally {
+                fclose($stream);
             }
         };
     }

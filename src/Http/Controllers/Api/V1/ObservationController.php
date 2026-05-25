@@ -24,8 +24,8 @@ final class ObservationController
     public function prices(Request $request): JsonResponse
     {
         $request->validate([
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
             'competitor_product_id' => ['nullable', 'integer'],
             'host' => ['nullable', 'string', 'max:191'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
@@ -48,8 +48,8 @@ final class ObservationController
         $request->validate([
             'competitor_product_id' => ['nullable', 'integer'],
             'host' => ['nullable', 'string', 'max:191'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
         ]);
 
@@ -70,8 +70,8 @@ final class ObservationController
         $request->validate([
             'competitor_product_id' => ['nullable', 'integer'],
             'host' => ['nullable', 'string', 'max:191'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:500'],
         ]);
 

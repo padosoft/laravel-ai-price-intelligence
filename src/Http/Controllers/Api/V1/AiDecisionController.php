@@ -20,8 +20,8 @@ final class AiDecisionController
             'feature' => ['nullable', 'string', 'max:50'],
             'subject_type' => ['nullable', 'string', 'max:100'],
             'subject_id' => ['nullable', 'integer'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:200'],
         ]);
 
