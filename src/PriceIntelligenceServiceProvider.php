@@ -14,10 +14,13 @@ use Padosoft\PriceIntelligence\Contracts\AnomalyDetectorInterface;
 use Padosoft\PriceIntelligence\Contracts\EmbeddingProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\ForecastProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
+use Padosoft\PriceIntelligence\Contracts\LlmProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
 use Padosoft\PriceIntelligence\Contracts\RepricerEngineInterface;
 use Padosoft\PriceIntelligence\Contracts\ReviewSentimentInterface;
+use Padosoft\PriceIntelligence\Services\Ai\Llm\FakeLlmProvider;
+use Padosoft\PriceIntelligence\Services\Ai\Llm\LaravelAiLlmProvider;
 use Padosoft\PriceIntelligence\Services\Ai\NullAnomalyDetector;
 use Padosoft\PriceIntelligence\Services\Ai\NullForecaster;
 use Padosoft\PriceIntelligence\Services\Ai\ReviewInsight\LexiconSentimentAnalyzer;
@@ -27,6 +30,7 @@ use Padosoft\PriceIntelligence\Services\Compliance\DomainRateLimiter;
 use Padosoft\PriceIntelligence\Services\Compliance\NullAiActBridge;
 use Padosoft\PriceIntelligence\Services\Compliance\PiiFilter;
 use Padosoft\PriceIntelligence\Services\Matching\Embeddings\FakeEmbeddingProvider;
+use Padosoft\PriceIntelligence\Services\Matching\Embeddings\LaravelAiEmbeddingProvider;
 use Padosoft\PriceIntelligence\Services\Pricing\FixedFxProvider;
 use Padosoft\PriceIntelligence\Services\Pricing\Repricer\RepricerEngine;
 use Padosoft\PriceIntelligence\Services\Pricing\Repricer\StrategyCalculator;
@@ -34,6 +38,10 @@ use Padosoft\PriceIntelligence\Services\Scheduling\AdaptiveBackoff;
 use Padosoft\PriceIntelligence\Services\Scraping\Drivers\GenericHttpScraper;
 use Padosoft\PriceIntelligence\Services\Scraping\HtmlProductExtractor;
 use Padosoft\PriceIntelligence\Support\Config\Flag;
+use Padosoft\PriceIntelligence\Support\Llm\AgentRunner;
+use Padosoft\PriceIntelligence\Support\Llm\EmbeddingRunner;
+use Padosoft\PriceIntelligence\Support\Llm\LaravelAiAgentRunner;
+use Padosoft\PriceIntelligence\Support\Llm\LaravelAiEmbeddingRunner;
 use Padosoft\PriceIntelligence\Support\Tenant\TenantContext;
 
 final class PriceIntelligenceServiceProvider extends ServiceProvider
@@ -44,8 +52,26 @@ final class PriceIntelligenceServiceProvider extends ServiceProvider
 
         $this->app->singleton(TenantContext::class, static fn (): TenantContext => new TenantContext);
 
-        $this->app->bind(EmbeddingProviderInterface::class, static function (): EmbeddingProviderInterface {
-            // Default offline-safe driver; host apps rebind to OpenAI/Voyage/etc.
+        $this->app->bind(AgentRunner::class, static fn (): AgentRunner => new LaravelAiAgentRunner);
+        $this->app->bind(EmbeddingRunner::class, static fn (): EmbeddingRunner => new LaravelAiEmbeddingRunner);
+
+        $this->app->bind(LlmProviderInterface::class, static function ($app): LlmProviderInterface {
+            return config('price-intelligence.ai.llm.driver', 'fake') === 'laravel-ai'
+                ? new LaravelAiLlmProvider($app->make(AgentRunner::class))
+                : new FakeLlmProvider;
+        });
+
+        $this->app->bind(EmbeddingProviderInterface::class, static function ($app): EmbeddingProviderInterface {
+            // Default offline-safe driver; switch to laravel/ai via config or rebind in the host.
+            if (config('price-intelligence.matching.embeddings.driver', 'fake') === 'laravel-ai') {
+                return new LaravelAiEmbeddingProvider(
+                    $app->make(EmbeddingRunner::class),
+                    (string) config('price-intelligence.matching.embeddings.provider', 'openai'),
+                    (string) config('price-intelligence.matching.embeddings.model', 'text-embedding-3-small'),
+                    (int) config('price-intelligence.matching.embeddings.dimensions', 1536),
+                );
+            }
+
             return new FakeEmbeddingProvider;
         });
 
