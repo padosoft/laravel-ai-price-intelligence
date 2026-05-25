@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Services\Scraping\Marketplaces;
 
 use Padosoft\PriceIntelligence\Contracts\ProductScraperInterface;
+use Padosoft\PriceIntelligence\Data\ApiProductResult;
 use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
@@ -56,9 +57,28 @@ final class AmazonAdapter extends AbstractApiAdapter
         $result = match ($driver) {
             'sp_api' => $this->spApi->fetchOffers($asin),
             'keepa' => $this->keepa->fetchByAsin($asin),
-            default => $this->spApi->fetchOffers($asin) ?? $this->keepa->fetchByAsin($asin), // auto
+            default => $this->autoFetch($asin),
         };
 
         return $result?->toSnapshot($competitorProduct->url);
+    }
+
+    /**
+     * Try SP-API first; if it returns no price data (zero offers), fall through to Keepa.
+     * If both succeed but only one has prices, prefer the priced result.
+     */
+    private function autoFetch(string $asin): ?ApiProductResult
+    {
+        $spResult = $this->spApi->fetchOffers($asin);
+
+        if ($spResult !== null && $spResult->priceCents !== null) {
+            return $spResult;
+        }
+
+        // SP-API null (no creds) or returned zero offers — try Keepa.
+        $keepaResult = $this->keepa->fetchByAsin($asin);
+
+        // Prefer whichever has pricing; fall back to SP-API result (at least has offerCount).
+        return $keepaResult ?? $spResult;
     }
 }

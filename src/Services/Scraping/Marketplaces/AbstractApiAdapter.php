@@ -43,7 +43,7 @@ abstract class AbstractApiAdapter extends AbstractScrapeAdapter
             }
 
             if ($snapshot !== null && $snapshot->reachable) {
-                $ref = $this->externalRef($competitorProduct->url);
+                $ref = $this->externalRef($competitorProduct->url) ?? $snapshot->externalRef;
                 if ($ref !== null && $competitorProduct->external_ref === null) {
                     $competitorProduct->forceFill(['external_ref' => $ref])->save();
                 }

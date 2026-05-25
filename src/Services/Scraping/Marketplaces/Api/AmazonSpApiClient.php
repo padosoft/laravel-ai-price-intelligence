@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Padosoft\PriceIntelligence\Data\ApiProductResult;
 
@@ -70,6 +71,14 @@ final class AmazonSpApiClient
      */
     private function accessToken(array $cfg): ?string
     {
+        // Cache slightly under the 3600 s LWA TTL to avoid clock-skew races.
+        $cacheKey = 'pi_lwa_token_'.md5((string) $cfg['client_id'].(string) $cfg['refresh_token']);
+
+        $cached = Cache::get($cacheKey);
+        if (is_string($cached)) {
+            return $cached;
+        }
+
         $response = Http::asForm()->timeout(20)->post(
             (string) ($cfg['token_endpoint'] ?? 'https://api.amazon.com/auth/o2/token'),
             [
@@ -81,6 +90,10 @@ final class AmazonSpApiClient
         );
 
         $token = $response->successful() ? $response->json('access_token') : null;
+
+        if (is_string($token)) {
+            Cache::put($cacheKey, $token, 3500);
+        }
 
         return is_string($token) ? $token : null;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Scraping\Marketplaces\Api;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Padosoft\PriceIntelligence\Data\ApiProductResult;
 
@@ -58,6 +59,14 @@ final class EbayBrowseClient
 
     private function token(string $endpoint, string $clientId, string $clientSecret): ?string
     {
+        // Cache slightly under the 7200 s eBay CC token TTL.
+        $cacheKey = 'pi_ebay_token_'.md5($clientId.$endpoint);
+
+        $cached = Cache::get($cacheKey);
+        if (is_string($cached)) {
+            return $cached;
+        }
+
         $response = Http::withBasicAuth($clientId, $clientSecret)
             ->asForm()
             ->timeout(20)
@@ -67,6 +76,10 @@ final class EbayBrowseClient
             ]);
 
         $token = $response->successful() ? $response->json('access_token') : null;
+
+        if (is_string($token)) {
+            Cache::put($cacheKey, $token, 7000);
+        }
 
         return is_string($token) ? $token : null;
     }

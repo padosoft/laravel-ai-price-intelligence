@@ -33,6 +33,7 @@ final class ApiProductResult
             mpn: $this->mpn,
             brand: $this->brand,
             buyboxSeller: $this->buyboxSeller,
+            externalRef: $this->externalRef,
         );
     }
 }

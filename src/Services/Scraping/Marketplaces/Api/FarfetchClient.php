@@ -83,7 +83,7 @@ final class FarfetchClient
 
         $availability = $data['availability'] ?? null;
         $available = $priceCents !== null
-            && ! in_array($availability, ['out_of_stock', 'OUT_OF_STOCK', 'sold_out'], true);
+            && ! in_array(strtolower((string) $availability), ['out_of_stock', 'sold_out'], true);
 
         $images = [];
         if (isset($data['images']) && is_array($data['images'])) {
