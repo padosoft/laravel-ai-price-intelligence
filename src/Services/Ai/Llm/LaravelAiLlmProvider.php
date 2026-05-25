@@ -121,10 +121,13 @@ final class LaravelAiLlmProvider implements LlmProviderInterface
 
         $decoded = json_decode($clean, true);
 
-        if (! is_array($decoded)) {
+        // Callers ask the model for a single JSON *object*; reject scalars and top-level lists so a
+        // malformed list response can't masquerade as valid structured output. (Empty `[]` — how
+        // PHP decodes `{}` — is allowed; callers read keys with `?? default`.)
+        if (! is_array($decoded) || (array_is_list($decoded) && $decoded !== [])) {
             // Don't embed the raw model output: callers may report($e) and the response could
             // contain sensitive prompt/response content. Include only a non-sensitive length hint.
-            throw new RuntimeException('LLM did not return decodable JSON ('.strlen($text).' chars).');
+            throw new RuntimeException('LLM did not return a decodable JSON object ('.strlen($text).' chars).');
         }
 
         /** @var array<string, mixed> $decoded */

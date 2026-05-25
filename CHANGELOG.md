@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ## [1.3.0] - 2026-05-25
 
 B-phase **B1**: real, provider-agnostic LLM layer built on the official `laravel/ai` SDK +
-`padosoft/laravel-ai-regolo` (EU/Italian-safe Regolo). 197 PHPUnit green (PHP 8.3/8.4),
+`padosoft/laravel-ai-regolo` (EU/Italian-safe Regolo). 198 PHPUnit green (PHP 8.3/8.4),
 Pint + PHPStan level 5 clean; no live calls in CI.
 
 ### Added

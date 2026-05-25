@@ -98,6 +98,16 @@ final class LaravelAiLlmProviderTest extends TestCase
     }
 
     #[Test]
+    public function complete_json_throws_on_top_level_list(): void
+    {
+        $runner = $this->runnerReturning('[{"a": 1}, {"b": 2}]');
+        $provider = new LaravelAiLlmProvider($runner);
+
+        $this->expectException(\RuntimeException::class);
+        $provider->completeJson('s', 'p', ['feature' => 'promo_detection']);
+    }
+
+    #[Test]
     public function vision_forwards_image_urls(): void
     {
         $runner = $this->runnerReturning('{"same_product": true, "confidence": 88}');

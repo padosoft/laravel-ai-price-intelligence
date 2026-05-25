@@ -25,7 +25,9 @@ interface LlmProviderInterface
     public function completeJson(string $instructions, string $prompt, array $options = []): LlmResult;
 
     /**
-     * Vision completion: image URLs are attached to the prompt.
+     * Vision completion: image URLs are attached to the prompt. Like completeJson(), the response is
+     * expected to be a single JSON object and is decoded into LlmResult::$json; implementations throw
+     * \RuntimeException on undecodable output.
      *
      * @param  array<int, string>  $imageUrls
      * @param  array<string, mixed>  $options

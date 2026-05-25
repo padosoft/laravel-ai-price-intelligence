@@ -57,8 +57,12 @@ final class MatchingPipeline
                     $score = $step->score($product, $candidate);
                 } catch (RuntimeException $e) {
                     // A flaky external judge (e.g. LLM timeout / undecodable JSON) must not fail the
-                    // cascade; report it and fall back to the deterministic steps' best score.
-                    report($e);
+                    // cascade; report it (when the framework helper is available — this package also
+                    // runs on bare illuminate/* without laravel/framework) and fall back to the
+                    // deterministic steps' best score.
+                    if (function_exists('report')) {
+                        report($e);
+                    }
 
                     continue;
                 }
