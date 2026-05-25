@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Padosoft\PriceIntelligence\Services\Matching;
 
+use Padosoft\PriceIntelligence\Contracts\BorderlineOnlyStep;
 use Padosoft\PriceIntelligence\Contracts\MatchStepInterface;
 use Padosoft\PriceIntelligence\Data\MatchOutcome;
 use Padosoft\PriceIntelligence\Data\MatchScore;
@@ -44,6 +45,12 @@ final class MatchingPipeline
                 continue;
             }
 
+            // Expensive borderline-only steps (e.g. the LLM judge) run only when the best
+            // score so far is uncertain, so confident or hopeless candidates skip the call.
+            if ($step instanceof BorderlineOnlyStep && ! $this->isUncertain($best->confidence)) {
+                continue;
+            }
+
             $score = $step->score($product, $candidate);
             $trail[] = $score->toArray();
 
@@ -62,6 +69,14 @@ final class MatchingPipeline
             method: $best->method,
             trail: $trail,
         );
+    }
+
+    private function isUncertain(int $confidence): bool
+    {
+        [, $high] = $this->confidenceBand;
+        $floor = max(0, $high - 45); // default band [60,85] => run judge for best in [40, 85)
+
+        return $confidence >= $floor && $confidence < $high;
     }
 
     private function decide(int $confidence): MatchStatus
