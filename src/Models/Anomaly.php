@@ -36,16 +36,21 @@ final class Anomaly extends PriceIntelligenceModel
     ];
 
     /**
-     * Mark this anomaly as reviewed (admin "acknowledge"). Idempotent: a no-op when already
-     * acknowledged, so the original review timestamp is preserved (matches the bulk endpoint,
-     * which only touches rows whose acknowledged_at is null).
+     * Mark this anomaly as reviewed (admin "acknowledge"). Idempotent and race-safe: a single
+     * atomic `WHERE acknowledged_at IS NULL` UPDATE sets the timestamp only if not already set,
+     * so concurrent requests can't overwrite the original review time. `updated_at` is bumped
+     * alongside (the query builder doesn't auto-manage timestamps). The instance is refreshed to
+     * reflect the stored state (whether this call or a concurrent one set it).
      */
     public function acknowledge(): void
     {
-        if ($this->acknowledged_at !== null) {
-            return;
-        }
+        $now = now();
 
-        $this->forceFill(['acknowledged_at' => now()])->save();
+        self::query()
+            ->whereKey($this->getKey())
+            ->whereNull('acknowledged_at')
+            ->update(['acknowledged_at' => $now, 'updated_at' => $now]);
+
+        $this->refresh();
     }
 }
