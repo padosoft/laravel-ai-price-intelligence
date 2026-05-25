@@ -8,6 +8,11 @@
 - **PHP & Composer are NOT on the bash PATH.** Use **PowerShell**: PHP 8.4.21 + Composer 2.9.7 live
   under `C:\Users\lopad\.config\herd\bin\php84`. Run `vendor\bin\phpunit` and `composer ...` via the
   PowerShell tool, not Bash.
+- **PHPStan OOMs on the default 128M parallel-worker limit on this box** (fatal in php-parser while
+  scanning vendor). Always run `vendor\bin\phpstan analyse --memory-limit=1G`. CI is unaffected.
+- **`vendor\bin\phpunit --filter "A|B"`** fails on PowerShell — the `|` is parsed by the batch
+  wrapper ("'B' is not recognized"). Run multiple test files by path instead:
+  `vendor\bin\phpunit tests/Feature/A.php tests/Feature/B.php`.
 - Project root for this package: `C:\Users\lopad\Documents\DocLore\Visual Basic\Ai\laravel-ai-price-intelligence`.
 
 ## Dependencies

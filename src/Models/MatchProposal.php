@@ -16,12 +16,17 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property int $monitoring_target_id
  * @property int|null $competitor_source_id
  * @property string $candidate_url
+ * @property string|null $candidate_title
+ * @property string|null $candidate_image_url
+ * @property int|null $candidate_price_cents
+ * @property string|null $candidate_host
  * @property array<string, mixed>|null $evidence
  * @property int $confidence
  * @property string $source
  * @property string $status
  * @property int|null $reviewer_id
  * @property Carbon|null $reviewed_at
+ * @property-read MonitoringTarget|null $target
  */
 final class MatchProposal extends PriceIntelligenceModel
 {
@@ -34,6 +39,7 @@ final class MatchProposal extends PriceIntelligenceModel
     protected $casts = [
         'evidence' => 'array',
         'confidence' => 'integer',
+        'candidate_price_cents' => 'integer',
         'reviewed_at' => 'datetime',
     ];
 

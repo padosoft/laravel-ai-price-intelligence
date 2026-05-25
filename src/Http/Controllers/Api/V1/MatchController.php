@@ -24,8 +24,10 @@ final class MatchController
         $status = $request->string('status', 'pending')->toString();
 
         $proposals = MatchProposal::query()
+            ->with('target.product')
             ->where('status', $status)
             ->orderByDesc('confidence')
+            ->orderByDesc('id')
             ->cursorPaginate((int) $request->integer('per_page', 50));
 
         return response()->json($proposals);

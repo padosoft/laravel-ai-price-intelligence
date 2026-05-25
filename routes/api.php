@@ -51,6 +51,7 @@ Route::middleware(ResolveTenant::class)->group(function (): void {
     Route::post('/competitor-products', [MatchController::class, 'storeCompetitorProduct'])->name('price-intelligence.competitor-products.store');
 
     Route::get('/observations/prices', [ObservationController::class, 'prices'])->name('price-intelligence.observations.prices');
+    Route::get('/competitor-products', [ObservationController::class, 'index'])->name('price-intelligence.competitor-products.index');
     Route::get('/competitor-products/{id}', [ObservationController::class, 'show'])->whereNumber('id')->name('price-intelligence.competitor-products.show');
 
     Route::get('/forecasts', [IntelligenceController::class, 'forecasts'])->name('price-intelligence.forecasts.index');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Padosoft\PriceIntelligence\Enums\MatchMethod;
 use Padosoft\PriceIntelligence\Enums\MatchStatus;
@@ -28,6 +29,7 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property Carbon|null $dead_since
  * @property-read MonitoringTarget|null $target
  * @property-read CompetitorSource|null $source
+ * @property-read PriceObservation|null $latestPrice
  */
 final class CompetitorProduct extends PriceIntelligenceModel
 {
@@ -54,5 +56,15 @@ final class CompetitorProduct extends PriceIntelligenceModel
     public function source(): BelongsTo
     {
         return $this->belongsTo(CompetitorSource::class, 'competitor_source_id');
+    }
+
+    /**
+     * Most recent price observation for this listing — used by the competitors list
+     * to show the current price and the delta versus our retail price.
+     */
+    public function latestPrice(): HasOne
+    {
+        return $this->hasOne(PriceObservation::class, 'competitor_product_id')
+            ->ofMany(['captured_at' => 'max', 'id' => 'max']);
     }
 }
