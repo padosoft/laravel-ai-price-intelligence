@@ -59,7 +59,8 @@ It is **boundary-respecting**: it provides intelligence; your platform keeps the
 - 🕷️ **Scraping**: JSON-LD + OpenGraph extraction, generic HTTP + Browsershot, **marketplace adapters**
   (Amazon, eBay, Google Shopping, Idealo, Trovaprezzi).
 - 💶 **Price normalization**: multi-currency FX to a base currency, time-series observations.
-- ⏱️ **Scheduling** with adaptive backoff + dedicated Horizon queues (`pi-discovery`, `pi-scrape`, …).
+- ⏱️ **Scheduling** with adaptive backoff + dedicated, configurable queues (`pi-discovery`,
+  `pi-scrape`, …; Horizon-friendly, but any Laravel queue driver works).
 - 🚨 **Alerts + webhooks** (HMAC-signed when a subscription secret is set): price drop/raise, undercut, stock-out.
 - 🤖 **AI layer**: forecasting, anomaly detection, GDPR-safe review sentiment (pluggable, toggleable).
 - 💸 **Optional no-code repricer** (off by default, advisory-only).
@@ -174,8 +175,8 @@ facet chips, streamed export) end-to-end:
   rows age out; composite indexes keep range queries on `(competitor_product_id, captured_at)` fast.
   The observations tables are partition-friendly (`captured_at` present, no cross-table FKs) so
   monthly partitioning can be enabled later (planned `PartitionManager`).
-- **Chunked jobs + adaptive backoff** on dedicated Horizon queues so scraping 500k targets doesn't
-  cause a thundering herd.
+- **Chunked jobs + adaptive backoff** on dedicated, configurable queues (Horizon-friendly; any
+  Laravel queue driver) so scraping 500k targets doesn't cause a thundering herd.
 
 ### Analytics, history & decision log
 
