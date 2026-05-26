@@ -164,8 +164,8 @@ Every list and analytics path is built to stay cheap as the catalog and time-ser
 facet chips, streamed export) end-to-end:
 
 - **Cursor pagination** on every list endpoint (stable, OFFSET-free) — `?cursor=` / `next_cursor`.
-- **DB-level facets** computed in SQL, never page-1: `GET /facets/hosts`, `GET /facets/brands`
-  (`COUNT(*) GROUP BY`) and `GET /facets/categories` (aggregated over a lazy cursor).
+- **Exact facets, never page-1**: `GET /facets/hosts` & `GET /facets/brands` via SQL
+  `COUNT(*) … GROUP BY`, and `GET /facets/categories` aggregated in one pass over a lazy DB cursor.
 - **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
   stream CSV via a database cursor — OOM-safe for 100k+ rows. (Excel opt-in via `phpoffice/phpspreadsheet`.)
 - **Daily aggregates + partition-ready time-series**: `piprice:aggregates:daily` materializes

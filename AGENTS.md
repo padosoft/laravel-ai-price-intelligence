@@ -72,8 +72,9 @@ Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the r
 - **Orchestra TestCase** is required for any test touching Eloquent (booting the app); its `seed()` method
   is reserved — don't define a private `seed()` helper.
 - **GitHub flakiness**: `gh pr merge` can 504 without merging — re-check PR `state` and retry idempotently.
-- **Admin-driven backfills (v1.6/v1.7)**: small endpoints added so the admin has no dead buttons /
-  scales — keep them consistent with siblings (`/facets/brands` mirrors `/facets/hosts`; anomaly ack
+- **Admin-driven backfills (v1.6/v1.7)**: small endpoints added so the admin panel stays complete
+  (no dead buttons) and scales — keep them consistent with siblings (`/facets/brands` mirrors
+  `/facets/hosts`; anomaly ack
   mirrors alert ack). "Acknowledge"-style writes should be **idempotent + race-safe**: a single atomic
   `whereNull(...)->update([...])` (not read-then-`save()`), scoped to the row's own tenant via
   `withoutTenantScope()` + explicit `tenant_id` so it's correct off the ambient `TenantContext` (jobs);
