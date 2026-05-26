@@ -157,19 +157,32 @@ Set e.g. `PI_AMAZON_DRIVER=keepa` + `PI_KEEPA_KEY=…`, or `PI_EBAY_CLIENT_ID/SE
 `PI_SERPAPI_KEY`, or `PI_FARFETCH_DRIVER=retailed` + `PI_RETAILED_KEY`. No extra Composer packages
 are required — the adapters call each API directly over HTTP.
 
-### Analytics, facets & export
+### Engineered for large catalogs (≈500k SKU)
 
-- **History**: `GET /observations/prices` (now with a `?host=` filter), `GET /observations/stock`,
+Every list and analytics path is built to stay cheap as the catalog and time-series grow — and the
+[web admin panel](#web-admin-panel) consumes these primitives (cursor pagination, virtualization,
+facet chips, streamed export) end-to-end:
+
+- **Cursor pagination** on every list endpoint (stable, OFFSET-free) — `?cursor=` / `next_cursor`.
+- **DB-level facets** computed in SQL, never page-1: `GET /facets/hosts`, `GET /facets/brands`
+  (`COUNT(*) GROUP BY`) and `GET /facets/categories` (aggregated over a lazy cursor).
+- **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
+  stream CSV via a database cursor — OOM-safe for 100k+ rows. (Excel opt-in via `phpoffice/phpspreadsheet`.)
+- **Monthly-partitioned time-series + daily aggregates**: `piprice:aggregates:daily` materializes
+  per-day min/max/avg into `pi_price_daily_aggregates` (nightly) so long histories stay cheap as raw
+  rows age out; composite indexes keep range queries on `(competitor_product_id, captured_at)` fast.
+- **Chunked jobs + adaptive backoff** on dedicated Horizon queues so scraping 500k targets doesn't
+  thundering-herd.
+
+### Analytics, history & decision log
+
+- **History**: `GET /observations/prices` (with a `?host=` filter), `GET /observations/stock`,
   `GET /observations/promos` — cursor-paginated time series.
 - **AI decision log**: `GET /ai-decisions` (filter by feature/subject/date) backs the EU AI Act
-  Compliance screen.
-- **Facets**: `GET /facets/hosts` (confirmed-competitor count per host, SQL `GROUP BY`) and
-  `GET /facets/categories` (per-category product counts, aggregated over a lazy cursor).
-- **Bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export` stream CSV
-  via a database cursor — OOM-safe for 100k+ rows. (Excel is opt-in via `phpoffice/phpspreadsheet`.)
+  Compliance screen (Art. 12 record-keeping).
+- **Anomaly review**: `POST /anomalies/{id}/ack` (idempotent, race-safe) and `POST /anomalies:ack`
+  (bulk by ids) mark detections reviewed.
 - **Tenant settings**: read in `GET /tenants/me` and writable via `PATCH /tenants/me/settings`.
-- **Daily aggregates**: `piprice:aggregates:daily` materializes per-day min/max/avg into
-  `pi_price_daily_aggregates` (scheduled nightly) so long histories stay cheap as raw rows age out.
 
 ## AI features
 
