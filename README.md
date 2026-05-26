@@ -158,7 +158,7 @@ Set e.g. `PI_AMAZON_DRIVER=keepa` + `PI_KEEPA_KEY=…`, or `PI_EBAY_CLIENT_ID/SE
 `PI_SERPAPI_KEY`, or `PI_FARFETCH_DRIVER=retailed` + `PI_RETAILED_KEY`. No extra Composer packages
 are required — the adapters call each API directly over HTTP.
 
-### Engineered for large catalogs (≈500k SKU)
+### Engineered for large catalogs (≈500k SKUs)
 
 Every list and analytics path is built to stay cheap as the catalog and time-series grow — and the
 [web admin panel](#web-admin-panel) consumes these primitives (cursor pagination, virtualization,
@@ -166,7 +166,7 @@ facet chips, streamed export) end-to-end:
 
 - **Cursor pagination** on the catalog / observation / competitor / decision-log lists (stable,
   OFFSET-free) — `?cursor=` / `next_cursor`. (Facet endpoints instead return one pre-aggregated row
-  per host/brand/category — computed in the DB, not the per-row dataset.)
+  per host/brand/category, not the per-row dataset.)
 - **Exact facets, never page-1**: `GET /facets/hosts` & `GET /facets/brands` via SQL
   `COUNT(*) … GROUP BY`, and `GET /facets/categories` aggregated in one pass over a lazy DB cursor.
 - **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
