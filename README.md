@@ -165,14 +165,16 @@ Every list and analytics path is built to stay cheap as the catalog and time-ser
 facet chips, streamed export) end-to-end:
 
 - **Cursor pagination** on the catalog / observation / competitor / decision-log lists (stable,
-  OFFSET-free) — `?cursor=` / `next_cursor`. (Facet endpoints return small pre-aggregated sets.)
+  OFFSET-free) — `?cursor=` / `next_cursor`. (Facet endpoints instead return one pre-aggregated row
+  per host/brand/category — computed in the DB, not the per-row dataset.)
 - **Exact facets, never page-1**: `GET /facets/hosts` & `GET /facets/brands` via SQL
   `COUNT(*) … GROUP BY`, and `GET /facets/categories` aggregated in one pass over a lazy DB cursor.
 - **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
   stream CSV via a database cursor — OOM-safe for 100k+ rows. (Excel opt-in via `phpoffice/phpspreadsheet`.)
 - **Daily aggregates + partition-ready time-series**: `piprice:aggregates:daily` materializes
-  per-day min/max/avg into `pi_price_daily_aggregates` (nightly) so long histories stay cheap as raw
-  rows age out; composite indexes keep range queries on `(competitor_product_id, captured_at)` fast.
+  per-day min/max/avg into `pi_price_daily_aggregates` (nightly) so dashboards/charts query the small
+  aggregate table instead of full raw history; composite indexes keep range queries on
+  `(competitor_product_id, captured_at)` fast.
   The observations tables are partition-friendly (`captured_at` present, no cross-table FKs) so
   monthly partitioning can be enabled later (planned `PartitionManager`).
 - **Chunked jobs + adaptive backoff** on dedicated, configurable queues (Horizon-friendly; any

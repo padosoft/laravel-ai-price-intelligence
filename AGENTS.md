@@ -77,7 +77,9 @@ Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the r
   `/facets/hosts`; anomaly ack
   mirrors alert ack). "Acknowledge"-style writes should be **idempotent + race-safe**: a single atomic
   `whereNull(...)->update([...])` (not read-then-`save()`), scoped to the row's own tenant via
-  `withoutTenantScope()` + explicit `tenant_id` so it's correct off the ambient `TenantContext` (jobs);
+  `withoutTenantScope()` + an explicit `tenant_id` predicate **only where `TenantContext` may be
+  unset** (queued jobs) — in HTTP handlers keep the tenant global scope on; never bypass it without
+  re-asserting `tenant_id`;
   bump `updated_at` explicitly in the `update([...])` call; bound bulk-id arrays (`max:<N>` on the
   array, items `min:1` + `distinct`) and add a cross-tenant isolation test. Terminology: the
   **Eloquent** builder (`Model::query()->update()`) *does* auto-set `updated_at`; the base **DB**
