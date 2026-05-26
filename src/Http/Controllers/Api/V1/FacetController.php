@@ -35,6 +35,24 @@ final class FacetController
         return response()->json(['data' => $rows]);
     }
 
+    public function brands(Request $request): JsonResponse
+    {
+        // Exact per-brand product counts for the admin Catalog brand chips, computed in a single
+        // DB-side aggregation (GROUP BY brand) — one pass over the table, no per-page OFFSET scans
+        // and no N client round-trips, so it stays practical as the catalog grows to 500k SKU.
+        $rows = Product::query()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->selectRaw('brand, COUNT(*) as count')
+            ->groupBy('brand')
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn (Product $r): array => ['brand' => (string) $r->getAttribute('brand'), 'count' => (int) $r->getAttribute('count')])
+            ->all();
+
+        return response()->json(['data' => $rows]);
+    }
+
     public function categories(Request $request): JsonResponse
     {
         // categories is a JSON array per product; aggregate in PHP over a streaming cursor() —
