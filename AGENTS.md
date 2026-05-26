@@ -78,8 +78,8 @@ Review `docs/LESSON.md` and all knowhow gained, then **create/strengthen** the r
   mirrors alert ack). "Acknowledge"-style writes should be **idempotent + race-safe**: a single atomic
   `whereNull(...)->update([...])` (not read-then-`save()`), scoped to the row's own tenant via
   `withoutTenantScope()` + explicit `tenant_id` so it's correct off the ambient `TenantContext` (jobs);
-  bump `updated_at` explicitly when using the query builder; bound bulk-id arrays (`max`, `min:1`,
-  `distinct`) and add a cross-tenant isolation test. Note Eloquent builder `->update()` *does* set
+  bump `updated_at` explicitly when using the query builder; bound bulk-id arrays (`max:<N>` on the
+  array, items `min:1` + `distinct`) and add a cross-tenant isolation test. Note Eloquent builder `->update()` *does* set
   `updated_at` — don't claim otherwise in comments.
 - **Facet/aggregate endpoints** are the scale story: compute counts in SQL (`GROUP BY`) or a lazy
   `cursor()`, never page-1; document cost honestly (one DB-side pass, not "constant").
