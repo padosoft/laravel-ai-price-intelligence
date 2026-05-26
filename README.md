@@ -59,7 +59,8 @@ It is **boundary-respecting**: it provides intelligence; your platform keeps the
 - 🕷️ **Scraping**: JSON-LD + OpenGraph extraction, generic HTTP + Browsershot, **marketplace adapters**
   (Amazon, eBay, Google Shopping, Idealo, Trovaprezzi).
 - 💶 **Price normalization**: multi-currency FX to a base currency, time-series observations.
-- ⏱️ **Scheduling** with adaptive backoff + dedicated Horizon queues (`pi-discovery`, `pi-scrape`, …).
+- ⏱️ **Scheduling** with adaptive backoff + dedicated, configurable queues (`pi-discovery`,
+  `pi-scrape`, …; Horizon-friendly, but any Laravel queue driver works).
 - 🚨 **Alerts + webhooks** (HMAC-signed when a subscription secret is set): price drop/raise, undercut, stock-out.
 - 🤖 **AI layer**: forecasting, anomaly detection, GDPR-safe review sentiment (pluggable, toggleable).
 - 💸 **Optional no-code repricer** (off by default, advisory-only).
@@ -157,19 +158,37 @@ Set e.g. `PI_AMAZON_DRIVER=keepa` + `PI_KEEPA_KEY=…`, or `PI_EBAY_CLIENT_ID/SE
 `PI_SERPAPI_KEY`, or `PI_FARFETCH_DRIVER=retailed` + `PI_RETAILED_KEY`. No extra Composer packages
 are required — the adapters call each API directly over HTTP.
 
-### Analytics, facets & export
+### Engineered for large catalogs (≈500k SKUs)
 
-- **History**: `GET /observations/prices` (now with a `?host=` filter), `GET /observations/stock`,
+Every list and analytics path is built to stay cheap as the catalog and time-series grow — and the
+[web admin panel](#web-admin-panel) consumes these primitives (cursor pagination, virtualization,
+facet chips, streamed export) end-to-end:
+
+- **Cursor pagination** on the catalog / observation / competitor / decision-log lists (stable,
+  OFFSET-free) — `?cursor=` / `next_cursor`. (Facet endpoints instead return one pre-aggregated row
+  per host/brand/category, not the per-row dataset.)
+- **Exact facets, never page-1**: `GET /facets/hosts` & `GET /facets/brands` via SQL
+  `COUNT(*) … GROUP BY`, and `GET /facets/categories` aggregated in one pass over a lazy DB cursor.
+- **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
+  stream CSV via a database cursor — OOM-safe for 100k+ rows. (Excel opt-in via `phpoffice/phpspreadsheet`.)
+- **Daily aggregates + partition-ready time-series**: `piprice:aggregates:daily` materializes
+  per-day min/max/avg into `pi_price_daily_aggregates` (nightly) so dashboards/charts query the small
+  aggregate table instead of full raw history; composite indexes keep range queries on
+  `(competitor_product_id, captured_at)` fast.
+  The observations tables are partition-friendly (`captured_at` present, no cross-table FKs) so
+  monthly partitioning can be enabled later (planned `PartitionManager`).
+- **Chunked jobs + adaptive backoff** on dedicated, configurable queues (Horizon-friendly; any
+  Laravel queue driver) so scraping 500k targets doesn't cause a thundering herd.
+
+### Analytics, history & decision log
+
+- **History**: `GET /observations/prices` (with a `?host=` filter), `GET /observations/stock`,
   `GET /observations/promos` — cursor-paginated time series.
 - **AI decision log**: `GET /ai-decisions` (filter by feature/subject/date) backs the EU AI Act
-  Compliance screen.
-- **Facets**: `GET /facets/hosts` (confirmed-competitor count per host, SQL `GROUP BY`) and
-  `GET /facets/categories` (per-category product counts, aggregated over a lazy cursor).
-- **Bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export` stream CSV
-  via a database cursor — OOM-safe for 100k+ rows. (Excel is opt-in via `phpoffice/phpspreadsheet`.)
+  Compliance screen (Art. 12 record-keeping).
+- **Anomaly review**: `POST /anomalies/{id}/ack` (idempotent, race-safe) and `POST /anomalies:ack`
+  (bulk by ids) mark detections reviewed.
 - **Tenant settings**: read in `GET /tenants/me` and writable via `PATCH /tenants/me/settings`.
-- **Daily aggregates**: `piprice:aggregates:daily` materializes per-day min/max/avg into
-  `pi_price_daily_aggregates` (scheduled nightly) so long histories stay cheap as raw rows age out.
 
 ## AI features
 
