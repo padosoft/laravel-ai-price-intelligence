@@ -163,7 +163,8 @@ Every list and analytics path is built to stay cheap as the catalog and time-ser
 [web admin panel](#web-admin-panel) consumes these primitives (cursor pagination, virtualization,
 facet chips, streamed export) end-to-end:
 
-- **Cursor pagination** on every list endpoint (stable, OFFSET-free) — `?cursor=` / `next_cursor`.
+- **Cursor pagination** on the catalog / observation / competitor / decision-log lists (stable,
+  OFFSET-free) — `?cursor=` / `next_cursor`. (Facet endpoints return small pre-aggregated sets.)
 - **Exact facets, never page-1**: `GET /facets/hosts` & `GET /facets/brands` via SQL
   `COUNT(*) … GROUP BY`, and `GET /facets/categories` aggregated in one pass over a lazy DB cursor.
 - **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
