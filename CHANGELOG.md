@@ -189,7 +189,8 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.4.0...v1.5.0
