@@ -168,11 +168,13 @@ facet chips, streamed export) end-to-end:
   (`COUNT(*) GROUP BY`) and `GET /facets/categories` (aggregated over a lazy cursor).
 - **Streamed bulk export**: `GET /catalog/products:export` and `GET /observations/prices:export`
   stream CSV via a database cursor — OOM-safe for 100k+ rows. (Excel opt-in via `phpoffice/phpspreadsheet`.)
-- **Monthly-partitioned time-series + daily aggregates**: `piprice:aggregates:daily` materializes
+- **Daily aggregates + partition-ready time-series**: `piprice:aggregates:daily` materializes
   per-day min/max/avg into `pi_price_daily_aggregates` (nightly) so long histories stay cheap as raw
   rows age out; composite indexes keep range queries on `(competitor_product_id, captured_at)` fast.
+  The observations tables are partition-friendly (`captured_at` present, no cross-table FKs) so
+  monthly partitioning can be enabled later (planned `PartitionManager`).
 - **Chunked jobs + adaptive backoff** on dedicated Horizon queues so scraping 500k targets doesn't
-  thundering-herd.
+  cause a thundering herd.
 
 ### Analytics, history & decision log
 
