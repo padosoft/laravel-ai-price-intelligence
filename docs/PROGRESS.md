@@ -107,8 +107,9 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
   OOM-safe); `PATCH /tenants/me/settings` + settings in `me()`; daily-aggregate table + `piprice:aggregates:daily`
   (nightly) + composite index review. league/csv → require. 239 PHPUnit green. Plan:
   docs/superpowers/plans/2026-05-25-b3-api-gaps-scale.md.
-- [ ] **B4–B8 (admin)**: real Laravel+DB test harness + visual regression; wire placeholder actions;
+- [x] **B4–B8 (admin)**: real Laravel+DB test harness + visual regression; wire placeholder actions;
   enterprise UX (pagination/virtualization/facets); SSE bearer/polling fallback; release hygiene → admin v1.1.0.
+  DONE — admin tagged **v1.1.0** (B4–B8 complete); later toolchain bumps (Vitest v4, **Vite 8**) shipped to admin main.
 - [x] **v1.6.0 (core) — admin gap-backfill (B5)**: anomaly acknowledgement endpoints
   `POST /anomalies/{id}/ack` (idempotent no-op when already acked) + `POST /anomalies:ack`
   (bulk by ids[], skips acked, returns count) + `Anomaly::acknowledge()`. So the admin Anomalies

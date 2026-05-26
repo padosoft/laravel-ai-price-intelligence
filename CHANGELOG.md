@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-05-26
+
+Documentation only — no code or API changes.
+
+### Changed
+- **WOW README**: enterprise-scale (≈500k SKU) section, full v1.6/v1.7 endpoint coverage
+  (anomaly-ack, tenant settings, facets, AI-decision log), and the B-phase lessons consolidated into
+  `AGENTS.md`.
+- README: list Farfetch among the marketplace adapters (was already in the adapter table).
+- Marked the admin B4–B8 tracking item complete in `docs/PROGRESS.md` (admin shipped v1.1.0).
+
 ## [1.7.0] - 2026-05-26
 
 Admin-driven backfill (gap-backfill policy): a **brand facet** so the admin Catalog brand chips are
