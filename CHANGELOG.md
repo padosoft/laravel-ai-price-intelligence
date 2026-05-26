@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-05-26
+
+Documentation only — no code or API changes.
+
+### Changed
+- **WOW README**: enterprise-scale (≈500k SKU) section, full v1.6/v1.7 endpoint coverage
+  (anomaly-ack, tenant settings, facets, AI-decision log), and the B-phase lessons consolidated into
+  `AGENTS.md`.
+- README: list Farfetch among the marketplace adapters (was already in the adapter table).
+- Marked the admin B4–B8 tracking item complete in `docs/PROGRESS.md` (admin shipped v1.1.0).
+
 ## [1.7.0] - 2026-05-26
 
 Admin-driven backfill (gap-backfill policy): a **brand facet** so the admin Catalog brand chips are
@@ -178,7 +189,8 @@ First public release. Enterprise Product & Price Intelligence / Competitor Monit
 - Companion web admin panel: [`padosoft/laravel-ai-price-intelligence-admin`](https://github.com/padosoft/laravel-ai-price-intelligence-admin).
 - Apache-2.0. PHP 8.3+, Laravel 11/12/13.
 
-[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/padosoft/laravel-ai-price-intelligence/compare/v1.4.0...v1.5.0
