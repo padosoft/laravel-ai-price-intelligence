@@ -1,5 +1,7 @@
 # laravel-ai-price-intelligence
 
+[Official documentation](https://doc.laravel-ai-price-intelligence.padosoft.com)
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/padosoft/laravel-ai-price-intelligence.svg?style=flat-square)](https://packagist.org/packages/padosoft/laravel-ai-price-intelligence)
 [![PHP](https://img.shields.io/badge/PHP-8.3%2B-777bb4.svg?style=flat-square)](https://www.php.net/)
 [![Laravel](https://img.shields.io/badge/Laravel-11%20%7C%2012%20%7C%2013-ff2d20.svg?style=flat-square)](https://laravel.com/)

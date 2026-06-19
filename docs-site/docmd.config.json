@@ -1,0 +1,275 @@
+{
+  "title": "laravel-ai-price-intelligence",
+  "description": "Enterprise Product & Price Intelligence / Competitor Monitoring for Laravel, AI-native, EU AI Act-ready, and self-hostable.",
+  "url": "https://doc.laravel-ai-price-intelligence.padosoft.com",
+  "src": "docs",
+  "out": "_site",
+  "base": "/",
+  "favicon": "assets/favicon.svg",
+  "theme": {
+    "name": "default",
+    "appearance": "system",
+    "codeHighlight": true,
+    "customCss": [
+      "assets/custom.css"
+    ],
+    "primaryColor": "#0d9488"
+  },
+  "copyCode": true,
+  "pageNavigation": true,
+  "minify": true,
+  "layout": {
+    "spa": true,
+    "header": {
+      "enabled": true
+    },
+    "sidebar": {
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "position": "left"
+    },
+    "optionsMenu": {
+      "position": "header",
+      "components": {
+        "search": true,
+        "themeSwitch": true
+      }
+    },
+    "footer": {
+      "style": "complete",
+      "content": "Apache-2.0 © Padosoft. Documentation for padosoft/laravel-ai-price-intelligence.",
+      "branding": true,
+      "columns": [
+        {
+          "title": "Project",
+          "links": [
+            {
+              "text": "GitHub",
+              "url": "https://github.com/padosoft/laravel-ai-price-intelligence"
+            },
+            {
+              "text": "Issues",
+              "url": "https://github.com/padosoft/laravel-ai-price-intelligence/issues"
+            }
+          ]
+        }
+      ]
+    },
+    "menubar": {
+      "position": "header",
+      "left": [
+        {
+          "text": "Docs",
+          "url": "/"
+        },
+        {
+          "text": "Reference",
+          "url": "/reference/api"
+        }
+      ],
+      "right": [
+        {
+          "text": "GitHub",
+          "url": "https://github.com/padosoft/laravel-ai-price-intelligence"
+        }
+      ]
+    }
+  },
+  "navigation": [
+    {
+      "title": "Get Started",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Overview",
+          "path": "/"
+        },
+        {
+          "title": "Quickstart",
+          "path": "/get-started/quickstart"
+        },
+        {
+          "title": "Installation",
+          "path": "/get-started/installation"
+        },
+        {
+          "title": "Configuration",
+          "path": "/get-started/configuration"
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Integrating an Ecommerce",
+          "path": "/guides/integrating-ecommerce"
+        },
+        {
+          "title": "Catalog and Targets",
+          "path": "/guides/catalog-targets"
+        },
+        {
+          "title": "Product Matching",
+          "path": "/guides/product-matching"
+        },
+        {
+          "title": "Marketplace Adapters",
+          "path": "/guides/marketplace-adapters"
+        },
+        {
+          "title": "Alerts and Webhooks",
+          "path": "/guides/alerts-webhooks"
+        },
+        {
+          "title": "Extending Drivers",
+          "path": "/guides/extending-drivers"
+        }
+      ]
+    },
+    {
+      "title": "Concetti & Teoria",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Motivazione",
+          "path": "/concepts/motivazione"
+        },
+        {
+          "title": "Teoria",
+          "path": "/concepts/teoria"
+        },
+        {
+          "title": "Design",
+          "path": "/concepts/design"
+        },
+        {
+          "title": "Modello dati e contratto",
+          "path": "/concepts/modello-dati-contratto"
+        },
+        {
+          "title": "ADR",
+          "path": "/concepts/adr"
+        },
+        {
+          "title": "Worked Example",
+          "path": "/concepts/worked-example"
+        }
+      ]
+    },
+    {
+      "title": "Architettura",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Overview",
+          "path": "/architecture/overview"
+        },
+        {
+          "title": "Pipeline and Workflow",
+          "path": "/architecture/pipeline-workflow"
+        },
+        {
+          "title": "AI Layer",
+          "path": "/architecture/ai-layer"
+        },
+        {
+          "title": "Data Model",
+          "path": "/architecture/data-model"
+        }
+      ]
+    },
+    {
+      "title": "Best Practices",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Compliance",
+          "path": "/best-practices/compliance"
+        },
+        {
+          "title": "Scaling Large Catalogs",
+          "path": "/best-practices/scaling-large-catalogs"
+        },
+        {
+          "title": "Pricing Governance",
+          "path": "/best-practices/pricing-governance"
+        }
+      ]
+    },
+    {
+      "title": "Operations",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Deployment",
+          "path": "/operations/deployment"
+        },
+        {
+          "title": "Queues and Scheduling",
+          "path": "/operations/queues-scheduling"
+        },
+        {
+          "title": "Monitoring",
+          "path": "/operations/monitoring"
+        },
+        {
+          "title": "Troubleshooting",
+          "path": "/operations/troubleshooting"
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "CLI",
+          "path": "/reference/cli"
+        },
+        {
+          "title": "API",
+          "path": "/reference/api"
+        },
+        {
+          "title": "Events",
+          "path": "/reference/events"
+        },
+        {
+          "title": "Configuration",
+          "path": "/reference/configuration"
+        },
+        {
+          "title": "Package API",
+          "path": "/reference/package-api"
+        }
+      ]
+    }
+  ],
+  "plugins": {
+    "search": {
+      "semantic": true,
+      "config": ".docmd-search/config.json"
+    },
+    "git": {},
+    "seo": {
+      "defaultDescription": "Enterprise Product & Price Intelligence / Competitor Monitoring for Laravel, AI-native, EU AI Act-ready, and self-hostable.",
+      "openGraph": {
+        "siteName": "laravel-ai-price-intelligence",
+        "defaultImage": "assets/favicon.svg"
+      },
+      "twitter": {
+        "cardType": "summary"
+      }
+    },
+    "sitemap": {
+      "defaultChangefreq": "weekly",
+      "priority": 0.8
+    },
+    "mermaid": {},
+    "math": {},
+    "llms": {},
+    "analytics": false
+  }
+}

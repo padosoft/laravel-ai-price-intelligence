@@ -1,0 +1,16 @@
+:root {
+  --docmd-primary: #0d9488;
+  --docmd-primary-contrast: #ffffff;
+}
+
+a {
+  text-underline-offset: 0.18em;
+}
+
+code {
+  border-radius: 4px;
+}
+
+.mermaid {
+  margin-block: 1.25rem;
+}

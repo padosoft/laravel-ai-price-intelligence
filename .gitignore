@@ -1,5 +1,9 @@
 /vendor/
 /node_modules/
+/docs-site/node_modules/
+/docs-site/_site/
+/docs-site/.docmd-search/*
+!/docs-site/.docmd-search/config.json
 .phpunit.cache/
 .phpunit.result.cache
 composer.phar

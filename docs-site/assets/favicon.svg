@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="laravel-ai-price-intelligence">
+  <rect width="64" height="64" rx="14" fill="#0d9488"/>
+  <path d="M16 42h32v6H16zM19 35l8-12 7 8 9-15 4 3-12 21-7-8-6 9z" fill="#fff"/>
+  <circle cx="27" cy="23" r="3" fill="#facc15"/>
+  <circle cx="43" cy="16" r="3" fill="#facc15"/>
+</svg>
