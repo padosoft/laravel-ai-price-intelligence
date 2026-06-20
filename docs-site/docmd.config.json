@@ -5,15 +5,14 @@
   "src": "docs",
   "out": "_site",
   "base": "/",
-  "favicon": "assets/favicon.svg",
   "theme": {
     "name": "default",
     "appearance": "system",
     "codeHighlight": true,
+    "primaryColor": "#0d9488",
     "customCss": [
       "assets/custom.css"
-    ],
-    "primaryColor": "#0d9488"
+    ]
   },
   "copyCode": true,
   "pageNavigation": true,
@@ -271,5 +270,6 @@
     "math": {},
     "llms": {},
     "analytics": false
-  }
+  },
+  "favicon": "assets/favicon.svg"
 }

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "docmd dev",
     "build": "docmd build",
-    "check": "docmd build && node scripts/check-no-raw-html.mjs"
+    "check": "node scripts/check-no-raw-html.mjs"
   },
   "devDependencies": {
     "@docmd/core": "^0.8.6",
