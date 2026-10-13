@@ -200,6 +200,7 @@ facet chips, streamed export) end-to-end:
 | Anomaly detection | on | detrended-residual outliers + price-error (civetta) detection |
 | Review sentiment | **off** | GDPR-safe: per-domain opt-in, mandatory PII redaction, anonymous aggregates only |
 | Narrative / content-gap / promo / visual-match / LLM match-judge | on | Real LLM-backed via the official `laravel/ai` SDK; `fake` deterministic driver is the zero-config default |
+| Category attributes (`wanted_attributes`) | schema.org **on**, LLM **off** | Reads the attributes a target asks for from competitor pages; LLM step opt-in (`PI_ATTRIBUTE_EXTRACTION_ENABLED`) |
 
 Every AI output is flagged `is_ai_generated` and logged in the decision-log table (default
 `pi_ai_decision_logs`, configurable).
@@ -221,6 +222,36 @@ For an EU/Italian-sovereign option, install [`padosoft/laravel-ai-regolo`](https
 and set `PI_LLM_PROVIDER=regolo`. Embeddings have the same switch (`PI_EMBEDDINGS_DRIVER=laravel-ai`,
 `PI_EMBEDDINGS_PROVIDER`, `PI_EMBEDDINGS_MODEL`, `PI_EMBEDDINGS_DIMENSIONS`); the default is the
 deterministic `FakeEmbeddingProvider`.
+
+### Category attributes
+
+A target can ask for the attributes of its product category; they are read from every confirmed
+competitor page and returned in `latest_content.attributes` (`GET /competitor-products/{id}`).
+
+```php
+Http::withHeaders(['X-Api-Key' => $plaintext])->post("$base/api/v1/targets", [
+    'product_external_id' => 'SKU-123', 'country' => 'IT', 'locale' => 'it-IT',
+    'wanted_attributes' => [
+        ['key' => 'a12', 'label' => 'Made in', 'allowed_values' => ['Italia', 'Francia', 'Romania']],
+        ['key' => 'a7', 'label' => 'Materiale', 'allowed_values' => ['Lana', 'Cotone'], 'jsonld_property' => 'material'],
+    ],
+]);
+```
+
+- **schema.org first, for free**: the page's Product node (`jsonld_property`, or an
+  `additionalProperty` named like the label) on every scrape.
+- **LLM for the rest** (`PI_ATTRIBUTE_EXTRACTION_ENABLED=true` and a real `PI_LLM_DRIVER`): queued on
+  the `ai` queue with the page text (PII-redacted, `PI_ATTRIBUTE_EXTRACTION_MAX_TEXT_CHARS`, never
+  stored). The model may translate (allowed values in Italian, page in English), but an answer is kept
+  only when its evidence quote is on the page and the value is one of `allowed_values`, returned with the
+  client's exact spelling; otherwise `value` is null and `rejected_reason` says why
+  (`evidence_not_found`, `value_not_allowed`). An unchanged page reuses the previous extraction.
+- **When to read**: `latest_content.attributes_status` is `pending` while the LLM step runs, then
+  `done` (or `failed`, schema.org values kept); `skipped` when the target asks for nothing.
+
+Limits: 50 attributes, 1000 allowed values each (5000 in total), strings of at most 191 characters,
+values distinct within an attribute (case-insensitive). Each POST replaces the list; omitting it
+removes it.
 
 ## Compliance: GDPR & EU AI Act
 

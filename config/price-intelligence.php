@@ -187,6 +187,14 @@ return [
         ],
         'visual_match' => ['enabled' => true],
         'content_gap' => ['enabled' => true],
+        // Category attributes asked per target (POST /targets wanted_attributes) and returned in
+        // latest_content.attributes. schema.org values are always read for free; this flag turns
+        // on the LLM step for the rest, run on the `ai` queue once per page version.
+        'attribute_extraction' => [
+            'enabled' => env('PI_ATTRIBUTE_EXTRACTION_ENABLED', false),
+            // Page-text budget sent to the model (characters, after PII redaction).
+            'max_text_chars' => (int) env('PI_ATTRIBUTE_EXTRACTION_MAX_TEXT_CHARS', 12000),
+        ],
         // Forecast driver is selected by binding ForecastProviderInterface (Statistical by
         // default); there is no string "driver" switch here to avoid a dead setting.
         'forecast' => ['enabled' => true, 'min_observations' => 14, 'show_confidence_interval' => true],

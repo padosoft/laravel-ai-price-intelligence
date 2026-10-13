@@ -44,6 +44,8 @@ final class ProductSnapshot
         public readonly bool $reachable = true,
         public readonly ?int $httpStatus = null,
         public readonly ?string $externalRef = null,
+        // Visible page text, used only in memory for attribute extraction (never persisted).
+        public readonly ?string $pageText = null,
     ) {}
 
     public function withReachable(bool $reachable): self
@@ -73,6 +75,7 @@ final class ProductSnapshot
             reachable: $reachable,
             httpStatus: $this->httpStatus,
             externalRef: $this->externalRef,
+            pageText: $this->pageText,
         );
     }
 
@@ -105,6 +108,7 @@ final class ProductSnapshot
             reachable: $clone->reachable,
             httpStatus: $status,
             externalRef: $clone->externalRef,
+            pageText: $clone->pageText,
         );
     }
 

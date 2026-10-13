@@ -121,3 +121,33 @@ loop until CI green AND GitHub Copilot review has zero actionable comments. Only
 **B5** (wire placeholder actions/forms — consumes B3 export/settings/facets), **B6** (enterprise UX:
 pagination/virtualization/facet chips/ai-decision viewer), **B7** (SSE bearer/polling fallback),
 **B8** (release hygiene → admin v1.1.0). Admin repo: `../laravel-ai-price-intelligence-admin`.
+
+## 2026-10-13 — Category attributes (branch `m-ad-attribute-extraction`, target v1.10.0)
+
+Requested by the Gescat integration (AI enrichment): read the attributes of the product category
+from competitor pages. Contract agreed with the Gescat side; local only, not pushed.
+
+- `POST /targets` → `wanted_attributes` stored in `MonitoringTarget.options` (validated: key slug,
+  label ≤191, ≤50 attributes, ≤1000 allowed values each and ≤5000 in total, case-insensitive distinct
+  values per attribute). Each POST replaces the list, omitting it removes it (like `given_urls`).
+- `HtmlProductExtractor` → `ProductSnapshot::$pageText` (visible text, scripts/head/nav/footer
+  dropped, never persisted).
+- `ScrapeService` → `CompetitorAttributeExtraction::start()` after the content snapshot (wrapped:
+  a failure only marks the snapshot `failed`):
+  - no wanted list → `attributes_status=skipped`;
+  - schema.org values (`AttributeExtractor::fromJsonLd`) always;
+  - missing ones → `ExtractCompetitorAttributesJob` on the `ai` queue when
+    `ai.attribute_extraction.enabled` and the LLM driver is not fake → `pending`, else `done`;
+  - same `html_hash` + `attributes_signature` (wanted list + LLM on/off) → reuse, no LLM call.
+- `AttributeExtractor::fromPageText` keeps an LLM answer only if the evidence is on the page text
+  (normalized) and the value is an allowed value (returned with the client's spelling); otherwise
+  `rejected_reason` = `evidence_not_found` / `value_not_allowed`.
+- Job: 3 tries, `failed()` sets `failed` scoped to the job's tenant; decision logged as
+  `attribute_extraction`.
+- Gates: PHPUnit 260 tests / 726 assertions, PHPStan level 5 no errors, Pint, composer validate.
+
+### Next action
+User OK → push branch + PR (no reviewers, per the user's preference) → tag v1.10.0 → update the
+admin app's composer.lock → set `PI_ATTRIBUTE_EXTRACTION_ENABLED=true`, `PI_LLM_DRIVER=laravel-ai`
+(+ provider/keys) on Cloud; keep `PI_LLM_TIMEOUT` below the managed-queue job limit.
+

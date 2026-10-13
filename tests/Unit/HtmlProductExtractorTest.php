@@ -91,4 +91,22 @@ final class HtmlProductExtractorTest extends TestCase
         $this->assertSame('Graphed', $s->title);
         $this->assertSame(500, $s->priceCents);
     }
+
+    #[Test]
+    public function it_keeps_the_visible_page_text_without_scripts_and_page_chrome(): void
+    {
+        $html = <<<'HTML'
+        <html><head><title>Shorts</title><style>.x{color:red}</style></head><body>
+        <nav><a href="/donna">Donna</a><a href="/uomo">Uomo</a></nav>
+        <h1>Wool gabardine shorts</h1>
+        <div>Composition:&nbsp;100% virgin   wool</div><p>Made in&nbsp;Italy</p>
+        <script>window.tracking = {"material": "cotton"};</script>
+        <footer>Newsletter &amp; privacy</footer>
+        </body></html>
+        HTML;
+
+        $text = $this->extractor()->extract($html, 'https://shop/p/1')->pageText;
+
+        $this->assertSame("Wool gabardine shorts\nComposition: 100% virgin wool\nMade in Italy", $text);
+    }
 }

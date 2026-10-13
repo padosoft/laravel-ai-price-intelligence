@@ -305,3 +305,21 @@
   `DATE(captured_at) = ?` which wraps the column in a function, preventing MySQL from using the
   `(competitor_product_id, captured_at)` index added in B3. Fix: use an explicit range
   (`>= $dayStart / < $dayEnd`) so the index is available for the nightly aggregate command.
+
+## Category attributes (v1.10.0)
+- **Only the scrape has the page HTML.** Discovery builds candidates from search-result title/URL/image
+  and never fetches the page; `GenericHttpScraper` fetches it for confirmed competitors and the HTML is
+  dropped after extraction (only `html_hash` stays). Anything that needs page content must run there —
+  hence `ProductSnapshot::$pageText` (in memory) and the page text carried in the job payload.
+- **Never trust an LLM extraction without a server-side check.** Keep a value only if the quoted
+  evidence is a substring of the text actually sent (normalized: entities decoded, blanks collapsed,
+  case-insensitive) and the value is one of the client's allowed values; return the client's exact
+  spelling so it can map back to its own ids. This also caps the damage of prompt injection in the page.
+- **Laravel `distinct` on nested wildcards compares across parents**: `a.*.b.*` with `distinct`
+  rejects the same value in two different `a` items. Per-parent uniqueness needs a manual check.
+- **Recurring scrapes multiply LLM costs**: reuse the previous extraction when `html_hash` and the
+  request signature are unchanged; include "LLM on/off" in the signature or enabling the LLM later
+  would keep reusing schema.org-only results.
+- **Fake LLM driver = LLM off** for this feature (`isFake()`): queuing a job that can only return
+  empty answers would just delay `done`.
+

@@ -72,6 +72,7 @@ final class TenantController
             'pii' => Flag::enabled('price-intelligence.pii.enabled', true),
             'visual_match' => Flag::enabled('price-intelligence.ai.visual_match.enabled', true),
             'content_gap' => Flag::enabled('price-intelligence.ai.content_gap.enabled', true),
+            'attribute_extraction' => Flag::enabled('price-intelligence.ai.attribute_extraction.enabled', false),
             'forecast' => Flag::enabled('price-intelligence.ai.forecast.enabled', true),
             'anomaly' => Flag::enabled('price-intelligence.ai.anomaly.enabled', true),
             'narrative' => Flag::enabled('price-intelligence.ai.narrative.enabled', true),
