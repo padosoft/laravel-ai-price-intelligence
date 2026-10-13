@@ -6,6 +6,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+### Added
+- **Category attributes from competitor pages.** `POST /targets` accepts `wanted_attributes`
+  (`key`, `label`, `allowed_values?`, `multiple?`, `jsonld_property?`; 50 attributes, 1000 values each,
+  5000 in total). Every scrape reads them from the page's schema.org Product node; with
+  `ai.attribute_extraction.enabled` (`PI_ATTRIBUTE_EXTRACTION_ENABLED`, default off) and a real LLM
+  driver, `ExtractCompetitorAttributesJob` asks the model for the rest on the `ai` queue. Answers are
+  kept only when the evidence quote is on the page and the value is one of `allowed_values`.
+  Results in `latest_content.attributes`, progress in `latest_content.attributes_status`
+  (`pending|done|skipped|failed`) and `attributes_extracted_at`. Unchanged pages reuse the previous
+  extraction (no new LLM call).
+- Migration `add_attribute_extraction_to_content_snapshots` (`attributes_status`,
+  `attributes_signature`, `attributes_extracted_at`).
+- `attribute_extraction` in the tenant `features` map.
+
 ## [1.7.1] - 2026-05-26
 
 Documentation only — no code or API changes.

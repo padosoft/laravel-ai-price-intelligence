@@ -16,6 +16,9 @@ use Padosoft\PriceIntelligence\Support\Pricing\PriceParser;
  */
 final class HtmlProductExtractor
 {
+    /** Hard cap on the in-memory page text; the attribute step truncates further to its prompt budget. */
+    private const MAX_PAGE_TEXT_CHARS = 100_000;
+
     public function extract(string $html, string $url): ProductSnapshot
     {
         $jsonld = $this->extractJsonLd($html);
@@ -48,7 +51,24 @@ final class HtmlProductExtractor
             brand: is_string($brand) ? $brand : null,
             htmlHash: $htmlHash,
             reachable: true,
+            pageText: $this->visibleText($html),
         );
+    }
+
+    /**
+     * Visible page text for attribute extraction: scripts, styles, <head>, navigation and footer
+     * are dropped, tags stripped, entities decoded and blank space collapsed (line breaks kept
+     * between blocks so the model still sees the page structure).
+     */
+    private function visibleText(string $html): ?string
+    {
+        $html = preg_replace('#<(script|style|noscript|template|svg|head|nav|footer)\b[^>]*>.*?</\1\s*>#is', ' ', $html) ?? $html;
+        $html = preg_replace('#<(?:br|/p|/div|/li|/h[1-6]|/tr|/dd|/dt|/td|/th)\b[^>]*>#i', "\n", $html) ?? $html;
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/[^\S\n]+/u', ' ', $text) ?? $text;
+        $text = trim(preg_replace('/ *\n[\s]*/u', "\n", $text) ?? $text);
+
+        return $text === '' ? null : mb_substr($text, 0, self::MAX_PAGE_TEXT_CHARS);
     }
 
     /**

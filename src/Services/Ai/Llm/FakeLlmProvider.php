@@ -77,6 +77,7 @@ final class FakeLlmProvider implements LlmProviderInterface
                 'conditions' => null,
                 'effective_discount_pct' => null,
             ],
+            'attribute_extraction' => ['attributes' => []],
             'match_judge' => [
                 'same_product' => false,
                 'confidence' => 0,

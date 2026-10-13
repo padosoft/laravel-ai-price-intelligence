@@ -8,6 +8,7 @@ use Padosoft\PriceIntelligence\Contracts\FxProviderInterface;
 use Padosoft\PriceIntelligence\Contracts\PiiFilterInterface;
 use Padosoft\PriceIntelligence\Data\ProductSnapshot;
 use Padosoft\PriceIntelligence\Enums\AdapterCode;
+use Padosoft\PriceIntelligence\Enums\AttributeExtractionStatus;
 use Padosoft\PriceIntelligence\Enums\PromoType;
 use Padosoft\PriceIntelligence\Models\CompetitorProduct;
 use Padosoft\PriceIntelligence\Models\ContentSnapshot;
@@ -15,9 +16,11 @@ use Padosoft\PriceIntelligence\Models\FetchLog;
 use Padosoft\PriceIntelligence\Models\PriceObservation;
 use Padosoft\PriceIntelligence\Models\PromoObservation;
 use Padosoft\PriceIntelligence\Models\StockObservation;
+use Padosoft\PriceIntelligence\Services\Ai\CompetitorAttributeExtraction;
 use Padosoft\PriceIntelligence\Services\Alerts\AlertDispatcher;
 use Padosoft\PriceIntelligence\Services\Pricing\PriceNormalizer;
 use Padosoft\PriceIntelligence\Support\Config\Flag;
+use Throwable;
 
 /**
  * Fetches a competitor product, normalizes its price and persists the resulting
@@ -32,6 +35,7 @@ final class ScrapeService
         private readonly PriceNormalizer $normalizer,
         private readonly AlertDispatcher $alerts,
         private readonly PiiFilterInterface $pii,
+        private readonly CompetitorAttributeExtraction $attributeExtraction,
     ) {}
 
     private function redact(?string $text): ?string
@@ -103,7 +107,7 @@ final class ScrapeService
             ]);
         }
 
-        ContentSnapshot::query()->create([
+        $content = ContentSnapshot::query()->create([
             'tenant_id' => $competitor->tenant_id,
             'competitor_product_id' => $competitor->id,
             'captured_at' => $now,
@@ -145,6 +149,15 @@ final class ScrapeService
             ourCents: $this->ourPriceBaseCents($competitor),
             available: $snapshot->available,
         );
+
+        // Category attributes are a by-product of the scrape: a failure there must not lose the
+        // price observation, so it only marks the snapshot as failed.
+        try {
+            $this->attributeExtraction->start($competitor, $snapshot, $content);
+        } catch (Throwable $exception) {
+            report($exception);
+            $content->forceFill(['attributes_status' => AttributeExtractionStatus::Failed, 'attributes_extracted_at' => now()])->save();
+        }
 
         return $snapshot;
     }

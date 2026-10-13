@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Padosoft\PriceIntelligence\Models;
 
 use Illuminate\Support\Carbon;
+use Padosoft\PriceIntelligence\Enums\AttributeExtractionStatus;
 use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
 
 /**
@@ -15,6 +16,9 @@ use Padosoft\PriceIntelligence\Models\Concerns\BelongsToTenant;
  * @property string|null $title
  * @property array<string, mixed>|null $attributes
  * @property string|null $html_hash
+ * @property AttributeExtractionStatus|null $attributes_status
+ * @property string|null $attributes_signature
+ * @property Carbon|null $attributes_extracted_at
  */
 final class ContentSnapshot extends PriceIntelligenceModel
 {
@@ -31,5 +35,7 @@ final class ContentSnapshot extends PriceIntelligenceModel
         'jsonld' => 'array',
         'images' => 'array',
         'dom_diff_score' => 'float',
+        'attributes_status' => AttributeExtractionStatus::class,
+        'attributes_extracted_at' => 'datetime',
     ];
 }

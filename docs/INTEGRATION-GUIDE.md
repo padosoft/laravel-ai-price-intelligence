@@ -28,7 +28,7 @@ All endpoints are under `config('price-intelligence.api.prefix')` (default `api/
 
 | Method | Endpoint | Notes |
 |---|---|---|
-| POST | `/targets` | `{product_external_id|product_id, country, locale?, frequency?, given_urls?, given_domains?}` |
+| POST | `/targets` | `{product_external_id|product_id, country, locale?, frequency?, given_urls?, given_domains?, wanted_attributes?}` — `wanted_attributes`: `[{key, label, allowed_values?, multiple?, jsonld_property?}]`, see README "Category attributes" |
 | GET | `/targets` | filter by `status` |
 | PATCH | `/targets/{id}` | `status` (active/paused/stopped), `frequency`, `priority` |
 | POST | `/targets/{id}/discover:now` | queue an immediate discovery |
